@@ -1,0 +1,49 @@
+```gitignore
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging
+build/
+dist/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated reports
+redteam-report.md
+redteam-report.json
+
+# Environment
+.env
+.env.*
+
+# IDEs
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+```
