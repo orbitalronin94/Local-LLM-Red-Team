@@ -1,49 +1,28 @@
-```gitignore
-# Python
-__pycache__/
+**pycache**/
 *.py[cod]
 *$py.class
 
-# Virtual environments
-.venv/
-venv/
-env/
-ENV/
-
-# Packaging
-build/
-dist/
-*.egg-info/
-
-# Testing
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
 coverage.xml
 
-# Local databases
+*.egg-info/
+dist/
+build/
+
+.venv/
+venv/
+env/
+
 *.db
 *.sqlite
 *.sqlite3
 
-# Generated reports
-redteam-report.md
-redteam-report.json
+report.json
+report.md
 
-# Environment
-.env
-.env.*
-
-# IDEs
+.DS_Store
 .idea/
 .vscode/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.swp
-*.swo
-```
