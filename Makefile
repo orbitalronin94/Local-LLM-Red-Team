@@ -1,25 +1,23 @@
-```makefile
-.PHONY: selftest test cov demo list clean
-
 PYTHON ?= python
 
-selftest:
-	$(PYTHON) redteam.py --selftest
+.PHONY: test coverage selftest demo install-dev clean
 
 test:
-	pytest -q
+$(PYTHON) -m pytest
 
-cov:
-	pytest --cov=. --cov-report=term-missing
+coverage:
+$(PYTHON) -m pytest --cov=redteam --cov-report=term-missing --cov-report=html
+
+selftest:
+$(PYTHON) redteam.py --selftest
 
 demo:
-	$(PYTHON) redteam.py --list-attacks
+$(PYTHON) redteam.py --selftest
+$(PYTHON) redteam.py --list-attacks
 
-list:
-	$(PYTHON) redteam.py --list-attacks
+install-dev:
+$(PYTHON) -m pip install -e ".[dev]"
 
 clean:
-	rm -rf __pycache__ .pytest_cache .coverage htmlcov
-	find . -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete
-	rm -f redteam-results.db redteam-report.md redteam-report.json
-```
+rm -rf .coverage htmlcov .pytest_cache **pycache** tests/**pycache**
+rm -f *.db report.json report.md
