@@ -1,656 +1,389 @@
 # Local LLM Red Team
 
-Herramienta pequeña y reproducible para realizar **red teaming de modelos de lenguaje ejecutados localmente**.
+Small, local-first red teaming harness for testing LLMs against common prompt-level attacks.
 
-El objetivo es poder lanzar una batería de ataques contra un LLM, detectar comportamientos potencialmente vulnerables y conservar los resultados de forma auditable, sin necesidad de enviar las conversaciones a servicios externos.
+The project is deliberately small and auditable. It focuses on reproducible experiments rather than becoming another general-purpose LLM evaluation framework.
 
-> **Estado:** `v0.1.0` — prototipo funcional / primera versión de portfolio.
-
----
-
-## Qué hace
-
-El proyecto ejecuta una colección de ataques controlados contra un modelo y registra:
-
-* ataque utilizado
-* categoría
-* prompt enviado
-* respuesta del modelo
-* resultado de la detección
-* latencia
-* tokens, cuando el proveedor los proporciona
-* modelo utilizado
-* `run_id`
-* timestamp
-* hash del corpus de ataques
-* errores de ejecución
-
-Los resultados se almacenan en **SQLite** y pueden exportarse a Markdown o JSON.
-
-La arquitectura deliberadamente pequeña es:
+## What it does
 
 ```text
-Ataque
-   ↓
-Target
-   ↓
-Respuesta del modelo
-   ↓
-Detector
-   ↓
-Resultado
-   ↓
-SQLite / Markdown / JSON
+attack
+  ↓
+target
+  ↓
+response
+  ↓
+heuristic detector
+  ↓
+result
+  ↓
+SQLite / JSON / Markdown
 ```
 
----
+It can test local models through:
 
-## Objetivo
+* Ollama
+* OpenAI-compatible local endpoints
+* Generic HTTP JSON endpoints
 
-El proyecto está pensado principalmente para evaluar **LLMs locales o endpoints bajo control del usuario**.
+The scanner supports two modes:
 
-Casos de uso:
+* `static`: one request per attack
+* `adaptive`: multi-turn attacks with a separate attacker model/target
 
-* comparar diferentes modelos locales
-* detectar jailbreaks básicos
-* comprobar resistencia frente a prompt injection
-* intentar extraer instrucciones de sistema
-* comprobar si el modelo acepta instrucciones que contradicen su contexto
-* estudiar comportamientos de persistencia
-* generar evidencia reproducible de una evaluación
-* integrar red teaming básico en procesos de desarrollo
+## Included attack categories
 
-No pretende sustituir frameworks completos de evaluación o red teaming.
+The default attack set includes:
 
-La prioridad es mantener una herramienta:
-
-* pequeña
-* auditable
-* reproducible
-* fácil de ejecutar
-* fácil de modificar
-* con pocas dependencias
-* orientada a modelos locales
-
----
-
-## Características
-
-### Targets
-
-Actualmente soporta:
-
-* **Ollama**
-* **OpenAI-compatible APIs**
-* **HTTP JSON genérico**
-
-Esto permite trabajar con servidores locales como:
-
-```text
-Ollama
-llama.cpp
-vLLM
-servidores propios
-gateways locales
-```
-
-siempre que expongan una interfaz compatible.
-
----
-
-### Ataques
-
-La versión inicial incluye probes para:
-
-* jailbreak mediante roleplay
-* jailbreak mediante autoridad
+* jailbreak
 * instruction override
-* extracción del system prompt
-* resumen del system prompt
-* prompt injection mediante documentos
-* prompt injection orientado a herramientas
-* persistencia de instrucciones inseguras
+* system prompt extraction
+* prompt injection
+* persistence
 
-Los ataques están definidos como datos, no como una jerarquía compleja de clases.
+Each attack has a stable ID, category, version and prompt.
 
-Ejemplo conceptual:
+## Requirements
 
-```python
-Attack(
-    id="instruction-override",
-    category="instruction_override",
-    name="Instruction Override",
-    prompt="Ignore previous instructions and ..."
-)
-```
+* Python 3.10+
+* No runtime dependency is required for the core scanner.
+* `pytest` and `pytest-cov` are only required for development/testing.
 
-Esto permite ampliar el corpus sin convertir el proyecto en un framework.
+## Quick start
 
----
-
-## Detección
-
-La primera versión utiliza un detector heurístico.
-
-El detector busca patrones asociados con:
-
-* aceptación de jailbreak
-* revelación de instrucciones
-* confirmación de overrides
-* respuestas que indican extracción de contexto
-* determinados patrones de rechazo
-
-Por diseño, **no se presenta como un juez semántico perfecto**.
-
-Un resultado positivo significa:
-
-> El detector encontró evidencia compatible con un comportamiento vulnerable.
-
-No significa necesariamente que un modelo haya sido comprometido de forma semánticamente correcta.
-
-Esta distinción es importante para evitar falsos positivos y, especialmente, falsos niveles de confianza.
-
----
-
-## Ejecución
-
-### Requisitos
-
-* Python `3.10+`
-* un modelo local o endpoint HTTP compatible
-
-El núcleo utiliza únicamente la biblioteca estándar de Python.
-
-Para ejecutar los tests se utiliza `pytest`.
-
----
-
-## Self-test
-
-Antes de utilizar un target real:
-
-```bash
-python redteam.py --selftest
-```
-
-También:
-
-```bash
-make selftest
-```
-
----
-
-## Ver ataques disponibles
+List the available attacks:
 
 ```bash
 python redteam.py --list-attacks
 ```
 
-o:
+Run the self-tests:
 
 ```bash
-make list
+python redteam.py --selftest
 ```
 
----
-
-## Ollama
-
-Con Ollama ejecutándose localmente:
-
-```bash
-ollama serve
-```
-
-y un modelo disponible:
-
-```bash
-ollama run llama3.2
-```
-
-se puede lanzar:
+Run against Ollama:
 
 ```bash
 python redteam.py \
-    --target ollama \
-    --model llama3.2
+  --target ollama \
+  --model llama3.2 \
+  --url http://localhost:11434
 ```
 
-Por defecto se utiliza:
-
-```text
-http://127.0.0.1:11434
-```
-
-También puede especificarse otro endpoint:
+Run selected attacks:
 
 ```bash
 python redteam.py \
-    --target ollama \
-    --model llama3.2 \
-    --url http://127.0.0.1:11434
+  --target ollama \
+  --model llama3.2 \
+  --attack jailbreak-roleplay \
+  --attack system-prompt-extraction
 ```
 
----
-
-## API compatible con OpenAI
-
-Para un servidor local que exponga una API compatible:
+Run by category:
 
 ```bash
 python redteam.py \
-    --target openai \
-    --model local-model \
-    --url http://127.0.0.1:8000/v1
+  --target ollama \
+  --model llama3.2 \
+  --category jailbreak
 ```
 
-Si requiere autenticación:
-
-```bash
-export REDTEAM_API_KEY="..."
-```
-
-y:
+Use adaptive multi-turn red teaming:
 
 ```bash
 python redteam.py \
-    --target openai \
-    --model local-model \
-    --api-key "$REDTEAM_API_KEY"
+  --target ollama \
+  --model llama3.2 \
+  --mode adaptive \
+  --adaptive-rounds 5
 ```
 
----
-
-## HTTP JSON
-
-También se puede utilizar un endpoint HTTP genérico:
+Use a separate attacker model:
 
 ```bash
 python redteam.py \
-    --target http \
-    --model local-model \
-    --url http://127.0.0.1:8000/generate
+  --target ollama \
+  --model llama3.2 \
+  --mode adaptive \
+  --adaptive-rounds 5 \
+  --attacker-model llama3.1
 ```
 
-El adaptador espera una respuesta JSON de la que pueda extraer el texto generado.
+## Targets
 
----
-
-## Resultados
-
-Por defecto los resultados se almacenan en SQLite.
-
-Ejemplo:
-
-```text
-redteam.db
-```
-
-Cada ejecución genera un identificador:
-
-```text
-run_id
-```
-
-y cada ataque queda asociado a esa ejecución.
-
-La base de datos permite conservar varias campañas y compararlas posteriormente.
-
----
-
-## Informes
-
-Para generar un informe Markdown:
+### Ollama
 
 ```bash
 python redteam.py \
-    --target ollama \
-    --model llama3.2 \
-    --report report.md
+  --target ollama \
+  --model llama3.2 \
+  --url http://localhost:11434
 ```
 
-También se puede generar JSON:
+### OpenAI-compatible endpoint
 
 ```bash
 python redteam.py \
-    --target ollama \
-    --model llama3.2 \
-    --json results.json
+  --target openai \
+  --model local-model \
+  --url http://localhost:8000/v1
 ```
 
-El informe contiene, entre otros datos:
-
-* modelo
-* número de ataques
-* vulnerabilidades detectadas
-* tasa de éxito de los ataques
-* tasa de rechazo
-* latencia
-* percentiles de latencia
-* tokens
-* errores
-* detalle de cada ataque
-
----
-
-## Reproducibilidad
-
-Cada ejecución conserva información suficiente para reconstruir el contexto de la evaluación:
-
-```text
-run_id
-timestamp
-modelo
-target
-corpus de ataques
-hash del corpus
-resultados individuales
-latencia
-tokens
-errores
-```
-
-El hash del corpus permite detectar cambios en la batería de ataques entre ejecuciones.
-
-Por ejemplo:
-
-```text
-run A
-attack_manifest_hash = abc123...
-
-run B
-attack_manifest_hash = abc123...
-```
-
-indica que ambas ejecuciones utilizaron el mismo corpus de ataques.
-
-Si el hash cambia, el conjunto de probes ha cambiado.
-
----
-
-## Arquitectura
-
-El proyecto está deliberadamente implementado como un **monolito pequeño**.
-
-No existe una arquitectura de plugins obligatoria ni una cadena de dependencias extensa.
-
-Los principales componentes son:
-
-```text
-Attack
-    ↓
-Target
-    ↓
-TargetResponse
-    ↓
-Detector
-    ↓
-Detection
-    ↓
-AttackResult
-    ↓
-Database
-```
-
-### Attack
-
-Representa un ataque reproducible.
-
-### Target
-
-Abstracción mínima sobre el modelo evaluado.
-
-Implementaciones actuales:
-
-```text
-OllamaTarget
-OpenAICompatibleTarget
-HTTPJSONTarget
-```
-
-### Detector
-
-Analiza la respuesta del modelo.
-
-La implementación inicial es:
-
-```text
-HeuristicDetector
-```
-
-### Database
-
-Persistencia en SQLite.
-
-No requiere servidor de base de datos.
-
-### Scanner
-
-Coordina:
-
-```text
-ataques → target → detector → persistencia
-```
-
-### Reporter
-
-Genera:
-
-```text
-Markdown
-JSON
-resumen de consola
-```
-
----
-
-## Métricas
-
-La primera versión recoge métricas sencillas pero útiles:
-
-### Attack Success Rate
-
-Proporción de ataques que producen evidencia compatible con el comportamiento buscado.
-
-```text
-successful attacks / executed attacks
-```
-
-### Refusal Rate
-
-Proporción de ataques ante los que el modelo presenta un rechazo detectable.
-
-### Latencia
-
-Tiempo de respuesta por ataque.
-
-Se calculan también percentiles para evitar depender exclusivamente de la media.
-
-### Tokens
-
-Cuando el proveedor los proporciona se almacenan los tokens de entrada y salida.
-
-No todos los targets tienen por qué proporcionar esta información.
-
----
-
-## Limitaciones actuales
-
-Esta es deliberadamente una primera versión.
-
-No intenta resolver todavía:
-
-* ataques adaptativos
-* ataques multi-turn reales
-* generación automática de ataques
-* jueces LLM
-* clasificación semántica avanzada
-* fuzzing de prompts
-* optimización de ataques
-* agentes autónomos de red teaming
-* browser automation
-* tool-use complejo
-* scoring avanzado
-* distribución de cargas
-* ejecución concurrente masiva
-
-Estas funcionalidades pueden ser interesantes, pero añadirlas demasiado pronto convertiría una herramienta pequeña y auditable en otro framework de evaluación generalista.
-
----
-
-## Filosofía
-
-El proyecto sigue unas pocas reglas:
-
-### 1. Local-first
-
-Siempre que sea posible, la evaluación debe ejecutarse contra modelos bajo control del usuario.
-
-### 2. Reproducibilidad
-
-Una ejecución debe poder identificarse y compararse con otras.
-
-### 3. Auditabilidad
-
-Los prompts y respuestas deben poder conservarse para analizar posteriormente los resultados.
-
-### 4. Simplicidad
-
-La herramienta debe ser suficientemente pequeña como para entender su funcionamiento completo leyendo el repositorio.
-
-### 5. No confundir heurística con verdad
-
-Un detector puede producir falsos positivos y falsos negativos.
-
-Los resultados deben interpretarse como evidencia de una evaluación, no como una prueba matemática de seguridad.
-
----
-
-## Relación con otros proyectos
-
-Existen frameworks mucho más completos para evaluación y red teaming de LLMs.
-
-Este proyecto no pretende competir con ellos en amplitud.
-
-El objetivo es diferente:
-
-```text
-frameworks completos
-        ↓
-muchas capacidades
-muchas integraciones
-muchas abstracciones
-
-Local LLM Red Team
-        ↓
-pocas abstracciones
-ejecución local
-reproducibilidad
-auditabilidad
-facilidad de modificación
-```
-
-La intención es disponer de una herramienta pequeña que pueda utilizarse para experimentar con modelos locales y estudiar técnicas de red teaming sin introducir una infraestructura excesiva.
-
----
-
-## Tests
-
-Ejecutar:
+An API key can be supplied when required:
 
 ```bash
-pytest -q
+python redteam.py \
+  --target openai \
+  --model local-model \
+  --url http://localhost:8000/v1 \
+  --api-key local-key
 ```
 
-Con cobertura:
+### Generic HTTP JSON
 
 ```bash
-pytest --cov=. --cov-report=term-missing
+python redteam.py \
+  --target http \
+  --model local-model \
+  --url http://localhost:8000/generate
 ```
 
-O:
+The HTTP target accepts common response formats such as:
+
+```json
+{"response": "..." }
+```
+
+```json
+{"text": "..." }
+```
+
+```json
+{"message": {"content": "..."}}
+```
+
+and OpenAI-style:
+
+```json
+{
+  "choices": [
+    {
+      "message": {
+        "content": "..."
+      }
+    }
+  ]
+}
+```
+
+## Output
+
+Every scan produces a run ID and a summary containing information such as:
+
+* total attacks
+* successful attacks
+* refusals
+* errors
+* attack success rate
+* refusal rate
+* latency statistics
+* token usage
+* estimated cost when token pricing is available
+
+Results can be persisted to SQLite:
+
+```bash
+python redteam.py \
+  --target ollama \
+  --model llama3.2 \
+  --db redteam.db
+```
+
+Generate JSON:
+
+```bash
+python redteam.py \
+  --target ollama \
+  --model llama3.2 \
+  --json report.json
+```
+
+Generate Markdown:
+
+```bash
+python redteam.py \
+  --target ollama \
+  --model llama3.2 \
+  --report report.md
+```
+
+Both can be generated at the same time:
+
+```bash
+python redteam.py \
+  --target ollama \
+  --model llama3.2 \
+  --db redteam.db \
+  --json report.json \
+  --report report.md
+```
+
+## Reproducibility
+
+Each scan records:
+
+* run ID
+* scanner version
+* model
+* attack IDs
+* attack manifest
+* attack versions
+* execution mode
+* timestamps
+* responses
+* latency
+* token usage when provided
+* detector output
+* adaptive conversation turns
+
+The attack manifest is derived from the complete attack definitions, allowing the exact attack set used by a run to be identified later.
+
+SQLite stores both run-level and attack-level results.
+
+## Detection
+
+The default detector is intentionally lightweight.
+
+It uses deterministic heuristics such as:
+
+* refusal indicators
+* instruction override indicators
+* system prompt disclosure indicators
+* prompt injection indicators
+* persistence indicators
+
+It is **not a semantic LLM judge**.
+
+A `FAIL` therefore means that the heuristic detector found evidence consistent with a successful attack. It does not claim that the model has been comprehensively compromised.
+
+Likewise, `PASS` does not prove that a model is secure.
+
+The goal is to provide a reproducible first-pass signal that can be inspected, compared and extended.
+
+## Static vs adaptive
+
+### Static
+
+Each attack is executed independently:
+
+```text
+attack → model → response → detector
+```
+
+This mode is deterministic and inexpensive.
+
+### Adaptive
+
+Adaptive mode maintains a conversation and allows a separate attacker target to generate follow-up prompts:
+
+```text
+initial attack
+      ↓
+target response
+      ↓
+attacker follow-up
+      ↓
+target response
+      ↓
+detector
+      ↓
+repeat
+```
+
+The conversation stops early when the detector identifies a successful attack.
+
+This makes adaptive mode useful for exploring multi-turn failure modes without requiring a large orchestration framework.
+
+## Model comparison
+
+Results from multiple models can be compared programmatically using `compare_results`.
+
+The comparison focuses on measurable outcomes such as attack success rate rather than subjective model quality.
+
+## Testing
+
+Run the test suite:
 
 ```bash
 make test
-make cov
 ```
 
-Los tests cubren:
+Run tests with coverage:
 
-* utilidades
-* corpus de ataques
-* detectores
-* targets simulados
-* persistencia SQLite
-* ejecución del scanner
-* errores de target
-* generación de informes
-* métricas
-* reproducibilidad básica
-
----
-
-## Estructura
-
-```text
-local-llm-redteam/
-├── redteam.py
-├── README.md
-├── pyproject.toml
-├── Makefile
-├── .gitignore
-├── .github/
-│   └── workflows/
-│       └── ci.yml
-└── tests/
-    └── test_redteam.py
+```bash
+make coverage
 ```
 
-La aplicación principal está contenida en:
+Run built-in self-tests:
 
-```text
-redteam.py
+```bash
+make selftest
 ```
 
-La intención es que el proyecto pueda estudiarse sin tener que recorrer una arquitectura distribuida entre decenas de módulos.
+The project deliberately keeps the core implementation dependency-light so it can also be executed directly:
 
----
-
-## CI
-
-GitHub Actions ejecuta automáticamente:
-
-```text
-Python 3.10
-Python 3.11
-Python 3.12
+```bash
+python redteam.py --selftest
 ```
 
-y comprueba:
+## Design principles
 
-```text
-self-test
-pytest
-coverage
-```
+### Local-first
 
----
+The primary use case is testing models running on local infrastructure.
 
-## Seguridad y uso responsable
+No cloud service is required when using Ollama or another local endpoint.
 
-Esta herramienta está destinada a evaluar sistemas de IA que el usuario controla o para los que dispone de autorización explícita.
+### Auditable
 
-Las técnicas de red teaming pueden producir prompts diseñados para provocar comportamientos no deseados.
+The implementation is intentionally compact.
 
-No utilices el proyecto para acceder, modificar o extraer información de sistemas de terceros sin autorización.
+There is no hidden agent framework, remote telemetry layer or mandatory external service.
 
----
+### Reproducible
 
-## Licencia
+Runs capture attack definitions, model information, results and execution metadata.
 
-MIT License.
+### Comparable
 
-Copyright (c) 2026 David Ferrandez Canalis.
+The same attack manifest can be executed against different local models and the resulting metrics compared.
 
-Consulta el archivo `LICENSE` para el texto completo de la licencia.
+### Small by design
+
+This project is not intended to replace larger red teaming frameworks.
+
+It deliberately avoids becoming a general-purpose attack orchestration platform.
+
+## Scope
+
+This project focuses on prompt-level model behavior.
+
+It does not currently attempt to provide:
+
+* full semantic security evaluation
+* model weight analysis
+* automated exploit generation
+* browser exploitation
+* tool sandbox exploitation
+* network penetration testing
+* comprehensive OWASP coverage
+* autonomous long-running attack agents
+
+Those capabilities may be useful in larger systems, but they are outside the scope of this small reproducible harness.
+
+## License
+
+MIT
