@@ -40,4 +40,4 @@ steps:
 
   - name: Check coverage
     run: python -m coverage report --fail-under=60
-```
+
