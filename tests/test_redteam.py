@@ -1,4 +1,3 @@
-```python
 import json
 import sqlite3
 
@@ -803,5 +802,3 @@ def test_database_connection_can_be_used_with_sqlite(tmp_path):
         assert row[0] == 0
     finally:
         connection.close()
-```
-    
