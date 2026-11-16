@@ -1,5 +1,9 @@
 # Local LLM Red Team
 
+
+**English summary:** Local LLM Red Team is a lightweight Python toolkit for security testing and adversarial evaluation of locally hosted large language models. It helps probe model behavior with configurable red-team prompts and repeatable tests, without requiring a heavyweight evaluation framework.
+
+
 Small, local-first red teaming harness for testing LLMs against common prompt-level attacks.
 
 The project is deliberately small and auditable. It focuses on reproducible experiments rather than becoming another general-purpose LLM evaluation framework.
