@@ -96,6 +96,18 @@ def test_extract_int():
     ) is None
 
 
+def test_extract_int_rejects_boolean_and_negative_values():
+    assert extract_int({"tokens": True}, ("tokens",)) is None
+    assert extract_int({"tokens": -1}, ("tokens",)) is None
+    assert extract_int({"usage": {"tokens": False}}, ("tokens",)) is None
+    assert extract_int({"usage": {"tokens": -5}}, ("tokens",)) is None
+
+
+def test_extract_int_accepts_zero_and_non_negative_usage():
+    assert extract_int({"tokens": 0}, ("tokens",)) == 0
+    assert extract_int({"usage": {"tokens": 24}}, ("tokens",)) == 24
+
+
 def test_default_attacks_have_unique_ids():
     ids = [attack.id for attack in DEFAULT_ATTACKS]
 
