@@ -711,6 +711,7 @@ def test_write_json(tmp_path):
         str(path),
         run_id,
         results,
+        metadata={"target_type": "fake", "model": "fake-model"},
     )
 
     assert path.exists()
@@ -722,6 +723,8 @@ def test_write_json(tmp_path):
     assert payload["version"] == "0.1.0"
     assert payload["run_id"] == run_id
     assert payload["summary"]["total"] == 1
+    assert payload["run_metadata"]["target_type"] == "fake"
+    assert payload["run_metadata"]["model"] == "fake-model"
     assert len(payload["results"]) == 1
 
 
