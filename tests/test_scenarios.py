@@ -59,6 +59,9 @@ def test_scenario_report_includes_manifest_and_limitations(tmp_path):
     write_markdown(str(md_path), "run-id", "fixture", [result])
     payload = json.loads(json_path.read_text(encoding="utf-8"))
     assert payload["scenario_manifest_sha256"]
+    assert payload["schema_version"] == "2"
+    assert payload["evidence_model"] == "independent_capability_vector"
+    assert payload["results"][0]["evidence_vector"]["POLICY_BYPASS"]["status"] == "UNVERIFIED"
     assert payload["scenario_manifest"]
     assert "NOT_DETECTED is inconclusive" in payload["limitations"][3]
     markdown = md_path.read_text(encoding="utf-8")

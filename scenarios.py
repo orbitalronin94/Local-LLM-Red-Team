@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from evidence import EVIDENCE_SCHEMA_VERSION, empty_evidence_vector
 from redteam import Attack, HeuristicDetector, Message, Target, build_target
 
 
@@ -197,6 +198,7 @@ class ScenarioEvidence:
     benign_control: dict[str, Any] = field(default_factory=dict)
     error: str | None = None
     validity: str = "valid"
+    evidence_vector: dict[str, dict[str, Any]] = field(default_factory=empty_evidence_vector)
 
 
 def run_scenario(target: Target, scenario: Scenario, model: str | None = None,
@@ -288,7 +290,8 @@ def write_report(path: str, run_id: str, model: str | None,
                  results: list[ScenarioEvidence], target_type: str = "unknown",
                  scenarios=DEFAULT_SCENARIOS) -> None:
     payload = {
-        "schema_version": "1",
+        "schema_version": EVIDENCE_SCHEMA_VERSION,
+        "evidence_model": "independent_capability_vector",
         "run_id": run_id,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "scanner_version": "0.1.0",
