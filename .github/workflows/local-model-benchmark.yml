@@ -42,12 +42,14 @@ jobs:
           cmake --install /tmp/llama.cpp/build --prefix "$RUNNER_TEMP/llama-install"
           /tmp/llama.cpp/build/bin/llama-server --version
           git -C /tmp/llama.cpp rev-parse HEAD > "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT"
+          # Archive to preserve executable bits and shared-library symlinks.
+          tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/llama-install.tar.gz" llama-install
 
       - name: Upload reusable llama.cpp installation
         uses: actions/upload-artifact@v6
         with:
           name: llama-cpp-cpu-server
-          path: ${{ runner.temp }}/llama-install/
+          path: ${{ runner.temp }}/llama-install.tar.gz
           if-no-files-found: error
           retention-days: 1
 
@@ -172,10 +174,11 @@ jobs:
         uses: actions/download-artifact@v6
         with:
           name: llama-cpp-cpu-server
-          path: ${{ runner.temp }}/llama-install
+          path: ${{ runner.temp }}
 
       - name: Configure prebuilt llama.cpp runtime
         run: |
+          tar -xzf "$RUNNER_TEMP/llama-install.tar.gz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/llama-install/bin" >> "$GITHUB_PATH"
           echo "LD_LIBRARY_PATH=$RUNNER_TEMP/llama-install/lib:$RUNNER_TEMP/llama-install/lib64:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
           test -x "$RUNNER_TEMP/llama-install/bin/llama-server"
