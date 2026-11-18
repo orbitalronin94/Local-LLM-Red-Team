@@ -60,6 +60,30 @@
       "license": "Apache-2.0",
       "upstream_model": "ibm-granite/granite-3.3-2b-instruct",
       "model_card": "https://huggingface.co/bartowski/ibm-granite_granite-3.3-2b-instruct-GGUF"
+    },
+    "phi3_5_mini": {
+      "name": "Phi-3.5 Mini Instruct Q4_K_M",
+      "parameters": "3.8B",
+      "repo_id": "bartowski/Phi-3.5-mini-instruct-GGUF",
+      "revision": "main",
+      "filename": "Phi-3.5-mini-instruct-Q4_K_M.gguf",
+      "quantization": "Q4_K_M",
+      "approx_size": "2.39 GB",
+      "license": "MIT",
+      "upstream_model": "microsoft/Phi-3.5-mini-instruct",
+      "model_card": "https://huggingface.co/bartowski/Phi-3.5-mini-instruct-GGUF"
+    },
+    "ministral_3b": {
+      "name": "Ministral 3B Instruct Q4_K_M",
+      "parameters": "3B",
+      "repo_id": "tensorblock/Ministral-3b-instruct-GGUF",
+      "revision": "main",
+      "filename": "Ministral-3b-instruct-Q4_K_M.gguf",
+      "quantization": "Q4_K_M",
+      "approx_size": "1.86 GB",
+      "license": "Apache-2.0",
+      "upstream_model": "ministral/Ministral-3b-instruct",
+      "model_card": "https://huggingface.co/tensorblock/Ministral-3b-instruct-GGUF"
     }
   }
 }
