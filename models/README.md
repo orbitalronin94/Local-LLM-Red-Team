@@ -4,8 +4,8 @@ Small GGUF models for repeatable local inference tests. Model weights are fetche
 
 | ID | Model family / upstream | Parameters | GGUF quantization | Approx. size | License |
 | --- | --- | ---: | --- | ---: | --- |
-| smollm2 | [Hugging Face SmolLM2](https://huggingface.co/QuantFactory/SmolLM2-360M-Instruct-GGUF) | 360M | Q4_K_M | 271 MB | Apache-2.0 |
-| qwen2_5 | [Alibaba Qwen2.5](https://huggingface.co/tensorblock/Qwen2.5-0.5B-Instruct-GGUF) | 0.5B | Q4_K_M | 398 MB | Apache-2.0 |
+| smollm2 | [Hugging Face SmolLM2](https://huggingface.co/tensorblock/SmolLM2-360M-Instruct-GGUF) | 360M | Q4_K_M | 271 MB | Apache-2.0 |
+| qwen2_5 | [Alibaba Qwen2.5](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF) | 0.5B | Q4_K_M | 491 MB | Apache-2.0 |
 | llama3_2_1b | [Meta Llama 3.2](https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF) | 1B | Q4_K_M | 808 MB | Llama 3.2 Community License |
 | gemma3_1b | [Google Gemma 3](https://huggingface.co/bartowski/google_gemma-3-1b-it-GGUF) | 1B | Q4_K_M | 806 MB | Gemma Terms |
 | granite3_3_2b | [IBM Granite 3.3](https://huggingface.co/bartowski/ibm-granite_granite-3.3-2b-instruct-GGUF) | 2B | Q4_K_M | 1.55 GB | Apache-2.0 |
@@ -57,7 +57,7 @@ These are compact smoke-test models, not a representative security benchmark and
 
 ## Automated full-catalog benchmark
 
-The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs the complete built-in attack catalogue against all seven GGUF models. For each model it starts a CPU-only `llama-server`, generates a static report and an adaptive report (one attacker round), and uploads SQLite, JSON, Markdown, server logs and provenance as separate artifacts.
+The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs the complete built-in attack catalogue against all seven GGUF models. For each model it starts a CPU-only `llama-server`, generates a static report and an adaptive report (two-turn self-play), and uploads SQLite, JSON, Markdown, server logs and provenance as separate artifacts.
 
 It can be started manually from **Actions → Local model red-team benchmark → Run workflow**. It also runs when the benchmark workflow, model downloader/catalogue or scanner changes on `main`. The benchmark uses public model files and does not require API secrets.
 
