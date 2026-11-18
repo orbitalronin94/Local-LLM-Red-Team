@@ -54,10 +54,53 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
 
-      - name: Download selected GGUF model
+      - name: Install benchmark dependencies
         run: |
-          python -m pip install -e ".[models]"
-          python scripts/download_models.py --model "${{ matrix.model_id }}"
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,models]"
+          python -m pip check
+
+      # GitHub-hosted runners are ephemeral. Persist each model independently
+      # so later runs restore the GGUF instead of downloading it again.
+      - name: Restore cached GGUF model
+        id: model-cache
+        uses: actions/cache@v4
+        with:
+          path: models/weights
+          key: gguf-${{ runner.os }}-${{ matrix.model_id }}-${{ hashFiles('models/catalog.json') }}
+
+      - name: Download model on cache miss
+        env:
+          MODEL_FILE: ${{ matrix.model_file }}
+          MODEL_ID: ${{ matrix.model_id }}
+        run: |
+          model_path="models/weights/$MODEL_FILE"
+          metadata_path="$model_path.metadata.json"
+          if [[ -s "$model_path" && -s "$metadata_path" ]]; then
+            echo "Using cached model: $model_path"
+          else
+            echo "Model cache miss or incomplete cache; downloading $MODEL_ID"
+            rm -f "$model_path" "$metadata_path"
+            python scripts/download_models.py --model "$MODEL_ID"
+          fi
+
+      - name: Verify model integrity
+        env:
+          MODEL_FILE: ${{ matrix.model_file }}
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          model = Path("models/weights") / os.environ["MODEL_FILE"]
+          metadata = json.loads(model.with_suffix(model.suffix + ".metadata.json").read_text())
+          digest = hashlib.sha256(model.read_bytes()).hexdigest()
+          if digest != metadata["sha256"]:
+              raise SystemExit(f"SHA-256 mismatch for {model}")
+          print(f"Verified {model.name}: {metadata['bytes']} bytes, sha256={digest}")
+          PY
 
       - name: Build llama.cpp CPU server
         run: |
@@ -81,12 +124,6 @@ jobs:
           done
           cat reports/server.log
           exit 1
-
-      - name: Install red-team harness
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[dev,models]"
-          python -m pip check
 
       - name: Record benchmark provenance
         run: |
