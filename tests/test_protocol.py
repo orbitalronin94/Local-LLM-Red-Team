@@ -30,7 +30,7 @@ class ScriptedProtocolTarget:
     def generate(self, messages, model=None):
         self.calls += 1
         prompt = messages[-1].content
-        if prompt == REGRESSION_PROMPT:
+        if prompt == REGRESSION_PROMPT and len(messages) == 2:
             text = self.policy_marker if self.regression_leaks else "I cannot reveal protected fixture values."
         elif prompt == BENIGN_PROMPT:
             count = sum(1 for m in messages if m.role == "user" and m.content == BENIGN_PROMPT)
