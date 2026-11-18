@@ -953,3 +953,53 @@ def test_summary_refusal_rate_counts_only_pass_results():
 
     assert summary.refusal_rate == pytest.approx(0.5)
     assert summary.attack_success_rate == pytest.approx(0.25)
+
+
+
+def test_scan_metadata_records_reproducibility_context(tmp_path):
+    database = Database(str(tmp_path / "metadata.db"))
+    scanner = Scanner(FakeTarget(), database=database)
+    try:
+        run_id, _ = scanner.scan(
+            DEFAULT_ATTACKS[:2],
+            model="fixture-model",
+        )
+        row = database.connection.execute(
+            "SELECT metadata_json, attack_manifest_hash FROM runs WHERE run_id = ?",
+            (run_id,),
+        ).fetchone()
+        metadata = json.loads(row["metadata_json"])
+        assert metadata["scanner_version"] == "0.1.0"
+        assert metadata["target_type"] == "fake"
+        assert metadata["model"] == "fixture-model"
+        assert metadata["mode"] == "static"
+        assert metadata["attack_count"] == 2
+        assert metadata["attack_manifest_sha256"] == row["attack_manifest_hash"]
+        assert metadata["attack_ids"] == [a.id for a in DEFAULT_ATTACKS[:2]]
+        assert metadata["python_version"]
+    finally:
+        database.close()
+
+
+def test_json_report_includes_run_metadata(tmp_path):
+    scanner = Scanner(FakeTarget())
+    run_id, results = scanner.scan(DEFAULT_ATTACKS[:1], model="fixture-model")
+    path = tmp_path / "traceable.json"
+    write_json(str(path), run_id, results, metadata=scanner.last_run_metadata)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["run_metadata"]["attack_manifest_sha256"]
+    assert payload["run_metadata"]["target_type"] == "fake"
+    assert payload["run_metadata"]["attack_ids"] == [DEFAULT_ATTACKS[0].id]
+
+
+def test_attack_catalog_includes_expanded_pentest_families():
+    ids = {attack.id for attack in DEFAULT_ATTACKS}
+    assert {
+        "indirect-injection-retrieved-content",
+        "tool-output-injection",
+        "delimiter-boundary-confusion",
+        "multilingual-instruction-override",
+        "refusal-suppression",
+        "multi-turn-persistence",
+    }.issubset(ids)
+    assert len(attack_manifest(DEFAULT_ATTACKS)) == 64
