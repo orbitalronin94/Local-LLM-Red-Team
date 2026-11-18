@@ -944,9 +944,9 @@ def test_summary_rates_use_non_error_denominator():
     assert summary.errors == 1
     assert summary.not_detected == 1
     assert summary.empty == 1
-    assert summary.refusal_rate == pytest.approx(0.25)
-    assert summary.attack_success_rate == pytest.approx(0.25)
-    assert summary.mean_latency_ms == pytest.approx(25.0)
+    assert summary.refusal_rate == pytest.approx(1 / 3)
+    assert summary.attack_success_rate == pytest.approx(1 / 3)
+    assert summary.mean_latency_ms == pytest.approx(20.0)
 
 
 def test_summary_refusal_rate_counts_only_pass_results():
