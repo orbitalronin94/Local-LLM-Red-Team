@@ -288,3 +288,18 @@ The initial suite covers context laundering, refusal followed by reframing, and 
 
 The benchmark runs ten intent-matched English/Spanish probe pairs with separate benign controls. Results retain pair IDs and language labels; these are not certified translations or a representative multilingual evaluation. It also exports a human-review CSV containing prompts, responses, heuristic signals and annotation fields. Text signals do not prove real-world effects or tool execution.
 
+
+
+## Reproducible sampling and endpoint provenance
+
+Sampling parameters are optional and are sent only when explicitly supplied. For a controlled run:
+
+```bash
+python redteam.py --target ollama --model your-model --temperature 0 --seed 42 --json report.json
+```
+
+For OpenAI-compatible endpoints, the same flags are sent in the chat-completions request. Ollama receives them under `options`. Generic HTTP targets receive top-level `temperature` and `seed` fields, so use these flags only when that endpoint supports them.
+
+Set `REDTEAM_API_KEY` in the environment instead of passing secrets on the command line. The legacy `--api-key` option remains available, but command-line secrets may be exposed through shell history and process listings.
+
+JSON and SQLite evidence retain requested sampling settings and provider-returned metadata when available: served model identifier, system fingerprint, request ID, and finish reason. Providers differ in what they return. A seed and temperature improve comparability but do not guarantee bit-for-bit reproducibility across server versions, hardware, quantization, batching, or backend implementations.
