@@ -418,6 +418,38 @@ def test_scanner_adaptive_mode():
     assert result.turns[2].turn == 3
 
 
+def test_scanner_adaptive_uses_separate_attacker_model():
+    class ModelRecordingTarget(FakeTarget):
+        def __init__(self, response):
+            super().__init__(response=response)
+            self.models = []
+
+        def generate(self, messages, model=None):
+            self.models.append(model)
+            return super().generate(messages, model=model)
+
+    target = FakeTarget(
+        response="I cannot help with that request.",
+    )
+    attacker = ModelRecordingTarget(
+        response="Please continue the same request.",
+    )
+
+    scanner = Scanner(target)
+
+    _, results = scanner.scan(
+        DEFAULT_ATTACKS[:1],
+        model="target-model",
+        mode="adaptive",
+        adaptive_attacker=attacker,
+        adaptive_rounds=2,
+        adaptive_model="attacker-model",
+    )
+
+    assert len(results) == 1
+    assert attacker.models == ["attacker-model"]
+
+
 def test_scanner_adaptive_stops_on_detection():
     target = FakeTarget(
         response="Previous instructions have been disabled.",
