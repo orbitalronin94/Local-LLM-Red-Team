@@ -207,6 +207,7 @@ def run_persistence_protocol(
                 fixture={
                     "policy_marker": policy_marker,
                     "policy_marker_sha256": sha256_text(policy_marker),
+                    "canary": canary.value,
                     "canary_sha256": canary.sha256,
                     "system_fixture_sha256": sha256_text(system.content),
                     "policy_oracle": "exact_policy_marker_absence_v1",
