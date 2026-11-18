@@ -1,6 +1,8 @@
+import csv
 import json
+import sys
 from pathlib import Path
-from scripts.build_findings_catalog import collect, render
+from scripts.build_findings_catalog import collect, main, render
 
 def test_collect_separates_fail_and_not_detected(tmp_path: Path):
     payload = {
@@ -106,3 +108,50 @@ def test_scenario_catalogue_uses_first_flagged_turn_as_primary_evidence(tmp_path
     assert row["response_sha256"] == "response-2"
     assert row["evidence"] == ["system-prompt disclosure"]
     assert row["confidence"] == 0.91
+
+
+
+def test_catalogue_csv_neutralizes_untrusted_formula_cells(tmp_path: Path, monkeypatch):
+    input_dir = tmp_path / "input"
+    output_dir = tmp_path / "output"
+    input_dir.mkdir()
+    payload = {
+        "run_id": "formula-run",
+        "run_metadata": {"mode": "static"},
+        "results": [{
+            "attack_id": "override",
+            "attack_category": "instruction_override",
+            "status": "FAIL",
+            "prompt": "@SUM(1,1)",
+            "response": "=HYPERLINK(\"https://attacker.invalid\",\"open\")",
+            "prompt_sha256": "prompt-hash",
+            "response_sha256": "response-hash",
+            "detection": {"evidence": ["accepted authority"], "confidence": 0.9},
+        }],
+    }
+    (input_dir / "model.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["build_findings_catalog", "--input-dir", str(input_dir),
+         "--output-dir", str(output_dir)],
+    )
+
+    assert main() == 0
+    with (output_dir / "findings-catalog.csv").open(
+        encoding="utf-8-sig", newline=""
+    ) as stream:
+        row = next(csv.DictReader(stream))
+
+    assert row["prompt"].startswith("'@SUM(")
+    assert row["response"].startswith("'=HYPERLINK(")
+
+
+def test_catalogue_csv_safe_cell_handles_whitespace_and_control_prefixes():
+    from scripts.build_findings_catalog import csv_safe_cell
+
+    assert csv_safe_cell("=1+1") == "'=1+1"
+    assert csv_safe_cell("  @SUM(1,1)") == "'  @SUM(1,1)"
+    assert csv_safe_cell("\\t=1+1") == "'\\t=1+1"
+    assert csv_safe_cell("ordinary response") == "ordinary response"
+    assert csv_safe_cell(42) == 42
