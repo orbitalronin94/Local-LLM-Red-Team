@@ -61,7 +61,7 @@ def download(model_id: str, item: dict, destination: Path, force: bool = False) 
             "filename": filename,
             "revision_requested": requested_revision,
             "revision_resolved": resolved_revision,
-            "resolved_url": f"https://huggingface.co/{item['repo_id']}/resolve/{item.get('revision', 'main')}/{filename}",
+            "resolved_url": f"https://huggingface.co/{item['repo_id']}/resolve/{resolved_revision}/{filename}",
             "download_backend": "huggingface_hub.hf_hub_download",
             "sha256": digest.hexdigest(),
             "bytes": byte_count,
