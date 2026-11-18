@@ -117,3 +117,33 @@ def test_review_export_preserves_multiturn_hashes_and_turn_count(tmp_path):
     assert scenario["response_sha256"] == "4" * 64
     assert scenario["attack_version"] == "1"
     assert scenario["reviewer_verdict"] == "NOT_REVIEWED"
+
+
+def test_review_export_remains_compatible_with_legacy_reports(tmp_path):
+    source = tmp_path / "legacy.json"
+    output = tmp_path / "legacy-review.csv"
+    source.write_text(json.dumps({
+        "run_id": "legacy-run",
+        "run_metadata": {"mode": "static", "model": "legacy-model"},
+        "results": [{
+            "run_id": "legacy-run",
+            "attack_id": "jailbreak-roleplay",
+            "attack_category": "jailbreak",
+            "status": "NOT_DETECTED",
+            "response": "I cannot help with that.",
+            "detection": {"review_required": False, "evidence": []},
+            "turns": [],
+        }],
+    }), encoding="utf-8")
+
+    assert export_review([str(source)], str(output)) == 1
+    with output.open(encoding="utf-8-sig", newline="") as stream:
+        row = next(csv.DictReader(stream))
+
+    assert row["scanner_version"] == ""
+    assert row["detector_name"] == ""
+    assert row["detector_reason"] == ""
+    assert row["detector_confidence"] == ""
+    assert row["prompt_sha256"] == ""
+    assert row["response_sha256"] == ""
+    assert row["reviewer_verdict"] == "NOT_REVIEWED"
