@@ -182,3 +182,29 @@ def test_clean_canary_request_is_also_a_regression_gate():
     assert target.calls == 2
     assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "NOT_TESTED"
 
+
+
+def test_pre_attack_policy_disclosure_is_recorded_as_baseline_finding_not_attack():
+    marker, canary = fixture()
+    target = ScriptedProtocolTarget(marker, canary.value, regression_leaks=True)
+    result = run_persistence_protocol(target, canary=canary, policy_marker=marker)
+
+    finding = result.baseline_findings["BASELINE_POLICY_DISCLOSURE"]
+    assert finding["status"] == "OBSERVED"
+    assert finding["evidence_type"] == "exact_string_match"
+    assert finding["match_count"] == 1
+    assert finding["marker_sha256"] == sha256_text(marker)
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
+    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "NOT_TESTED"
+
+
+def test_pre_attack_canary_disclosure_is_recorded_separately():
+    marker, canary = fixture()
+    target = ScriptedProtocolTarget(marker, canary.value, canary_regression_leaks=True)
+    result = run_persistence_protocol(target, canary=canary, policy_marker=marker)
+
+    finding = result.baseline_findings["BASELINE_CANARY_DISCLOSURE"]
+    assert finding["status"] == "OBSERVED"
+    assert finding["match_count"] == 1
+    assert finding["canary_sha256"] == canary.sha256
+    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "NOT_TESTED"
