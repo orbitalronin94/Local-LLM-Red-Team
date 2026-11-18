@@ -21,7 +21,8 @@ from pathlib import Path
 
 def resolve_invocation(argv: list[str], environ: dict[str, str]):
     parser = argparse.ArgumentParser(
-        description="Run Local LLM Red Team using an environment-backed API key."
+        description="Run Local LLM Red Team using an environment-backed API key.",
+        allow_abbrev=False,
     )
     parser.add_argument(
         "--api-key-env",
