@@ -208,8 +208,6 @@ SmolLM2 is primarily English; Qwen2.5 has broader multilingual support. These co
 python scripts/download_models.py --list
 python scripts/download_models.py --model smollm2
 python scripts/download_models.py --model qwen2_5
-python scripts/download_models.py --model smollm2
-python scripts/download_models.py --model qwen2_5
 python scripts/download_models.py --model llama3_2_1b
 python scripts/download_models.py --model gemma3_1b
 python scripts/download_models.py --model all
