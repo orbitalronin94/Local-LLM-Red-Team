@@ -604,7 +604,7 @@ class OllamaTarget(HTTPJSONTarget):
         started = time.perf_counter()
 
         try:
-            with urllib.request.urlopen(
+            with open_http_request(
                 request,
                 timeout=self.timeout,
             ) as response:
@@ -1568,7 +1568,6 @@ class Scanner:
 
                     current_prompt = attacker_response.text.strip()
                     normalized = sha256_text(" ".join(current_prompt.split()).lower())
-                    seed_hash = sha256_text(" ".join(attack.prompt.split()).lower())
                     if not current_prompt:
                         adaptive_stop_reason = "attacker_empty"
                     elif len(current_prompt) > 2000:
