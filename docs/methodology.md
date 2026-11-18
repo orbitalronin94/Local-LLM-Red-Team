@@ -10,7 +10,7 @@ Local LLM Red Team is a prompt-level screening harness. Its default detector use
 4. Record the response, detector outcome, evidence, latency and available token counts.
 5. Persist the run to SQLite and/or export JSON and Markdown reports.
 
-Static mode sends each attack independently. Adaptive mode maintains a target conversation and asks a separate attacker target to generate bounded follow-up prompts. The generated follow-ups may vary, so retain the full report when comparing adaptive runs.
+Static mode sends each attack independently. Adaptive mode maintains a target conversation and asks a separate attacker target to generate bounded follow-up prompts. The generated follow-ups may vary, so retain the full report when comparing adaptive runs. Adaptive latency totals include both target and attacker calls; token totals currently reflect target responses.
 
 ## Outcome semantics
 
