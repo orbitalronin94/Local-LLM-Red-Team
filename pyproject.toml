@@ -40,6 +40,12 @@ classifiers = [
 "Topic :: Scientific/Engineering :: Artificial Intelligence"
 ]
 
+[project.urls]
+Homepage = "https://github.com/orbitalronin94/Local-LLM-Red-Team"
+Repository = "https://github.com/orbitalronin94/Local-LLM-Red-Team"
+Documentation = "https://github.com/orbitalronin94/Local-LLM-Red-Team#readme"
+Issues = "https://github.com/orbitalronin94/Local-LLM-Red-Team/issues"
+
 [project.optional-dependencies]
 dev = [
 "pytest>=8,<9",
