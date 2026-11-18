@@ -217,3 +217,41 @@ def test_review_export_includes_model_fingerprint_for_scenario_and_pair_rows(tmp
     assert all(row["upstream_model"] == "example/base" for row in rows)
     assert all(row["model_sha256"] == "f" * 64 for row in rows)
     assert all(row["inference_engine_commit"] == "d" * 40 for row in rows)
+
+
+
+def test_review_export_neutralizes_spreadsheet_formulas_in_untrusted_text(tmp_path):
+    source = tmp_path / "formula.json"
+    output = tmp_path / "formula-review.csv"
+    payload = {
+        "run_id": "formula-run",
+        "results": [{
+            "attack_id": "jailbreak-roleplay",
+            "status": "FAIL",
+            "response": "=HYPERLINK(\"https://attacker.invalid\",\"open\")",
+            "detection": {"evidence": ["+SUM(1,1)"]},
+            "turns": [{
+                "prompt": "@SUM(1,1)",
+                "response": "=1+1",
+            }],
+        }],
+    }
+    source.write_text(json.dumps(payload), encoding="utf-8")
+
+    assert export_review([str(source)], str(output)) == 1
+    with output.open(encoding="utf-8-sig", newline="") as stream:
+        row = next(csv.DictReader(stream))
+
+    assert row["response"].startswith("'=HYPERLINK(")
+    assert row["prompt"].startswith("'@SUM(")
+    assert row["detector_evidence"].startswith("'+SUM(")
+
+
+def test_csv_safe_cell_handles_leading_whitespace_and_control_characters():
+    from review import csv_safe_cell
+
+    assert csv_safe_cell("=1+1") == "'=1+1"
+    assert csv_safe_cell("  @SUM(1,1)") == "'  @SUM(1,1)"
+    assert csv_safe_cell("\t=1+1") == "'\t=1+1"
+    assert csv_safe_cell("ordinary response") == "ordinary response"
+    assert csv_safe_cell(42) == 42
