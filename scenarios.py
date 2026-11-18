@@ -198,6 +198,7 @@ class ScenarioEvidence:
     benign_control: dict[str, Any] = field(default_factory=dict)
     error: str | None = None
     validity: str = "valid"
+    evidence_vector: dict[str, dict[str, Any]] = field(default_factory=empty_evidence_vector)
 
 
 def run_scenario(target: Target, scenario: Scenario, model: str | None = None,
