@@ -60,3 +60,8 @@ El workflow `.github/workflows/local-model-benchmark.yml` ejecuta el catálogo i
 Puede iniciarse desde **Actions → Local model red-team benchmark → Run workflow**. También se dispara cuando cambian en `main` el workflow, el descargador/catálogo o el escáner. Utiliza modelos públicos y no necesita secretos API.
 
 En el modo adaptativo, el modelo evaluado también actúa como atacante. Es una prueba de estrés por autojuego reproducible, no una evaluación con un atacante independiente. El rendimiento de los runners CPU y los timeouts pueden variar; una ejecución fallida se registra como fallida, nunca como resultado limpio de seguridad.
+
+
+## Caché persistente de modelos
+
+El workflow de benchmark guarda cada GGUF por separado en la caché de GitHub Actions. La clave depende del sistema operativo del runner, el ID del modelo y el contenido del catálogo. La primera ejecución descarga los pesos; las siguientes restauran el archivo y sus metadatos y verifican su SHA-256 antes de iniciar la inferencia. Si cambia el catálogo, se genera una clave nueva deliberadamente. GitHub puede expulsar cachés antiguas por sus límites de almacenamiento o retención; en ese caso habrá que descargar de nuevo ese modelo. La caché contiene los modelos, no los informes ni credenciales.
