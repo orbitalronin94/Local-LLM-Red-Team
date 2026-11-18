@@ -1686,6 +1686,12 @@ def parse_csv(value: str | None) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Local LLM red-team harness",
+        epilog=(
+            "AUTHORIZED USE ONLY: test only systems you own or have explicit "
+            "permission to assess. Review applicable laws in every relevant "
+            "jurisdiction before testing. This tool is not legal advice. "
+            "See docs/legal-use.md and docs/legal-use.es.md."
+        ),
     )
 
     parser.add_argument(
