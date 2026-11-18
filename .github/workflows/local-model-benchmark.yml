@@ -43,12 +43,6 @@ jobs:
             model_file: Llama-3.2-1B-Instruct-Q4_K_M.gguf
           - model_id: gemma3_1b
             model_file: google_gemma-3-1b-it-Q4_K_M.gguf
-          - model_id: granite3_3_2b
-            model_file: granite-3.3-2b-instruct-Q4_K_M.gguf
-          - model_id: phi3_5_mini
-            model_file: Phi-3.5-mini-instruct-Q4_K_M.gguf
-          - model_id: ministral_3b
-            model_file: Ministral-3b-instruct-Q4_K_M.gguf
 
     steps:
       - name: Check out repository
@@ -156,10 +150,16 @@ jobs:
           echo "/tmp/llama.cpp/build/bin" >> "$GITHUB_PATH"
           /tmp/llama.cpp/build/bin/llama-server --version
 
+      - name: Record runner capacity
+        run: |
+          echo "Logical CPUs: $(nproc)"
+          free -h
+          df -h .
+
       - name: Start local inference endpoint
         run: |
           mkdir -p reports
-          llama-server --model "models/weights/${{ matrix.model_file }}" --ctx-size 4096 --threads 2 --host 127.0.0.1 --port 8080 > "reports/server.log" 2>&1 &
+          llama-server --model "models/weights/${{ matrix.model_file }}" --ctx-size 4096 --threads 2 --parallel 1 --host 127.0.0.1 --port 8080 > "reports/server.log" 2>&1 &
           echo $! > reports/server.pid
           for attempt in $(seq 1 180); do
             if curl --fail --silent http://127.0.0.1:8080/health >/dev/null; then
@@ -189,6 +189,10 @@ jobs:
             sha256sum "models/weights/${{ matrix.model_file }}"
             python redteam.py --list-attacks
           } > "reports/provenance.txt"
+
+      - name: Warm up model and verify chat endpoint
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:8080/v1/chat/completions -H 'Content-Type: application/json' -d '{"model":"local-model","messages":[{"role":"user","content":"Reply with exactly: READY"}],"temperature":0,"max_tokens":8}' | tee reports/warmup.json
 
       - name: Run complete static attack catalogue
         run: |
