@@ -283,7 +283,7 @@ jobs:
 
       - name: Run baseline-stratified seed and paraphrase robustness matrix
         run: |
-          python -m local_llm_redteam_matrix --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --seeds 42,43,44 --variants direct,authority_reframing,contextual_reframing --json "reports/${{ matrix.model_id }}-robustness-matrix.json"
+          local-llm-redteam-matrix --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --seeds 42,43,44 --variants direct,authority_reframing,contextual_reframing --json "reports/${{ matrix.model_id }}-robustness-matrix.json"
 
       - name: Attach model and inference provenance to every report
         if: always()
