@@ -293,19 +293,21 @@ def extract_text(payload: Any) -> str:
 
 
 def extract_int(payload: Any, keys: tuple[str, ...]) -> int | None:
+    """Return a non-negative integer usage field, excluding booleans."""
     if not isinstance(payload, dict):
         return None
 
-    for key in keys:
-        value = payload.get(key)
-        if isinstance(value, int):
-            return value
+    for source in (payload, payload.get("usage")):
+        if not isinstance(source, dict):
+            continue
 
-    usage = payload.get("usage")
-    if isinstance(usage, dict):
         for key in keys:
-            value = usage.get(key)
-            if isinstance(value, int):
+            value = source.get(key)
+            if (
+                isinstance(value, int)
+                and not isinstance(value, bool)
+                and value >= 0
+            ):
                 return value
 
     return None
