@@ -18,7 +18,7 @@ def test_model_downloader_lists_catalog_without_network():
 
 def test_model_downloader_dry_run_does_not_download(tmp_path):
     result = subprocess.run([sys.executable, str(DOWNLOADER), '--model', 'smollm2', '--destination', str(tmp_path), '--dry-run'], cwd=ROOT, capture_output=True, text=True, check=True)
-    assert 'huggingface.co/tensorblock/SmolLM2-360M-Instruct-GGUF/resolve/main/' in result.stdout
+    assert 'huggingface.co/bartowski/SmolLM2-360M-Instruct-GGUF/resolve/main/' in result.stdout
     assert not list(tmp_path.iterdir())
 
 
