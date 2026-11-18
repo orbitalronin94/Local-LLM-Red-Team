@@ -26,7 +26,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build-llama-server:
+    name: Build reusable llama.cpp CPU server
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Build llama.cpp CPU server once
+        run: |
+          git clone --depth 1 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF
+          cmake --build /tmp/llama.cpp/build --config Release --target llama-server -j2
+          cmake --install /tmp/llama.cpp/build --prefix "$RUNNER_TEMP/llama-install"
+          /tmp/llama.cpp/build/bin/llama-server --version
+          git -C /tmp/llama.cpp rev-parse HEAD > "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT"
+
+      - name: Upload reusable llama.cpp installation
+        uses: actions/upload-artifact@v6
+        with:
+          name: llama-cpp-cpu-server
+          path: ${{ runner.temp }}/llama-install/
+          if-no-files-found: error
+          retention-days: 1
+
   benchmark:
+    needs: build-llama-server
     name: Pentest ${{ matrix.model_id }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -142,13 +168,19 @@ jobs:
           print(f"Verified {model.name}: {metadata['bytes']} bytes, sha256={digest}")
           PY
 
-      - name: Build llama.cpp CPU server
+      - name: Download reusable llama.cpp server
+        uses: actions/download-artifact@v6
+        with:
+          name: llama-cpp-cpu-server
+          path: ${{ runner.temp }}/llama-install
+
+      - name: Configure prebuilt llama.cpp runtime
         run: |
-          git clone --depth 1 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
-          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF
-          cmake --build /tmp/llama.cpp/build --config Release --target llama-server -j2
-          echo "/tmp/llama.cpp/build/bin" >> "$GITHUB_PATH"
-          /tmp/llama.cpp/build/bin/llama-server --version
+          echo "$RUNNER_TEMP/llama-install/bin" >> "$GITHUB_PATH"
+          echo "LD_LIBRARY_PATH=$RUNNER_TEMP/llama-install/lib:$RUNNER_TEMP/llama-install/lib64:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+          test -x "$RUNNER_TEMP/llama-install/bin/llama-server"
+          cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT"
+          "$RUNNER_TEMP/llama-install/bin/llama-server" --version
 
       - name: Record runner capacity
         run: |
@@ -182,7 +214,7 @@ jobs:
           {
             echo "model_id=${{ matrix.model_id }}"
             echo "model_file=${{ matrix.model_file }}"
-            echo "llama_cpp_commit=$(git -C /tmp/llama.cpp rev-parse HEAD)"
+            echo "llama_cpp_commit=$(cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT")"
             echo "python=$(python --version)"
             echo "runner=$(uname -a)"
             cat "models/weights/${{ matrix.model_file }}.metadata.json"
