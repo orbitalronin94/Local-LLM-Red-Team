@@ -29,7 +29,7 @@ def csv_safe_cell(value: Any) -> Any:
     """
     if not isinstance(value, str) or not value:
         return value
-    first = value.lstrip(" \\t\\r\\n")
+    first = value.lstrip(" \t\r\n")
     if value[0] in "\t\r\n" or (first and first[0] in "=+-@"):
         return "'" + value
     return value
