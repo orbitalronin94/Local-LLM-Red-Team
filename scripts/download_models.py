@@ -22,7 +22,7 @@ def download(model_id: str, item: dict, destination: Path, force: bool = False) 
     output = destination / filename
     if output.exists() and not force:
         raise FileExistsError(f"{output} already exists; use --force to replace it")
-    url = f"https://huggingface.co/{item['repo_id']}/resolve/{item.get('revision', 'main')}/{filename}"
+    url = f"https://huggingface.co/{item['repo_id']}/resolve/{item.get('revision', 'main')}/{filename}?download=true"
     request = urllib.request.Request(url, headers={"User-Agent": "Local-LLM-Red-Team-model-fetcher/1.0"})
     temporary = output.with_suffix(output.suffix + ".part")
     digest, byte_count, etag = hashlib.sha256(), 0, None
@@ -65,7 +65,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.model: parser.error("choose --model, or use --list")
     selected = catalog["models"] if args.model == "all" else {args.model: catalog["models"][args.model]}
     for model_id, item in selected.items():
-        url = f"https://huggingface.co/{item['repo_id']}/resolve/{item.get('revision', 'main')}/{item['filename']}"
+        url = f"https://huggingface.co/{item['repo_id']}/resolve/{item.get('revision', 'main')}/{item['filename']}?download=true"
         if args.dry_run:
             print(f"{model_id}: {url}"); print(f"  destination: {args.destination / item['filename']}"); continue
         try: path = download(model_id, item, args.destination, force=args.force)
