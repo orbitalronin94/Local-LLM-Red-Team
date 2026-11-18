@@ -62,3 +62,8 @@ The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs t
 It can be started manually from **Actions → Local model red-team benchmark → Run workflow**. It also runs when the benchmark workflow, model downloader/catalogue or scanner changes on `main`. The benchmark uses public model files and does not require API secrets.
 
 The adaptive run uses the tested model itself as the attacker. Treat this as a reproducible self-play stress test, not as an independent attacker evaluation. GitHub-hosted CPU performance and timeouts can vary; a failed model run is reported as failed, not as a clean security result.
+
+
+## Persistent model cache
+
+The benchmark workflow caches each GGUF independently with GitHub Actions cache, keyed by runner OS, model ID and the catalogue contents. The first run for a model downloads its weights; subsequent runs restore the cached file and sidecar metadata, then verify SHA-256 before starting inference. A catalogue change intentionally creates a fresh cache key. GitHub may evict old caches under its storage and retention policies, in which case that model is downloaded again. The cache stores benchmark assets, not reports or credentials.
