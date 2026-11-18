@@ -917,6 +917,7 @@ class TurnResult:
     detection: Detection
     prompt_sha256: str = ""
     response_sha256: str = ""
+    target_metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.prompt_sha256:
@@ -939,6 +940,7 @@ class AttackResult:
     output_tokens: int | None
     detection: Detection
     prompt: str = ""
+    target_metadata: dict[str, Any] = field(default_factory=dict)
     turns: list[TurnResult] = field(default_factory=list)
     error: str | None = None
     prompt_sha256: str = ""
@@ -1003,6 +1005,7 @@ class Database:
                 status TEXT NOT NULL,
                 response TEXT,
                 prompt TEXT,
+                target_metadata_json TEXT,
                 latency_ms REAL,
                 input_tokens INTEGER,
                 output_tokens INTEGER,
@@ -1039,7 +1042,7 @@ class Database:
             row["name"]
             for row in self.connection.execute("PRAGMA table_info(results)")
         }
-        for column in ("prompt", "prompt_sha256", "response_sha256"):
+        for column in ("prompt", "target_metadata_json", "prompt_sha256", "response_sha256"):
             if column not in result_columns:
                 self.connection.execute(
                     f"ALTER TABLE results ADD COLUMN {column} TEXT"
@@ -1094,6 +1097,7 @@ class Database:
                 status,
                 response,
                 prompt,
+                target_metadata_json,
                 latency_ms,
                 input_tokens,
                 output_tokens,
@@ -1106,7 +1110,7 @@ class Database:
                 prompt_sha256,
                 response_sha256
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 result.run_id,
@@ -1117,6 +1121,7 @@ class Database:
                 result.status,
                 result.response,
                 result.prompt,
+                json.dumps(result.target_metadata, ensure_ascii=False, sort_keys=True),
                 result.latency_ms,
                 result.input_tokens,
                 result.output_tokens,
@@ -1197,6 +1202,13 @@ class Scanner:
             "attacker_model": adaptive_model or model if adaptive_attacker else None,
             "adaptive_rounds": adaptive_rounds if mode == "adaptive" else None,
             "adaptive_self_play": bool(mode == "adaptive" and adaptive_attacker is not None and adaptive_attacker.name == self.target.name and (adaptive_model or model) == model),
+            "sampling": {
+                "temperature": getattr(self.target, "temperature", None),
+                "seed": getattr(self.target, "seed", None),
+            },
+            "endpoint_provenance_fields": [
+                "served_model", "system_fingerprint", "request_id", "finish_reason"
+            ],
         }
 
         if self.database:
@@ -1268,6 +1280,7 @@ class Scanner:
                 output_tokens=response.output_tokens,
                 detection=detection,
                 prompt_sha256=sha256_text(attack.prompt),
+                target_metadata=response.metadata,
             )
 
         except Exception as exc:
@@ -1352,6 +1365,7 @@ class Scanner:
                         response=response.text,
                         latency_ms=response.latency_ms,
                         detection=detection,
+                        target_metadata=response.metadata,
                     )
                 )
 
@@ -1380,6 +1394,7 @@ class Scanner:
                         ),
                         detection=detection,
                         turns=turns,
+                        target_metadata=response.metadata,
                         attacker_latency_ms=attacker_latency,
                     )
 
@@ -1442,6 +1457,7 @@ class Scanner:
                 ),
                 detection=final_detection,
                 turns=turns,
+                target_metadata=turns[-1].target_metadata if turns else {},
                 attacker_latency_ms=attacker_latency,
             )
 
