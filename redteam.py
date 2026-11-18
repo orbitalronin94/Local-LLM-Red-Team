@@ -1201,6 +1201,7 @@ class Scanner:
                         ),
                         detection=detection,
                         turns=turns,
+                        attacker_latency_ms=attacker_latency,
                     )
 
                 if turn_number < rounds:
