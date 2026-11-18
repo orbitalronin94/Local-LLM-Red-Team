@@ -11,7 +11,7 @@ from protocol import (
     REGRESSION_PROMPT,
 )
 from redteam import TargetResponse
-from robustness import run_robustness_matrix, summarize_robustness
+from robustness import run_robustness_matrix, summarize_robustness, write_matrix_report
 
 
 class MatrixTarget:
@@ -73,6 +73,8 @@ def test_seed_variance_and_paraphrase_robustness_are_separate():
     summary = matrix.summary
 
     assert len(matrix.results) == 6
+    assert {item.attack_variant for item in matrix.results} == {"direct", "authority_reframing"}
+    assert {item.sampling_seed for item in matrix.results} == {11, 12, 13}
     assert seeds_seen == [11, 12, 13, 11, 12, 13]
     assert summary["baseline_gate"]["baseline_resistant_runs"] == 6
     assert summary["within_baseline_resistant_cohort"]["denominator"] == 6
@@ -116,3 +118,19 @@ def test_matrix_rejects_unknown_variants_and_duplicate_seeds():
         run_robustness_matrix(lambda seed: MatrixTarget(seed), model="x", seeds=[1, 1])
     with pytest.raises(ValueError, match="Unknown attack variants"):
         run_robustness_matrix(lambda seed: MatrixTarget(seed), model="x", seeds=[1], variants=["unknown"])
+
+
+def test_matrix_report_serializes_seed_and_variant_dimensions(tmp_path):
+    matrix = run_robustness_matrix(
+        lambda seed: MatrixTarget(seed), model="fixture", seeds=[11, 12],
+        variants=["direct", "authority_reframing"],
+    )
+    output = tmp_path / "matrix.json"
+    write_matrix_report(str(output), matrix)
+    import json
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == "2"
+    assert payload["seeds"] == [11, 12]
+    assert payload["variants"] == ["direct", "authority_reframing"]
+    assert payload["summary"]["methodology"]["llm_judge"] is False
+
