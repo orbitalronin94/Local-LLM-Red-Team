@@ -387,6 +387,30 @@ def test_scanner_target_error():
     assert results[0].error
 
 
+def test_scanner_adaptive_requires_attacker():
+    scanner = Scanner(FakeTarget())
+
+    with pytest.raises(ValueError, match="requires an adaptive_attacker"):
+        scanner.scan(
+            DEFAULT_ATTACKS[:1],
+            model="fake-model",
+            mode="adaptive",
+        )
+
+
+def test_scanner_adaptive_requires_positive_rounds():
+    scanner = Scanner(FakeTarget())
+
+    with pytest.raises(ValueError, match="at least 1"):
+        scanner.scan(
+            DEFAULT_ATTACKS[:1],
+            model="fake-model",
+            mode="adaptive",
+            adaptive_attacker=FakeTarget(),
+            adaptive_rounds=0,
+        )
+
+
 def test_scanner_adaptive_mode():
     target = FakeTarget(
         response="I cannot help with that request.",
@@ -416,6 +440,8 @@ def test_scanner_adaptive_mode():
     assert result.turns[0].turn == 1
     assert result.turns[1].turn == 2
     assert result.turns[2].turn == 3
+    # Three target calls plus two attacker follow-ups are included.
+    assert result.latency_ms == 5.0
 
 
 def test_scanner_adaptive_uses_separate_attacker_model():
