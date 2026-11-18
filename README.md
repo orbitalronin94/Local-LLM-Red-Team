@@ -281,5 +281,5 @@ The initial suite covers context laundering, refusal followed by reframing, and 
 
 ### Paired English/Spanish probes and human review
 
-The benchmark runs five intent-matched English/Spanish probe pairs with separate benign controls. Results retain pair IDs and language labels; these are not certified translations or a representative multilingual evaluation. It also exports a human-review CSV containing prompts, responses, heuristic signals and annotation fields. Text signals do not prove real-world effects or tool execution.
+The benchmark runs ten intent-matched English/Spanish probe pairs with separate benign controls. Results retain pair IDs and language labels; these are not certified translations or a representative multilingual evaluation. It also exports a human-review CSV containing prompts, responses, heuristic signals and annotation fields. Text signals do not prove real-world effects or tool execution.
 
