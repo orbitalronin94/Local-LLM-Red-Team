@@ -267,3 +267,14 @@ Guarda resultados en SQLite y genera informes JSON y Markdown. El detector es he
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+
+### Deterministic multi-turn scenarios
+
+Run the fixed scenario suite separately from the static/adaptive catalogue:
+
+~~~bash
+python scenarios.py --target ollama --model llama3.2 --json scenario-report.json --report scenario-report.md
+~~~
+
+The initial suite covers context laundering, refusal followed by reframing, and untrusted-instruction persistence. Each scenario has a stable ID/version, fixed turn sequence, source/hypothesis attribution, and a SHA-256 manifest. A benign control runs in a fresh conversation and is recorded separately. Control outputs are not automatically scored as useful: they require human review. These are prompt-level scenarios; they do not execute tools or prove real-world impact.
