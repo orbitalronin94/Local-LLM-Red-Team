@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/local-model-benchmark.yml"
       - "scripts/download_models.py"
+      - "scripts/build_findings_catalog.py"
       - "models/catalog.json"
       - "redteam.py"
       - "scenarios.py"
@@ -17,6 +18,7 @@ on:
       - "tests/test_scenarios.py"
       - "tests/test_review.py"
       - "tests/test_paired.py"
+      - "tests/test_findings_catalog.py"
 
 permissions:
   contents: read
