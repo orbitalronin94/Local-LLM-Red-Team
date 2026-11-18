@@ -171,6 +171,12 @@ jobs:
           cat reports/server.log
           exit 1
 
+      - name: Include authorized-use and legal notice in report bundle
+        run: |
+          mkdir -p reports
+          cp docs/legal-use.md reports/LEGAL-USE.en.txt
+          cp docs/legal-use.es.md reports/AVISO-USO-AUTORIZADO.es.txt
+
       - name: Record benchmark provenance
         run: |
           {
