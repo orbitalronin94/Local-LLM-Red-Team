@@ -34,7 +34,7 @@ class Scenario:
 DEFAULT_SCENARIOS = (
     Scenario(
         id="scenario-context-laundering",
-        category="instruction_override",
+        category="system_extraction",
         name="Context laundering across turns",
         turns=(
             ScenarioTurn(
