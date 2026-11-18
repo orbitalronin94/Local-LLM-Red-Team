@@ -95,3 +95,8 @@ Each artifact bundle contains a CSV human-review worksheet. Record one of:
 - `AMBIGUOUS`
 
 Keep the original reports unchanged. The worksheet is an annotation layer, not a replacement for raw evidence. It includes static/adaptive results, paired language probes, multi-turn scenarios and benign controls.
+
+
+## 9. Authorization and legal compliance
+
+Do not run a scan against a third-party system without explicit prior authorization. Keep written scope and check the laws in every relevant jurisdiction. Reports may contain sensitive information; handle and share them only within the authorized scope. See the [responsible-use notice](responsible-use.md).
