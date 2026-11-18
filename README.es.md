@@ -12,6 +12,8 @@
 
 > **Uso responsable — autorización obligatoria.** Prueba únicamente sistemas, modelos y endpoints propios o cuyo análisis tengas expresamente autorizado. No escanees sistemas ajenos sin permiso previo. Antes de probar, define el alcance por escrito y revisa la legislación de **todos los países y jurisdicciones pertinentes**. Que un sistema sea accesible públicamente no significa que tengas autorización. Consulta el [aviso de uso responsable y legal](docs/uso-responsable.md).
 
+> **Solo uso autorizado:** prueba únicamente sistemas propios o aquellos para los que tengas permiso expreso y previo. No analices sistemas ajenos sin autorización. La legislación varía según la jurisdicción: revisa las leyes, contratos, normas de privacidad y condiciones del proveedor de cada país pertinente antes de realizar pruebas. Este proyecto no ofrece asesoramiento jurídico. Lee el [aviso de uso autorizado y consideraciones legales](docs/legal-use.es.md).
+
 ## Por qué existe
 
 Los modelos locales se utilizan en asistentes privados, herramientas de programación y flujos internos. Ejecutarlos en localhost no los hace inmunes a instrucciones hostiles. También necesitan pruebas de seguridad.
