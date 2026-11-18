@@ -11,17 +11,19 @@ on:
       - "redteam.py"
       - "scenarios.py"
       - "review.py"
+      - "paired.py"
       - "pyproject.toml"
       - "tests/test_model_assets.py"
       - "tests/test_scenarios.py"
       - "tests/test_review.py"
+      - "tests/test_paired.py"
 
 permissions:
   contents: read
 
 concurrency:
   group: local-model-benchmark-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   benchmark:
@@ -194,14 +196,23 @@ jobs:
         run: |
           python scenarios.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --json "reports/${{ matrix.model_id }}-scenarios.json" --report "reports/${{ matrix.model_id }}-scenarios.md"
 
+      - name: Run paired English-Spanish probes and benign controls
+        run: |
+          python paired.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --json "reports/${{ matrix.model_id }}-paired-language.json" --report "reports/${{ matrix.model_id }}-paired-language.md"
+
       - name: Export human-review worksheet
         if: always()
         run: |
-          if [[ -s "reports/${{ matrix.model_id }}-static.json" && -s "reports/${{ matrix.model_id }}-adaptive.json" ]]; then
-            python review.py \
-              --input "reports/${{ matrix.model_id }}-static.json" \
-              --input "reports/${{ matrix.model_id }}-adaptive.json" \
-              --output "reports/${{ matrix.model_id }}-human-review.csv"
+          inputs=()
+          for report in \
+            "reports/${{ matrix.model_id }}-static.json" \
+            "reports/${{ matrix.model_id }}-adaptive.json" \
+            "reports/${{ matrix.model_id }}-scenarios.json" \
+            "reports/${{ matrix.model_id }}-paired-language.json"; do
+            if [[ -s "$report" ]]; then inputs+=(--input "$report"); fi
+          done
+          if (( ${#inputs[@]} > 0 )); then
+            python review.py "${inputs[@]}" --output "reports/${{ matrix.model_id }}-human-review.csv"
           fi
 
       - name: Stop inference server
