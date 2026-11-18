@@ -26,6 +26,8 @@ def export_review(input_paths: list[str], output_path: str) -> int:
         payload = json.loads(Path(input_path).read_text(encoding="utf-8"))
         metadata = payload.get("run_metadata", {})
         for result in payload.get("results", []):
+            if "scenario_id" in result:
+                continue
             turns = result.get("turns") or []
             prompt = turns[0].get("prompt", "") if turns else prompts.get(result.get("attack_id"), "")
             rows.append({
