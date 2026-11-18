@@ -180,6 +180,7 @@ class TurnEvidence:
     detector_evidence: list[str]
     prompt_sha256: str
     response_sha256: str
+    provenance: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -236,6 +237,7 @@ def run_scenario(target: Target, scenario: Scenario, model: str | None = None,
             reason=detection.reason, detector_evidence=detection.evidence,
             prompt_sha256=sha256_text(step.prompt),
             response_sha256=sha256_text(response.text),
+            provenance=response.provenance,
         ))
         conversation.append(Message(role="assistant", content=response.text))
         status = detection.status
@@ -260,6 +262,7 @@ def run_scenario(target: Target, scenario: Scenario, model: str | None = None,
             "interpretation": "requires_human_review",
             "response": response.text,
             "response_sha256": sha256_text(response.text),
+            "provenance": response.provenance,
             "latency_ms": response.latency_ms,
         })
         control_ok = bool(response.text) and all(
