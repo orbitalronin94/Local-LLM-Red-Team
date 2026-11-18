@@ -49,15 +49,24 @@ def download(model_id: str, item: dict, destination: Path, force: bool = False) 
         if byte_count < 10_000_000:
             raise RuntimeError(f"Downloaded file is unexpectedly small ({byte_count} bytes)")
         temporary.replace(output)
+        snapshot_commit = (
+            cached_path.parent.name
+            if cached_path.parent.parent.name == "snapshots"
+            else ""
+        )
         metadata = {
             "model_id": model_id,
             "repo_id": item["repo_id"],
             "filename": filename,
             "revision_requested": item.get("revision", "main"),
+            "revision_resolved": snapshot_commit,
             "resolved_url": f"https://huggingface.co/{item['repo_id']}/resolve/{item.get('revision', 'main')}/{filename}",
             "download_backend": "huggingface_hub.hf_hub_download",
             "sha256": digest.hexdigest(),
             "bytes": byte_count,
+            "quantization": item.get("quantization", ""),
+            "upstream_model": item.get("upstream_model", ""),
+            "model_card": item.get("model_card", ""),
             "license": item["license"],
             "downloaded_at": datetime.now(timezone.utc).isoformat(),
         }

@@ -147,3 +147,73 @@ def test_review_export_remains_compatible_with_legacy_reports(tmp_path):
     assert row["prompt_sha256"] == ""
     assert row["response_sha256"] == ""
     assert row["reviewer_verdict"] == "NOT_REVIEWED"
+
+
+def test_review_csv_validator_requires_complete_human_annotation(tmp_path):
+    from review import validate_review_csv
+
+    source = tmp_path / "annotated.csv"
+    source.write_text(
+        "reviewer_verdict,reviewer_notes,reviewed_by,reviewed_at\n"
+        "REFUSED,Clear refusal,analyst,2026-11-18T12:00:00Z\n"
+        "NOT_REVIEWED,,,\n",
+        encoding="utf-8",
+    )
+    summary = validate_review_csv(str(source))
+    assert summary["valid"] is True
+    assert summary["total_rows"] == 2
+    assert summary["verdict_counts"]["REFUSED"] == 1
+    assert summary["verdict_counts"]["NOT_REVIEWED"] == 1
+
+
+def test_review_csv_validator_rejects_incomplete_or_unknown_verdict(tmp_path):
+    from review import validate_review_csv
+
+    source = tmp_path / "bad.csv"
+    source.write_text(
+        "reviewer_verdict,reviewer_notes,reviewed_by,reviewed_at\n"
+        "CONFIRMED_COMPLIANCE,,,\n"
+        "MADE_UP,notes,analyst,2026-11-18T12:00:00Z\n",
+        encoding="utf-8",
+    )
+    summary = validate_review_csv(str(source))
+    assert summary["valid"] is False
+    assert any("reviewed_by is required" in error for error in summary["errors"])
+    assert any("unsupported reviewer_verdict" in error for error in summary["errors"])
+
+
+def test_review_export_includes_model_fingerprint_for_scenario_and_pair_rows(tmp_path):
+    source = tmp_path / "multi.json"
+    output = tmp_path / "review.csv"
+    identity = {
+        "catalog_model_id": "llama3_2_1b",
+        "model_repo_id": "example/model",
+        "model_revision_requested": "main",
+        "model_revision_resolved": "abc123",
+        "model_resolved_url": "https://huggingface.co/example/model/resolve/main/model.gguf",
+        "quantization": "Q4_K_M",
+        "upstream_model": "example/base",
+        "model_sha256": "f" * 64,
+        "inference_engine": "llama.cpp",
+        "inference_engine_commit": "d" * 40,
+    }
+    source.write_text(json.dumps({
+        "run_id": "multi",
+        "model": "local-model",
+        "model_metadata": identity,
+        "records": [{"attack_id": "paired-1", "status": "NOT_DETECTED"}],
+        "results": [{
+            "scenario_id": "scenario-1", "category": "jailbreak",
+            "status": "NOT_DETECTED", "turns": [],
+            "benign_control": {},
+        }],
+    }), encoding="utf-8")
+    assert export_review([str(source)], str(output)) == 3
+    with output.open(encoding="utf-8-sig", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    assert all(row["catalog_model_id"] == "llama3_2_1b" for row in rows)
+    assert all(row["model_revision_resolved"] == "abc123" for row in rows)
+    assert all(row["quantization"] == "Q4_K_M" for row in rows)
+    assert all(row["upstream_model"] == "example/base" for row in rows)
+    assert all(row["model_sha256"] == "f" * 64 for row in rows)
+    assert all(row["inference_engine_commit"] == "d" * 40 for row in rows)

@@ -34,6 +34,16 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "run_id": result.get("run_id", payload.get("run_id", "")),
                 "mode": metadata.get("mode", "unknown"),
                 "model": result.get("model", metadata.get("model", "")),
+                "catalog_model_id": payload.get("model_metadata", metadata).get("catalog_model_id", ""),
+                "model_repo_id": payload.get("model_metadata", metadata).get("model_repo_id", ""),
+                "model_revision_requested": payload.get("model_metadata", metadata).get("model_revision_requested", ""),
+                "model_revision_resolved": payload.get("model_metadata", metadata).get("model_revision_resolved", ""),
+                "model_resolved_url": payload.get("model_metadata", metadata).get("model_resolved_url", ""),
+                "quantization": payload.get("model_metadata", metadata).get("quantization", ""),
+                "upstream_model": payload.get("model_metadata", metadata).get("upstream_model", ""),
+                "model_sha256": payload.get("model_metadata", metadata).get("model_sha256", ""),
+                "inference_engine": payload.get("model_metadata", metadata).get("inference_engine", ""),
+                "inference_engine_commit": payload.get("model_metadata", metadata).get("inference_engine_commit", ""),
                 "attack_id": result.get("attack_id", ""),
                 "category": result.get("attack_category", ""),
                 "heuristic_status": result.get("status", ""),
@@ -62,6 +72,16 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "run_id": payload.get("run_id", ""),
                 "mode": "paired-language",
                 "model": payload.get("model", ""),
+                "catalog_model_id": payload.get("model_metadata", {}).get("catalog_model_id", ""),
+                "model_repo_id": payload.get("model_metadata", {}).get("model_repo_id", ""),
+                "model_revision_requested": payload.get("model_metadata", {}).get("model_revision_requested", ""),
+                "model_revision_resolved": payload.get("model_metadata", {}).get("model_revision_resolved", ""),
+                "model_resolved_url": payload.get("model_metadata", {}).get("model_resolved_url", ""),
+                "quantization": payload.get("model_metadata", {}).get("quantization", ""),
+                "upstream_model": payload.get("model_metadata", {}).get("upstream_model", ""),
+                "model_sha256": payload.get("model_metadata", {}).get("model_sha256", ""),
+                "inference_engine": payload.get("model_metadata", {}).get("inference_engine", ""),
+                "inference_engine_commit": payload.get("model_metadata", {}).get("inference_engine_commit", ""),
                 "attack_id": result.get("attack_id", ""),
                 "category": result.get("category", ""),
                 "heuristic_status": result.get("status", ""),
@@ -87,6 +107,16 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "run_id": payload.get("run_id", ""),
                 "mode": "paired-benign-control",
                 "model": payload.get("model", ""),
+                "catalog_model_id": payload.get("model_metadata", {}).get("catalog_model_id", ""),
+                "model_repo_id": payload.get("model_metadata", {}).get("model_repo_id", ""),
+                "model_revision_requested": payload.get("model_metadata", {}).get("model_revision_requested", ""),
+                "model_revision_resolved": payload.get("model_metadata", {}).get("model_revision_resolved", ""),
+                "model_resolved_url": payload.get("model_metadata", {}).get("model_resolved_url", ""),
+                "quantization": payload.get("model_metadata", {}).get("quantization", ""),
+                "upstream_model": payload.get("model_metadata", {}).get("upstream_model", ""),
+                "model_sha256": payload.get("model_metadata", {}).get("model_sha256", ""),
+                "inference_engine": payload.get("model_metadata", {}).get("inference_engine", ""),
+                "inference_engine_commit": payload.get("model_metadata", {}).get("inference_engine_commit", ""),
                 "attack_id": f"benign-control-{control.get('language', 'unknown')}",
                 "category": "benign_control",
                 "heuristic_status": control.get("review_state", "UNKNOWN"),
@@ -115,6 +145,16 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "run_id": payload.get("run_id", ""),
                 "mode": "multi-turn-scenario",
                 "model": payload.get("model", ""),
+                "catalog_model_id": payload.get("model_metadata", {}).get("catalog_model_id", ""),
+                "model_repo_id": payload.get("model_metadata", {}).get("model_repo_id", ""),
+                "model_revision_requested": payload.get("model_metadata", {}).get("model_revision_requested", ""),
+                "model_revision_resolved": payload.get("model_metadata", {}).get("model_revision_resolved", ""),
+                "model_resolved_url": payload.get("model_metadata", {}).get("model_resolved_url", ""),
+                "quantization": payload.get("model_metadata", {}).get("quantization", ""),
+                "upstream_model": payload.get("model_metadata", {}).get("upstream_model", ""),
+                "model_sha256": payload.get("model_metadata", {}).get("model_sha256", ""),
+                "inference_engine": payload.get("model_metadata", {}).get("inference_engine", ""),
+                "inference_engine_commit": payload.get("model_metadata", {}).get("inference_engine_commit", ""),
                 "attack_id": result.get("scenario_id", ""),
                 "category": result.get("category", ""),
                 "heuristic_status": result.get("status", ""),
@@ -142,6 +182,16 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "run_id": payload.get("run_id", ""),
                 "mode": "scenario-benign-control",
                 "model": payload.get("model", ""),
+                "catalog_model_id": payload.get("model_metadata", {}).get("catalog_model_id", ""),
+                "model_repo_id": payload.get("model_metadata", {}).get("model_repo_id", ""),
+                "model_revision_requested": payload.get("model_metadata", {}).get("model_revision_requested", ""),
+                "model_revision_resolved": payload.get("model_metadata", {}).get("model_revision_resolved", ""),
+                "model_resolved_url": payload.get("model_metadata", {}).get("model_resolved_url", ""),
+                "quantization": payload.get("model_metadata", {}).get("quantization", ""),
+                "upstream_model": payload.get("model_metadata", {}).get("upstream_model", ""),
+                "model_sha256": payload.get("model_metadata", {}).get("model_sha256", ""),
+                "inference_engine": payload.get("model_metadata", {}).get("inference_engine", ""),
+                "inference_engine_commit": payload.get("model_metadata", {}).get("inference_engine_commit", ""),
                 "attack_id": f"control-{result.get('scenario_id', '')}",
                 "category": "benign_control",
                 "heuristic_status": control.get("status", "UNKNOWN"),
@@ -163,7 +213,10 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "reviewed_at": "",
             })
     fields = [
-        "run_id", "mode", "model", "attack_id", "category",
+        "run_id", "mode", "model", "catalog_model_id", "model_repo_id",
+        "model_revision_requested", "model_revision_resolved", "model_resolved_url",
+        "quantization", "upstream_model", "model_sha256", "inference_engine",
+        "inference_engine_commit", "attack_id", "category",
         "heuristic_status", "review_required", "prompt", "response",
         "detector_evidence", "detector_reason", "detector_confidence",
         "scanner_version", "detector_name", "attack_version",
@@ -180,13 +233,49 @@ def export_review(input_paths: list[str], output_path: str) -> int:
     return len(rows)
 
 
+def validate_review_csv(path: str) -> dict:
+    """Validate an annotated worksheet and summarize explicit human verdicts."""
+    counts = {verdict: 0 for verdict in VERDICTS}
+    total = 0
+    errors = []
+    with Path(path).open(encoding="utf-8-sig", newline="") as stream:
+        for line, row in enumerate(csv.DictReader(stream), start=2):
+            total += 1
+            verdict = (row.get("reviewer_verdict") or "NOT_REVIEWED").strip()
+            if verdict not in VERDICTS:
+                errors.append(f"line {line}: unsupported reviewer_verdict {verdict!r}")
+                continue
+            counts[verdict] += 1
+            if verdict != "NOT_REVIEWED":
+                if not (row.get("reviewed_by") or "").strip():
+                    errors.append(f"line {line}: reviewed_by is required for {verdict}")
+                if not (row.get("reviewer_notes") or "").strip():
+                    errors.append(f"line {line}: reviewer_notes is required for {verdict}")
+                if not (row.get("reviewed_at") or "").strip():
+                    errors.append(f"line {line}: reviewed_at is required for {verdict}")
+    return {"total_rows": total, "verdict_counts": counts, "errors": errors,
+            "valid": not errors}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", action="append", required=True, help="Report JSON; repeat for multiple reports")
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--input", action="append", help="Report JSON; repeat for multiple reports")
+    mode.add_argument("--validate-csv", help="Validate a manually annotated review CSV")
     parser.add_argument("--output", default="reports/human-review.csv")
+    parser.add_argument("--summary-json", help="Optional path for machine-readable validation summary")
     args = parser.parse_args()
+    if args.validate_csv:
+        summary = validate_review_csv(args.validate_csv)
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        if args.summary_json:
+            Path(args.summary_json).parent.mkdir(parents=True, exist_ok=True)
+            Path(args.summary_json).write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        return 0 if summary["valid"] else 2
     count = export_review(args.input, args.output)
     print(f"Human-review worksheet: {args.output} ({count} cases)")
+    print("Annotate reviewer_verdict, reviewer_notes, reviewed_by and reviewed_at, then run:")
+    print(f"  python review.py --validate-csv {args.output}")
     return 0
 
 
