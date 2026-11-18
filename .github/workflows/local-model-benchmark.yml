@@ -9,7 +9,10 @@ on:
       - "scripts/download_models.py"
       - "models/catalog.json"
       - "redteam.py"
+      - "scenarios.py"
+      - "pyproject.toml"
       - "tests/test_model_assets.py"
+      - "tests/test_scenarios.py"
 
 permissions:
   contents: read
@@ -78,10 +81,34 @@ jobs:
         run: |
           model_path="models/weights/$MODEL_FILE"
           metadata_path="$model_path.metadata.json"
+          cache_valid=false
           if [[ -s "$model_path" && -s "$metadata_path" ]]; then
-            echo "Using cached model: $model_path"
+            if python - "$MODEL_ID" "$MODEL_FILE" "$metadata_path" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          model_id, filename, metadata_path = sys.argv[1:]
+          metadata = json.loads(Path(metadata_path).read_text(encoding="utf-8"))
+          catalog = json.loads(Path("models/catalog.json").read_text(encoding="utf-8"))
+          expected = catalog["models"][model_id]
+          valid = (
+              metadata.get("model_id") == model_id
+              and metadata.get("repo_id") == expected["repo_id"]
+              and metadata.get("filename") == filename == expected["filename"]
+              and metadata.get("revision_requested") == expected.get("revision", "main")
+              and bool(metadata.get("sha256"))
+          )
+          raise SystemExit(0 if valid else 1)
+          PY
+            then
+              cache_valid=true
+            fi
+          fi
+          if [[ "$cache_valid" == "true" ]]; then
+            echo "Using verified cache metadata for $MODEL_ID: $model_path"
           else
-            echo "Model cache miss or incomplete cache; downloading $MODEL_ID"
+            echo "Model cache miss, stale metadata or incomplete cache; downloading $MODEL_ID"
             rm -f "$model_path" "$metadata_path"
             python scripts/download_models.py --model "$MODEL_ID"
           fi
@@ -89,6 +116,7 @@ jobs:
       - name: Verify model integrity
         env:
           MODEL_FILE: ${{ matrix.model_file }}
+          MODEL_ID: ${{ matrix.model_id }}
         run: |
           python - <<'PY'
           import hashlib
@@ -103,7 +131,12 @@ jobs:
               for chunk in iter(lambda: stream.read(1024 * 1024), b""):
                   hasher.update(chunk)
           digest = hasher.hexdigest()
-          if digest != metadata["sha256"]:
+          catalog = json.loads(Path("models/catalog.json").read_text(encoding="utf-8"))
+          model_id = os.environ["MODEL_ID"] if "MODEL_ID" in os.environ else None
+          expected = catalog["models"].get(model_id, {}) if model_id else {}
+          if metadata.get("filename") != model.name or metadata.get("repo_id") != expected.get("repo_id"):
+              raise SystemExit(f"Model provenance mismatch for {model}")
+          if metadata.get("sha256") != digest:
               raise SystemExit(f"SHA-256 mismatch for {model}")
           print(f"Verified {model.name}: {metadata['bytes']} bytes, sha256={digest}")
           PY
