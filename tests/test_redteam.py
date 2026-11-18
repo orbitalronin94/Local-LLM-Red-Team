@@ -860,3 +860,84 @@ def test_database_connection_can_be_used_with_sqlite(tmp_path):
         assert row[0] == 0
     finally:
         connection.close()
+
+
+def _result_with_status(status, latency_ms=0.0):
+    detection = Detection(
+        detected=status == "FAIL",
+        status=status,
+        confidence=0.0,
+        evidence=[],
+        reason="test fixture",
+    )
+    return AttackResult(
+        run_id="run",
+        attack_id=f"attack-{status.lower()}",
+        attack_category="jailbreak",
+        attack_version="1",
+        model="test-model",
+        status=status,
+        response="fixture",
+        latency_ms=latency_ms,
+        input_tokens=None,
+        output_tokens=None,
+        detection=detection,
+    )
+
+
+def test_summary_empty_results_has_zero_rates_and_latency():
+    summary = summarize([])
+
+    assert summary.total == 0
+    assert summary.failed == 0
+    assert summary.errors == 0
+    assert summary.refusal_rate == 0.0
+    assert summary.attack_success_rate == 0.0
+    assert summary.mean_latency_ms == 0.0
+    assert summary.p50_latency_ms == 0.0
+    assert summary.p95_latency_ms == 0.0
+
+
+def test_summary_all_errors_has_zero_rates_and_excludes_error_latency():
+    summary = summarize([
+        _result_with_status("ERROR", latency_ms=900.0),
+        _result_with_status("ERROR", latency_ms=1200.0),
+    ])
+
+    assert summary.total == 2
+    assert summary.errors == 2
+    assert summary.refusal_rate == 0.0
+    assert summary.attack_success_rate == 0.0
+    assert summary.mean_latency_ms == 0.0
+    assert summary.p95_latency_ms == 0.0
+
+
+def test_summary_rates_use_non_error_denominator():
+    summary = summarize([
+        _result_with_status("PASS", latency_ms=10.0),
+        _result_with_status("FAIL", latency_ms=20.0),
+        _result_with_status("NOT_DETECTED", latency_ms=30.0),
+        _result_with_status("EMPTY", latency_ms=40.0),
+        _result_with_status("ERROR", latency_ms=500.0),
+    ])
+
+    assert summary.total == 5
+    assert summary.failed == 1
+    assert summary.errors == 1
+    assert summary.not_detected == 1
+    assert summary.empty == 1
+    assert summary.refusal_rate == pytest.approx(0.25)
+    assert summary.attack_success_rate == pytest.approx(0.25)
+    assert summary.mean_latency_ms == pytest.approx(25.0)
+
+
+def test_summary_refusal_rate_counts_only_pass_results():
+    summary = summarize([
+        _result_with_status("PASS"),
+        _result_with_status("PASS"),
+        _result_with_status("NOT_DETECTED"),
+        _result_with_status("FAIL"),
+    ])
+
+    assert summary.refusal_rate == pytest.approx(0.5)
+    assert summary.attack_success_rate == pytest.approx(0.25)
