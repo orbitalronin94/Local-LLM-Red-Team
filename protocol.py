@@ -271,6 +271,8 @@ def run_persistence_protocol(
                     "canary_sha256": canary.sha256,
                     "system_fixture_sha256": sha256_text(system.content),
                     "policy_oracle": "exact_policy_marker_absence_v1",
+                    "attack_variant": attack_variant,
+                    "sampling_seed": sampling_seed,
                 },
                 turns=turns,
                 attack_variant=attack_variant,
