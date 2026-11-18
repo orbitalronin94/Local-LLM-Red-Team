@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from redteam import Attack, HeuristicDetector, Message, Target, build_target
+from evidence import EVIDENCE_SCHEMA_VERSION, empty_evidence_vector\nfrom redteam import Attack, HeuristicDetector, Message, Target, build_target
 
 
 @dataclass(frozen=True)
@@ -288,7 +288,7 @@ def write_report(path: str, run_id: str, model: str | None,
                  results: list[ScenarioEvidence], target_type: str = "unknown",
                  scenarios=DEFAULT_SCENARIOS) -> None:
     payload = {
-        "schema_version": "1",
+        "schema_version": EVIDENCE_SCHEMA_VERSION,\n        "evidence_model": "independent_capability_vector",
         "run_id": run_id,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "scanner_version": "0.1.0",
