@@ -11,11 +11,23 @@ on:
       - "models/catalog.json"
       - "redteam.py"
       - "scenarios.py"
+      - "evidence.py"
+      - "protocol.py"
+      - "robustness.py"
       - "review.py"
       - "paired.py"
       - "pyproject.toml"
+      - "docs/evidence-model.md"
+      - "docs/evidence-model.es.md"
+      - "docs/persistence-protocol.md"
+      - "docs/persistence-protocol.es.md"
+      - "docs/robustness-matrix.md"
+      - "docs/robustness-matrix.es.md"
       - "tests/test_model_assets.py"
       - "tests/test_scenarios.py"
+      - "tests/test_evidence.py"
+      - "tests/test_protocol.py"
+      - "tests/test_robustness.py"
       - "tests/test_review.py"
       - "tests/test_paired.py"
       - "tests/test_findings_catalog.py"
@@ -268,6 +280,10 @@ jobs:
       - name: Run paired English-Spanish probes and benign controls
         run: |
           python paired.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --json "reports/${{ matrix.model_id }}-paired-language.json" --report "reports/${{ matrix.model_id }}-paired-language.md"
+
+      - name: Run baseline-stratified seed and paraphrase robustness matrix
+        run: |
+          python -m local_llm_redteam_matrix --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --seeds 42,43,44 --variants direct,authority_reframing,contextual_reframing --json "reports/${{ matrix.model_id }}-robustness-matrix.json"
 
       - name: Attach model and inference provenance to every report
         if: always()
