@@ -10,6 +10,8 @@
 
 **Estado:** Alpha, versión 0.1.0. La interfaz pública y el catálogo de ataques pueden evolucionar antes de 1.0. Al probar un endpoint local no hace falta una cuenta cloud, una suscripción API ni un framework de ejecución adicional.
 
+> **Uso responsable — autorización obligatoria.** Prueba únicamente sistemas, modelos y endpoints propios o cuyo análisis tengas expresamente autorizado. No escanees sistemas ajenos sin permiso previo. Antes de probar, define el alcance por escrito y revisa la legislación de **todos los países y jurisdicciones pertinentes**. Que un sistema sea accesible públicamente no significa que tengas autorización. Consulta el [aviso de uso responsable y legal](docs/uso-responsable.md).
+
 ## Por qué existe
 
 Los modelos locales se utilizan en asistentes privados, herramientas de programación y flujos internos. Ejecutarlos en localhost no los hace inmunes a instrucciones hostiles. También necesitan pruebas de seguridad.
