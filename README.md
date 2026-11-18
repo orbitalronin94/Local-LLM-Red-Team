@@ -190,6 +190,8 @@ Each run receives a unique run ID. SQLite stores the scanner version, target, mo
 
 For meaningful model comparisons, keep the attack manifest, endpoint configuration, model revision, generation settings and test environment consistent. Record any differences alongside the report.
 
+See the [automated findings catalogue](docs/findings-catalog.md) for the per-run cross-model index of heuristic positives and inconclusive cases, including prompts, responses and model provenance.
+
 
 ## Local model benchmark kit
 
