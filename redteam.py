@@ -315,6 +315,7 @@ class TargetResponse:
     input_tokens: int | None = None
     output_tokens: int | None = None
     raw: Any = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class TargetError(RuntimeError):
@@ -365,6 +366,31 @@ def extract_text(payload: Any) -> str:
     raise TargetError("Could not extract generated text from JSON response")
 
 
+def extract_target_metadata(payload: Any) -> dict[str, Any]:
+    """Keep only non-sensitive provider identity and completion metadata."""
+    if not isinstance(payload, dict):
+        return {}
+    metadata: dict[str, Any] = {}
+    served_model = payload.get("model") or payload.get("model_name")
+    if isinstance(served_model, str):
+        metadata["served_model"] = served_model
+    fingerprint = payload.get("system_fingerprint")
+    if isinstance(fingerprint, str):
+        metadata["system_fingerprint"] = fingerprint
+    request_id = payload.get("id")
+    if isinstance(request_id, str):
+        metadata["request_id"] = request_id
+    choices = payload.get("choices")
+    if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+        finish_reason = choices[0].get("finish_reason")
+        if isinstance(finish_reason, str):
+            metadata["finish_reason"] = finish_reason
+    done_reason = payload.get("done_reason")
+    if isinstance(done_reason, str):
+        metadata["finish_reason"] = done_reason
+    return metadata
+
+
 def extract_int(payload: Any, keys: tuple[str, ...]) -> int | None:
     """Return a non-negative integer usage field, excluding booleans."""
     if not isinstance(payload, dict):
@@ -394,10 +420,14 @@ class HTTPJSONTarget(Target):
         url: str,
         timeout: float = 60.0,
         headers: dict[str, str] | None = None,
+        temperature: float | None = None,
+        seed: int | None = None,
     ):
         self.url = url
         self.timeout = timeout
         self.headers = headers or {}
+        self.temperature = temperature
+        self.seed = seed
 
     def generate(
         self,
@@ -408,6 +438,10 @@ class HTTPJSONTarget(Target):
             "model": model,
             "messages": [asdict(message) for message in messages],
         }
+        if self.temperature is not None:
+            payload["temperature"] = self.temperature
+        if self.seed is not None:
+            payload["seed"] = self.seed
 
         request = urllib.request.Request(
             self.url,
@@ -449,6 +483,7 @@ class HTTPJSONTarget(Target):
                 ("output_tokens", "completion_tokens"),
             ),
             raw=data,
+            metadata=extract_target_metadata(data),
         )
 
 
@@ -459,10 +494,14 @@ class OllamaTarget(HTTPJSONTarget):
         self,
         url: str = "http://127.0.0.1:11434",
         timeout: float = 60.0,
+        temperature: float | None = None,
+        seed: int | None = None,
     ):
         super().__init__(
             url.rstrip("/") + "/api/chat",
             timeout=timeout,
+            temperature=temperature,
+            seed=seed,
         )
 
     def generate(
@@ -478,6 +517,13 @@ class OllamaTarget(HTTPJSONTarget):
             "messages": [asdict(message) for message in messages],
             "stream": False,
         }
+        options = {}
+        if self.temperature is not None:
+            options["temperature"] = self.temperature
+        if self.seed is not None:
+            options["seed"] = self.seed
+        if options:
+            payload["options"] = options
 
         request = urllib.request.Request(
             self.url,
@@ -510,6 +556,7 @@ class OllamaTarget(HTTPJSONTarget):
             input_tokens=extract_int(data, ("prompt_eval_count",)),
             output_tokens=extract_int(data, ("eval_count",)),
             raw=data,
+            metadata=extract_target_metadata(data),
         )
 
 
@@ -521,6 +568,8 @@ class OpenAICompatibleTarget(HTTPJSONTarget):
         url: str = "http://127.0.0.1:8000/v1",
         timeout: float = 60.0,
         api_key: str | None = None,
+        temperature: float | None = None,
+        seed: int | None = None,
     ):
         endpoint = url.rstrip("/")
         if not endpoint.endswith("/chat/completions"):
@@ -534,6 +583,8 @@ class OpenAICompatibleTarget(HTTPJSONTarget):
             endpoint,
             timeout=timeout,
             headers=headers,
+            temperature=temperature,
+            seed=seed,
         )
 
 
