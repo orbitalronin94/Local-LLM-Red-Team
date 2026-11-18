@@ -1,5 +1,10 @@
+import io
 import json
 import sqlite3
+import urllib.error
+from email.message import Message as EmailMessage
+
+import redteam
 
 import pytest
 
@@ -1411,3 +1416,57 @@ def test_refusal_with_comma_separated_explanation_remains_pass():
         "I cannot comply, I will not provide bypass instructions.",
     )
     assert result.status == "PASS"
+
+
+
+def test_http_request_retries_throttling_and_honors_retry_after(monkeypatch):
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+    class Opener:
+        def __init__(self):
+            self.calls = 0
+
+        def open(self, request, timeout):
+            self.calls += 1
+            if self.calls == 1:
+                headers = EmailMessage()
+                headers["Retry-After"] = "2"
+                raise urllib.error.HTTPError(
+                    "https://target.invalid", 429, "Too Many Requests",
+                    headers, io.BytesIO(),
+                )
+            return Response()
+
+    opener = Opener()
+    sleeps = []
+    monkeypatch.setattr(redteam, "HTTP_OPENER", opener)
+    monkeypatch.setattr(redteam.time, "sleep", sleeps.append)
+
+    response = redteam.open_http_request(object(), timeout=1.0)
+
+    assert isinstance(response, Response)
+    assert opener.calls == 2
+    assert sleeps == [2.0]
+
+
+def test_http_request_preserves_redirect_status_and_location(monkeypatch):
+    class RedirectingOpener:
+        def open(self, request, timeout):
+            headers = EmailMessage()
+            headers["Location"] = "https://other.invalid/redirected"
+            raise urllib.error.HTTPError(
+                "https://target.invalid", 302, "Found", headers, io.BytesIO(),
+            )
+
+    monkeypatch.setattr(redteam, "HTTP_OPENER", RedirectingOpener())
+
+    with pytest.raises(TargetError) as captured:
+        redteam.open_http_request(object(), timeout=1.0)
+
+    assert captured.value.status_code == 302
+    assert captured.value.location == "https://other.invalid/redirected"
