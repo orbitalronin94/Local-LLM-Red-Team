@@ -217,3 +217,14 @@ MIT. Consulta [LICENSE](LICENSE).
 ## Investigación y evolución
 
 Consulta la [hoja de ruta de ampliación basada en papers recientes](docs/research-roadmap.es.md) para conocer las próximas familias de ataques, el plan de evaluación y las referencias científicas. La [versión en inglés](docs/research-roadmap.md) está disponible también.
+
+
+### Escenarios deterministas de varios turnos
+
+Ejecuta la suite fija por separado del catálogo estático/adaptativo:
+
+~~~bash
+python scenarios.py --target ollama --model llama3.2 --json informe-escenarios.json --report informe-escenarios.md
+~~~
+
+La primera suite cubre construcción gradual de contexto, negativa seguida de reformulación y persistencia de instrucciones no confiables. Cada escenario tiene ID/versión estables, secuencia fija, atribución de fuente/hipótesis y manifiesto SHA-256. El control benigno se ejecuta en una conversación nueva y se registra aparte. Su utilidad no se puntúa automáticamente: requiere revisión humana. Son pruebas a nivel de prompt; no ejecutan herramientas ni demuestran impacto real.
