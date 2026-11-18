@@ -1633,7 +1633,7 @@ class Scanner:
                 attack_category=attack.category,
                 attack_version=attack.version,
                 model=model,
-                status="ERROR",
+                status=("THROTTLED" if getattr(exc, "status_code", None) in (429, 503) else "ERROR"),
                 response=final_response,
                 latency_ms=target_latency,
                 input_tokens=(
@@ -2152,7 +2152,12 @@ def main() -> int:
     )
 
     if not attacks:
-        raise SystemExit("No attacks selected")
+        selected_ids = ",".join(args.attacks or []) or "all"
+        selected_categories = ",".join(args.categories or []) or "all"
+        raise SystemExit(
+            "No attacks selected: ids=" + selected_ids
+            + ", categories=" + selected_categories + " intersectan vacío"
+        )
 
     target = build_target(args)
 
