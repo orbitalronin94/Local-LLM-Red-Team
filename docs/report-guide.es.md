@@ -75,3 +75,8 @@ Evita afirmaciones como «el modelo es seguro», «100 % seguro» o «ha superad
 Los informes pueden contener prompts, respuestas e instrucciones confidenciales. Elimina secretos y datos personales antes de publicarlos. Conserva una copia privada sin modificar para auditoría. Nunca publiques claves API, URL privadas ni prompts de sistema sensibles.
 
 Relacionado: [Metodología de detección](methodology.es.md) · [Matriz de cobertura por idioma y ataque](coverage-matrix.es.md).
+
+
+## 8. Autorización y cumplimiento normativo
+
+No ejecutes pruebas contra sistemas ajenos sin autorización previa y expresa. Conserva el alcance por escrito y revisa la legislación de todas las jurisdicciones pertinentes. Trata y comparte los informes únicamente dentro del alcance autorizado, ya que pueden contener información sensible. Consulta el [aviso de uso responsable](uso-responsable.md).
