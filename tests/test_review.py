@@ -117,4 +117,3 @@ def test_review_export_preserves_multiturn_hashes_and_turn_count(tmp_path):
     assert scenario["response_sha256"] == "4" * 64
     assert scenario["attack_version"] == "1"
     assert scenario["reviewer_verdict"] == "NOT_REVIEWED"
-}
