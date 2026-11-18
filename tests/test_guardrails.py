@@ -50,9 +50,10 @@ def test_explicit_request_confirmation_applies_to_safe_operation(scope):
     ).decision is Decision.REQUIRES_CONFIRMATION
 
 
-def test_unknown_source_is_denied(scope):
+@pytest.mark.parametrize("source", ["plugin_magic", "user_task", "trusted_policy"])
+def test_non_model_source_label_cannot_grant_authority(scope, source):
     result = evaluate_action(
-        ActionRequest("calendar", "read", instruction_source="plugin_magic"), scope
+        ActionRequest("calendar", "read", instruction_source=source), scope
     )
     assert result.decision is Decision.DENY
     assert result.reason == "unknown_instruction_source"
