@@ -175,6 +175,7 @@ class ScenarioEvidence:
     scenario_version: str
     category: str
     name: str
+    source: str
     status: str
     first_flagged_turn: int | None
     total_latency_ms: float
@@ -245,14 +246,14 @@ def run_scenario(target: Target, scenario: Scenario, model: str | None = None,
 
     return ScenarioEvidence(
         scenario_id=scenario.id, scenario_version=scenario.version,
-        category=scenario.category, name=scenario.name, status=status,
-        first_flagged_turn=first_flagged, total_latency_ms=total_latency,
+        category=scenario.category, name=scenario.name, source=scenario.source,
+        status=status, first_flagged_turn=first_flagged, total_latency_ms=total_latency,
         turns=turns, benign_control=control, error=error,
     )
 
 
 def write_report(path: str, run_id: str, model: str | None,
-                 results: list[ScenarioEvidence]) -> None:
+                 results: list[ScenarioEvidence], target_type: str = "unknown") -> None:
     payload = {
         "schema_version": "1",
         "run_id": run_id,
@@ -261,6 +262,8 @@ def write_report(path: str, run_id: str, model: str | None,
         "python_version": platform.python_version(),
         "platform": platform.platform(),
         "model": model,
+        "target_type": target_type,
+        "detector": "heuristic",
         "scenario_manifest_sha256": scenario_manifest(),
         "scenario_count": len(results),
         "results": [asdict(result) for result in results],
@@ -294,7 +297,7 @@ def write_markdown(path: str, run_id: str, model: str | None,
         )
     for item in results:
         lines.extend(["", f"## {item.name}", "",
-                      f"- Source / hypothesis: {next(s.source for s in DEFAULT_SCENARIOS if s.id == item.scenario_id)}",
+                      f"- Source / hypothesis: {item.source}",
                       f"- Outcome: **{item.status}**",
                       f"- Total latency: {item.total_latency_ms:.1f} ms", ""])
         for turn in item.turns:
@@ -333,7 +336,7 @@ def main() -> int:
     target = build_target(args)
     run_id = str(uuid.uuid4())
     results = [run_scenario(target, scenario, model=args.model) for scenario in DEFAULT_SCENARIOS]
-    write_report(args.json, run_id, args.model, results)
+    write_report(args.json, run_id, args.model, results, target_type=target.name)
     write_markdown(args.report, run_id, args.model, results)
     print(f"Scenario run: {run_id}")
     for item in results:
