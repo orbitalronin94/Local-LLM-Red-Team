@@ -24,6 +24,7 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
+      max-parallel: 2
       matrix:
         include:
           - model_id: smollm2
@@ -105,7 +106,7 @@ jobs:
 
       - name: Run complete adaptive attack catalogue
         run: |
-          python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --mode adaptive --attacker-target openai --attacker-model local-model --adaptive-rounds 1 --db "reports/${{ matrix.model_id }}-adaptive.db" --json "reports/${{ matrix.model_id }}-adaptive.json" --report "reports/${{ matrix.model_id }}-adaptive.md"
+          python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --mode adaptive --attacker-target openai --attacker-model local-model --adaptive-rounds 2 --db "reports/${{ matrix.model_id }}-adaptive.db" --json "reports/${{ matrix.model_id }}-adaptive.json" --report "reports/${{ matrix.model_id }}-adaptive.md"
 
       - name: Stop inference server
         if: always()
