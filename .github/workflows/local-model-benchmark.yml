@@ -197,9 +197,12 @@ jobs:
         run: |
           tar -xzf "$RUNNER_TEMP/llama-install.tar.gz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/llama-install/bin" >> "$GITHUB_PATH"
-          echo "LD_LIBRARY_PATH=$RUNNER_TEMP/llama-install/bin:$RUNNER_TEMP/llama-install/lib:$RUNNER_TEMP/llama-install/lib64:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+          runtime_libs="$RUNNER_TEMP/llama-install/bin:$RUNNER_TEMP/llama-install/lib:$RUNNER_TEMP/llama-install/lib64"
+          echo "LD_LIBRARY_PATH=$runtime_libs:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+          export LD_LIBRARY_PATH="$runtime_libs:${LD_LIBRARY_PATH:-}"
           test -x "$RUNNER_TEMP/llama-install/bin/llama-server"
           cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT"
+          ldd "$RUNNER_TEMP/llama-install/bin/llama-server"
           "$RUNNER_TEMP/llama-install/bin/llama-server" --version
 
       - name: Record runner capacity
@@ -275,6 +278,7 @@ jobs:
           import os
           from pathlib import Path
 
+          Path("reports").mkdir(parents=True, exist_ok=True)
           model_path = Path("models/weights") / os.environ["MODEL_FILE"]
           metadata_path = model_path.with_suffix(model_path.suffix + ".metadata.json")
           model_metadata = {}
