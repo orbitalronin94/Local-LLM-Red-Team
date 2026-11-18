@@ -23,7 +23,7 @@ permissions:
 
 concurrency:
   group: local-model-benchmark-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   benchmark:
