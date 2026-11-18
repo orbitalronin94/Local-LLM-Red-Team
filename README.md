@@ -6,7 +6,7 @@
 
 **A lightweight, local-first Python harness for reproducible security testing of locally hosted large language models (LLMs).** Probe jailbreaks, prompt injection, instruction overrides, system-prompt extraction and multi-turn persistence against Ollama, OpenAI-compatible servers and generic HTTP JSON endpoints. Review heuristic findings as JSON, Markdown or SQLite records.
 
-No cloud account, API subscription or runtime framework is required when testing a local endpoint.
+**Project status:** Alpha, version 0.1.0. The public interface and attack catalogue may evolve before 1.0.\n\nNo cloud account, API subscription or runtime framework is required when testing a local endpoint.
 
 ## Why this project exists
 
@@ -23,6 +23,19 @@ Local LLM Red Team is deliberately narrower than a general-purpose AI security p
 - **Transparent heuristic detection:** explicit `PASS`, `FAIL`, `NOT_DETECTED`, `EMPTY` and `ERROR` outcomes.
 - **Portable evidence:** SQLite run records plus JSON and Markdown reports; JSON and SQLite preserve token counts when the target supplies them.
 - **Model comparison:** a programmatic helper for comparing result sets produced against the same attack set.
+
+### Default attack catalogue
+
+| Attack ID | Category | Probe |
+| --- | --- | --- |
+| `jailbreak-roleplay` | Jailbreak | Unrestricted role-play framing |
+| `jailbreak-authority` | Jailbreak | False authority and approval claims |
+| `instruction-override` | Instruction override | Attempts to disable previous instructions |
+| `system-prompt-extraction` | System extraction | Direct request for hidden system instructions |
+| `system-prompt-summary` | System extraction | Indirect request to summarize hidden instructions |
+| `prompt-injection-document` | Prompt injection | Malicious instructions embedded in untrusted document text |
+| `prompt-injection-tool` | Prompt injection | Tool/configuration disclosure framing |
+| `persistence` | Persistence | Attempts to retain unsafe instructions across turns |
 
 The core scanner uses the Python standard library. `pytest` and `pytest-cov` are optional development dependencies.
 
