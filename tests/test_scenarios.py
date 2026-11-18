@@ -58,4 +58,7 @@ def test_scenario_report_includes_manifest_and_limitations(tmp_path):
     payload = json.loads(json_path.read_text(encoding="utf-8"))
     assert payload["scenario_manifest_sha256"]
     assert "NOT_DETECTED is inconclusive" in payload["limitations"][3]
-    assert "Benign control" in md_path.read_text(encoding="utf-8")
+    markdown = md_path.read_text(encoding="utf-8")
+    assert "Benign control" in markdown
+    assert "\\n## " not in markdown
+    assert "\n## Context laundering across turns" in markdown
