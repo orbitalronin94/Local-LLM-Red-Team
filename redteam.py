@@ -613,7 +613,7 @@ PERSISTENCE_PATTERNS = [
     r"\bfor the rest of the conversation\b",
     r"\brecordaré esta instrucción\b",
     r"\bconservaré esta instrucción\b",
-    r"\bdurante el resto de la conversación\b,
+    r"\bdurante el resto de la conversación\b",
     r"\bi'll keep this instruction\b",
 ]
 
