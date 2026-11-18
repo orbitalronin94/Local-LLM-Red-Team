@@ -25,7 +25,7 @@ A heuristic `FAIL` is a review candidate, not proof. `NOT_DETECTED` is inconclus
    `python review.py --validate-csv reports/human-review.csv --summary-json reports/review-validation.json`
 5. Preserve the original JSON report and its model/inference fingerprints alongside the annotated CSV.
 
-The validator checks verdict vocabulary and required reviewer metadata; it does not judge whether the human verdict is correct. Protect reports because prompts and responses may contain sensitive test material.
+The exporter prefixes spreadsheet-formula-like cells from untrusted prompts and model responses with an apostrophe to reduce CSV formula-injection risk. The original JSON report remains authoritative; CSV values may be visibly prefixed when they begin with formula characters. The validator checks verdict vocabulary and required reviewer metadata; it does not judge whether the human verdict is correct. Protect reports because prompts and responses may contain sensitive test material.
 
 ## Español
 
@@ -50,4 +50,4 @@ Un `FAIL` heurístico es un candidato a revisión, no una prueba. `NOT_DETECTED`
 4. Ejecuta el validador indicado arriba.
 5. Conserva el JSON original y las huellas del modelo y del motor de inferencia junto al CSV anotado.
 
-El validador comprueba el vocabulario y los metadatos obligatorios, pero no determina si el juicio humano es acertado. Protege los informes: los prompts y las respuestas pueden contener material sensible de evaluación.
+El exportador antepone un apóstrofo a las celdas que parecen fórmulas de hoja de cálculo y proceden de prompts o respuestas no confiables, reduciendo el riesgo de inyección CSV. El JSON original sigue siendo la fuente autoritativa; algunos valores del CSV pueden aparecer prefijados. El validador comprueba el vocabulario y los metadatos obligatorios, pero no determina si el juicio humano es acertado. Protege los informes: los prompts y las respuestas pueden contener material sensible de evaluación.
