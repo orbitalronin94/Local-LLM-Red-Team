@@ -36,6 +36,10 @@ jobs:
             model_file: gemma-3-1b-it-Q4_K_M.gguf
           - model_id: granite3_3_2b
             model_file: granite-3.3-2b-instruct-Q4_K_M.gguf
+          - model_id: phi3_5_mini
+            model_file: Phi-3.5-mini-instruct-Q4_K_M.gguf
+          - model_id: ministral_3b
+            model_file: Ministral-3b-instruct-Q4_K_M.gguf
 
     steps:
       - name: Check out repository
