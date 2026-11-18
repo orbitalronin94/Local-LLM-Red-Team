@@ -11,6 +11,7 @@ from redteam import (
     Detection,
     FakeTarget,
     HTTPJSONTarget,
+    OllamaTarget,
     HeuristicDetector,
     Message,
     Scanner,
@@ -1347,3 +1348,36 @@ def test_http_target_sends_explicit_sampling_and_records_response_metadata(monke
     assert result.metadata["served_model"] == "actual-served-model"
     assert result.metadata["system_fingerprint"] == "fingerprint-1"
     assert result.metadata["finish_reason"] == "stop"
+
+
+
+def test_ollama_target_uses_options_for_temperature_and_seed(monkeypatch):
+    captured = {}
+
+    class FakeHTTPResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return json.dumps({
+                "message": {"content": "ok"},
+                "model": "ollama:served",
+                "done_reason": "stop",
+            }).encode("utf-8")
+
+    def fake_urlopen(request, timeout):
+        captured["payload"] = json.loads(request.data.decode("utf-8"))
+        return FakeHTTPResponse()
+
+    monkeypatch.setattr("redteam.urllib.request.urlopen", fake_urlopen)
+    target = OllamaTarget(temperature=0.0, seed=7)
+    result = target.generate([Message("user", "hello")], model="requested")
+
+    assert captured["payload"]["options"] == {"temperature": 0.0, "seed": 7}
+    assert result.metadata == {
+        "served_model": "ollama:served",
+        "finish_reason": "stop",
+    }
