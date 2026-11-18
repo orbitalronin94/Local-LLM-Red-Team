@@ -47,6 +47,79 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "reviewed_by": "",
                 "reviewed_at": "",
             })
+        for result in payload.get("records", []):
+            rows.append({
+                "run_id": payload.get("run_id", ""),
+                "mode": "paired-language",
+                "model": payload.get("model", ""),
+                "attack_id": result.get("attack_id", ""),
+                "category": result.get("category", ""),
+                "heuristic_status": result.get("status", ""),
+                "review_required": str(result.get("review_required", True)).lower(),
+                "prompt": result.get("prompt", ""),
+                "response": result.get("response", ""),
+                "detector_evidence": " | ".join(result.get("evidence", [])),
+                "reviewer_verdict": "NOT_REVIEWED",
+                "reviewer_notes": "",
+                "reviewed_by": "",
+                "reviewed_at": "",
+            })
+        for control in payload.get("benign_controls", []):
+            rows.append({
+                "run_id": payload.get("run_id", ""),
+                "mode": "paired-benign-control",
+                "model": payload.get("model", ""),
+                "attack_id": f"benign-control-{control.get('language', 'unknown')}",
+                "category": "benign_control",
+                "heuristic_status": control.get("review_state", "UNKNOWN"),
+                "review_required": "true",
+                "prompt": control.get("prompt", ""),
+                "response": control.get("response", ""),
+                "detector_evidence": "",
+                "reviewer_verdict": "NOT_REVIEWED",
+                "reviewer_notes": "",
+                "reviewed_by": "",
+                "reviewed_at": "",
+            })
+        for result in payload.get("results", []):
+            if "scenario_id" not in result:
+                continue
+            turns = result.get("turns", [])
+            rows.append({
+                "run_id": payload.get("run_id", ""),
+                "mode": "multi-turn-scenario",
+                "model": payload.get("model", ""),
+                "attack_id": result.get("scenario_id", ""),
+                "category": result.get("category", ""),
+                "heuristic_status": result.get("status", ""),
+                "review_required": "true",
+                "prompt": "\\n".join(turn.get("prompt", "") for turn in turns),
+                "response": "\\n".join(turn.get("response", "") for turn in turns),
+                "detector_evidence": " | ".join(
+                    evidence for turn in turns for evidence in turn.get("detector_evidence", [])
+                ),
+                "reviewer_verdict": "NOT_REVIEWED",
+                "reviewer_notes": "",
+                "reviewed_by": "",
+                "reviewed_at": "",
+            })
+            control = result.get("benign_control", {})
+            rows.append({
+                "run_id": payload.get("run_id", ""),
+                "mode": "scenario-benign-control",
+                "model": payload.get("model", ""),
+                "attack_id": f"control-{result.get('scenario_id', '')}",
+                "category": "benign_control",
+                "heuristic_status": control.get("status", "UNKNOWN"),
+                "review_required": "true",
+                "prompt": control.get("prompt", ""),
+                "response": control.get("response", ""),
+                "detector_evidence": "",
+                "reviewer_verdict": "NOT_REVIEWED",
+                "reviewer_notes": "",
+                "reviewed_by": "",
+                "reviewed_at": "",
+            })
     fields = [
         "run_id", "mode", "model", "attack_id", "category",
         "heuristic_status", "review_required", "prompt", "response",
