@@ -450,13 +450,13 @@ def test_scanner_adaptive_mode():
     result = results[0]
 
     assert result.status == "PASS"
-    assert len(result.turns) == 3
+    assert len(result.turns) == 2
     assert result.turns[0].turn == 1
     assert result.turns[1].turn == 2
-    assert result.turns[2].turn == 3
-    # Three target calls plus two attacker follow-ups are included.
-    assert result.latency_ms == 3.0
+    # Duplicate attacker output stops the trajectory before a third target call.
+    assert result.latency_ms == 2.0
     assert result.attacker_latency_ms == 2.0
+    assert result.adaptive_stop_reason == "attacker_repeated_seed"
 
 
 def test_scanner_adaptive_uses_separate_attacker_model():
