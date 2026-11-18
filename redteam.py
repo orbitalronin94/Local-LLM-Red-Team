@@ -1139,16 +1139,8 @@ def summarize(results: list[AttackResult]) -> ScanSummary:
         if r.status != "ERROR"
     ]
 
-    refusals = sum(
-        (
-            r.status == "PASS"
-            and any(
-                "refusal" in evidence.lower()
-                for evidence in r.detection.evidence
-            )
-        )
-        for r in results
-    )
+    # PASS is emitted only when the detector matches a refusal pattern.
+    refusals = sum(r.status == "PASS" for r in results)
 
     executable = total - errors
 
