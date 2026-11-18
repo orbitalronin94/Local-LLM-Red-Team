@@ -474,6 +474,8 @@ class HTTPJSONTarget(Target):
         url: str,
         timeout: float = 60.0,
         headers: dict[str, str] | None = None,
+        temperature: float = 0.0,
+        seed: int = 42,
     ):
         parsed = urllib.parse.urlparse(url)
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
@@ -481,6 +483,8 @@ class HTTPJSONTarget(Target):
         self.url = url
         self.timeout = timeout
         self.headers = headers or {}
+        self.temperature = temperature
+        self.seed = seed
 
     def generate(
         self,
@@ -490,6 +494,8 @@ class HTTPJSONTarget(Target):
         payload = {
             "model": model,
             "messages": [asdict(message) for message in messages],
+            "temperature": self.temperature,
+            "seed": self.seed,
         }
 
         request = urllib.request.Request(
@@ -563,10 +569,14 @@ class OllamaTarget(HTTPJSONTarget):
         self,
         url: str = "http://127.0.0.1:11434",
         timeout: float = 60.0,
+        temperature: float = 0.0,
+        seed: int = 42,
     ):
         super().__init__(
             url.rstrip("/") + "/api/chat",
             timeout=timeout,
+            temperature=temperature,
+            seed=seed,
         )
 
     def generate(
@@ -581,6 +591,7 @@ class OllamaTarget(HTTPJSONTarget):
             "model": model,
             "messages": [asdict(message) for message in messages],
             "stream": False,
+            "options": {"temperature": self.temperature, "seed": self.seed},
         }
 
         request = urllib.request.Request(
@@ -626,6 +637,8 @@ class OpenAICompatibleTarget(HTTPJSONTarget):
         url: str = "http://127.0.0.1:8000/v1",
         timeout: float = 60.0,
         api_key: str | None = None,
+        temperature: float = 0.0,
+        seed: int = 42,
     ):
         endpoint = url.rstrip("/")
         if not endpoint.endswith("/chat/completions"):
@@ -639,6 +652,8 @@ class OpenAICompatibleTarget(HTTPJSONTarget):
             endpoint,
             timeout=timeout,
             headers=headers,
+            temperature=temperature,
+            seed=seed,
         )
 
 
@@ -2015,6 +2030,8 @@ def build_target(args: argparse.Namespace) -> Target:
         return OllamaTarget(
             url=args.url or "http://127.0.0.1:11434",
             timeout=args.timeout,
+            temperature=getattr(args, "temperature", 0.0),
+            seed=getattr(args, "seed", 42),
         )
 
     if args.target == "openai":
@@ -2022,6 +2039,8 @@ def build_target(args: argparse.Namespace) -> Target:
             url=args.url or "http://127.0.0.1:8000/v1",
             timeout=args.timeout,
             api_key=args.api_key,
+            temperature=getattr(args, "temperature", 0.0),
+            seed=getattr(args, "seed", 42),
         )
 
     if args.target == "http":
@@ -2031,6 +2050,8 @@ def build_target(args: argparse.Namespace) -> Target:
         return HTTPJSONTarget(
             url=args.url,
             timeout=args.timeout,
+            temperature=getattr(args, "temperature", 0.0),
+            seed=getattr(args, "seed", 42),
         )
 
     raise SystemExit(f"Unknown target: {args.target}")
@@ -2070,6 +2091,8 @@ def main() -> int:
     parser.add_argument("--server-build", help="Inference server build or commit identifier")
     parser.add_argument("--threads", type=int, help="Inference server thread count")
     parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--temperature", type=float, default=0.0)
+    parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--db", default="redteam.db")
     parser.add_argument("--report")
     parser.add_argument("--json")
@@ -2166,6 +2189,8 @@ def main() -> int:
             "gguf_sha256": file_sha256(args.gguf) if args.gguf else None,
             "server_build": args.server_build,
             "threads": args.threads,
+            "temperature": args.temperature,
+            "seed": args.seed,
         }
         run_id, results = scanner.scan(
             attacks=attacks,
