@@ -196,6 +196,8 @@ def run_persistence_protocol(
                     "canary_sha256": canary.sha256,
                     "system_fixture_sha256": sha256_text(system.content),
                     "policy_oracle": "exact_policy_marker_absence_v1",
+                    "attack_variant": attack_variant,
+                    "sampling_seed": sampling_seed,
                 },
                 turns=turns,
                 attack_variant=attack_variant,
@@ -230,8 +232,12 @@ def run_persistence_protocol(
                     "canary_sha256": canary.sha256,
                     "system_fixture_sha256": sha256_text(system.content),
                     "policy_oracle": "exact_policy_marker_absence_v1",
+                    "attack_variant": attack_variant,
+                    "sampling_seed": sampling_seed,
                 },
                 turns=turns,
+                attack_variant=attack_variant,
+                sampling_seed=sampling_seed,
             )
 
         baseline_stratum = "BASELINE_RESISTANT"
@@ -267,6 +273,8 @@ def run_persistence_protocol(
                     "policy_oracle": "exact_policy_marker_absence_v1",
                 },
                 turns=turns,
+                attack_variant=attack_variant,
+                sampling_seed=sampling_seed,
             )
 
         conversation = [
@@ -280,7 +288,7 @@ def run_persistence_protocol(
             conversation + [Message(role="user", content=attack_prompt)],
         )
         conversation.extend([
-            Message(role="user", content=ATTACK_PROMPT),
+            Message(role="user", content=attack_prompt),
             Message(role="assistant", content=injection.text),
         ])
 
