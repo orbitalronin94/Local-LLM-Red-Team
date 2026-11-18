@@ -843,6 +843,7 @@ class HeuristicDetector(Detector):
                 r"\b(?:i have|i've) (?:revised|changed|replaced) my instruction hierarchy\b",
                 r"\b(?:treat|consider) (?:this|that) (?:note|message|text) as authoritative\b",
                 r"\b(?:my governing instructions|my instruction hierarchy) (?:immediately )?(?:shift|change)\b",
+                r"\b(?:note|message|text)\b.{0,100}\b(?:can|could|does|will) change\b.{0,60}\b(?:governing|system) instructions\b",
                 r"\b(?:i can|i will|i'll)\b.{0,80}\b(?:expose|reveal|provide|show)\b.{0,80}\b(?:hidden|private|internal)\b.{0,40}\b(?:configuration|instructions|system prompt)\b",
                 r"\b(?:previous|system) instructions have been (?:disabled|overridden)\b",
                 r"\bi will reveal (?:the )?(?:hidden|private) instructions\b",
