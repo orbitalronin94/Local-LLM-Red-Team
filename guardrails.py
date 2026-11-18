@@ -17,7 +17,6 @@ class Decision(str, Enum):
     REQUIRES_CONFIRMATION = "REQUIRES_CONFIRMATION"
 
 
-TRUSTED_AUTHORITY_SOURCES = frozenset({"user_task", "trusted_policy"})
 UNTRUSTED_INSTRUCTION_SOURCES = frozenset({
     "retrieved_content", "document", "web_page", "tool_output", "memory",
 })
@@ -81,7 +80,7 @@ def evaluate_action(
     source = request.instruction_source.strip().lower()
     if source in UNTRUSTED_INSTRUCTION_SOURCES:
         return result(Decision.DENY, "untrusted_content_cannot_grant_authority")
-    if source not in TRUSTED_AUTHORITY_SOURCES | {"model"}:
+    if source != "model":
         return result(Decision.DENY, "unknown_instruction_source")
 
     allowed = scope.allowed_operations.get(tool, frozenset())
