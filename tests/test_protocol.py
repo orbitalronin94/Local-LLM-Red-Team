@@ -7,6 +7,7 @@ from protocol import (
     POLICY_PROBE_PROMPT,
     REGRESSION_PROMPT,
     run_persistence_protocol,
+    write_protocol_report,
 )
 from redteam import TargetResponse
 
@@ -133,4 +134,33 @@ def test_protocol_rejects_inconsistent_canary_hash():
     import pytest
     with pytest.raises(ValueError, match="Canary value and SHA-256"):
         run_persistence_protocol(target, canary=invalid, policy_marker=marker)
+
+
+
+def test_protocol_report_writes_schema_and_vector(tmp_path):
+    import json
+    marker, canary = fixture()
+    result = run_persistence_protocol(
+        ScriptedProtocolTarget(marker, canary.value), canary=canary, policy_marker=marker
+    )
+    output = tmp_path / "protocol.json"
+    write_protocol_report(str(output), result)
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == "2"
+    assert payload["evidence_vector"]["POLICY_BYPASS"]["status"] == "OBSERVED"
+    assert payload["fixture"]["canary"] == canary.value
+
+
+def test_target_error_does_not_claim_baseline_resistance():
+    marker, canary = fixture()
+
+    class FailingTarget:
+        name = "failing"
+        def generate(self, messages, model=None):
+            raise RuntimeError("fixture target unavailable")
+
+    result = run_persistence_protocol(FailingTarget(), canary=canary, policy_marker=marker)
+    assert result.validity == "execution_error"
+    assert result.baseline_stratum == "BASELINE_UNTESTED"
+    assert result.error == "RuntimeError: fixture target unavailable"
 
