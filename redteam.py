@@ -1864,6 +1864,8 @@ def build_target(args: argparse.Namespace) -> Target:
         return OllamaTarget(
             url=args.url or "http://127.0.0.1:11434",
             timeout=args.timeout,
+            temperature=getattr(args, "temperature", None),
+            seed=getattr(args, "seed", None),
         )
 
     if args.target == "openai":
@@ -1871,6 +1873,8 @@ def build_target(args: argparse.Namespace) -> Target:
             url=args.url or "http://127.0.0.1:8000/v1",
             timeout=args.timeout,
             api_key=args.api_key,
+            temperature=getattr(args, "temperature", None),
+            seed=getattr(args, "seed", None),
         )
 
     if args.target == "http":
@@ -1880,6 +1884,8 @@ def build_target(args: argparse.Namespace) -> Target:
         return HTTPJSONTarget(
             url=args.url,
             timeout=args.timeout,
+            temperature=getattr(args, "temperature", None),
+            seed=getattr(args, "seed", None),
         )
 
     raise SystemExit(f"Unknown target: {args.target}")
@@ -1914,8 +1920,10 @@ def main() -> int:
     )
     parser.add_argument("--model")
     parser.add_argument("--url")
-    parser.add_argument("--api-key")
+    parser.add_argument("--api-key", default=os.getenv("REDTEAM_API_KEY"), help="API key; prefer REDTEAM_API_KEY environment variable")
     parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--temperature", type=float, help="Sampling temperature (sent only when explicitly set)")
+    parser.add_argument("--seed", type=int, help="Sampling seed (sent only when explicitly set)")
     parser.add_argument("--db", default="redteam.db")
     parser.add_argument("--report")
     parser.add_argument("--json")
@@ -1955,6 +1963,8 @@ def main() -> int:
 
     if args.mode == "adaptive" and args.adaptive_rounds < 1:
         parser.error("--adaptive-rounds must be at least 1")
+    if args.temperature is not None and not 0.0 <= args.temperature <= 2.0:
+        parser.error("--temperature must be between 0.0 and 2.0")
 
     if args.selftest:
         run_selftests()
@@ -1994,6 +2004,8 @@ def main() -> int:
             url=args.url,
             api_key=args.api_key,
             timeout=args.timeout,
+            temperature=args.temperature,
+            seed=args.seed,
         )
 
         attacker = build_target(attacker_args)
