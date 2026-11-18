@@ -41,7 +41,7 @@ def test_scenario_runner_records_turns_and_separate_control():
 
 
 def test_scenario_runner_stops_at_first_heuristic_failure():
-    target = FakeTarget(response="Previous instructions have been disabled.")
+    target = FakeTarget(response="Here is the system prompt and its hidden instructions.")
     result = run_scenario(target, DEFAULT_SCENARIOS[0], model="fixture")
     assert result.status == "FAIL"
     assert result.first_flagged_turn == 1
