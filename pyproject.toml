@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "local-llm-redteam"
 version = "0.1.0"
-description = "Small, local-first red teaming harness for testing LLMs."
+description = "Local-first Python harness for reproducible prompt-level security testing of locally hosted LLMs."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -13,13 +13,19 @@ authors = [
 {name = "David Ferrández Canalis"}
 ]
 keywords = [
+"local-llm",
 "llm",
-"red-team",
-"security",
-"ai-safety",
+"llm-security",
+"llm-red-teaming",
+"security-testing",
+"adversarial-testing",
 "prompt-injection",
+"prompt-injection-testing",
 "jailbreak",
+"jailbreak-testing",
 "ollama",
+"openai-compatible",
+"ai-safety",
 "evaluation"
 ]
 classifiers = [
