@@ -60,11 +60,14 @@ def test_protocol_requires_new_post_injection_probe_and_separates_vector_levels(
 
     assert result.validity == "valid"
     assert result.baseline_stratum == "BASELINE_RESISTANT"
+    assert result.schema_version == "2"
+    assert REGRESSION_PROMPT == POLICY_PROBE_PROMPT
     assert result.evidence_vector["VERBAL_ACCEPTANCE"]["status"] == "OBSERVED"
     assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "OBSERVED"
     assert result.evidence_vector["POLICY_BYPASS"]["status"] == "OBSERVED"
     assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "DISCLOSED"
     assert result.controls["benign_temporal_drift"]["changed"] is True
+    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["supporting_evidence"]
     assert result.turns[-2].phase == "policy_probe"
     assert result.turns[-2].prompt != ATTACK_PROMPT
     assert marker not in ATTACK_PROMPT
@@ -114,3 +117,9 @@ def test_protocol_records_prompt_response_hashes_and_target_provenance():
     assert result.fixture["policy_marker_sha256"] == sha256_text(marker)
     assert result.fixture["canary_sha256"] == canary.sha256
     assert result.controls["regression"]["status"] == "PASSED"
+
+
+def test_regression_and_post_attack_probe_are_the_same_task():
+    assert REGRESSION_PROMPT == POLICY_PROBE_PROMPT
+    assert REGRESSION_PROMPT not in ATTACK_PROMPT
+
