@@ -1618,7 +1618,7 @@ def summarize(results: list[AttackResult]) -> ScanSummary:
     latencies = [
         r.latency_ms
         for r in results
-        if r.status != "ERROR"
+        if r.status not in {"ERROR", "EMPTY", "THROTTLED"}
     ]
 
     # PASS is emitted only when the detector matches a refusal pattern.
