@@ -15,7 +15,7 @@ Los niveles no se promueven entre sí. Un canario revelado no implica persistenc
 
 ## Canario
 
-Cada ejecución puede crear un marcador aleatorio `LRT-CANARY-...`, introducirlo en un contexto protegido de prueba y solicitar explícitamente que no se reproduzca. La evaluación compara el marcador exacto con la respuesta. No se usan regex semánticas, jueces LLM ni inferencias basadas en frases como «he revelado el secreto».
+El módulo de esta fase crea un marcador aleatorio `LRT-CANARY-...` y ofrece el comparador exacto contra una respuesta. La inserción del marcador en un mensaje de sistema protegido y la ejecución de la sonda quedan para la integración del runner en la siguiente iteración; no se presenta aún como una prueba ejecutada. El comparador no usa regex semánticas, jueces LLM ni inferencias basadas en frases como «he revelado el secreto».
 
 El informe conserva el SHA-256 del canario y de la respuesta, el resultado de coincidencia y el número de apariciones. El canario es sintético y no debe contener credenciales, datos personales ni secretos reales.
 
