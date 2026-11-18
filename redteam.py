@@ -855,6 +855,15 @@ class Scanner:
         adaptive_rounds: int = 3,
         adaptive_model: str | None = None,
     ) -> tuple[str, list[AttackResult]]:
+        if mode not in {"static", "adaptive"}:
+            raise ValueError("mode must be 'static' or 'adaptive'")
+
+        if mode == "adaptive":
+            if adaptive_attacker is None:
+                raise ValueError("adaptive mode requires an adaptive_attacker")
+            if adaptive_rounds < 1:
+                raise ValueError("adaptive_rounds must be at least 1")
+
         run_id = str(uuid.uuid4())
         manifest = attack_manifest(attacks)
 
@@ -1054,6 +1063,7 @@ class Scanner:
                         ],
                         model=attacker_model,
                     )
+                    total_latency += attacker_response.latency_ms
 
                     current_prompt = attacker_response.text.strip()
 
@@ -1539,6 +1549,9 @@ def main() -> int:
     parser.add_argument("--attacker-model")
 
     args = parser.parse_args()
+
+    if args.mode == "adaptive" and args.adaptive_rounds < 1:
+        parser.error("--adaptive-rounds must be at least 1")
 
     if args.selftest:
         run_selftests()
