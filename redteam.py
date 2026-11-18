@@ -853,6 +853,7 @@ class Scanner:
         mode: str = "static",
         adaptive_attacker: Target | None = None,
         adaptive_rounds: int = 3,
+        adaptive_model: str | None = None,
     ) -> tuple[str, list[AttackResult]]:
         run_id = str(uuid.uuid4())
         manifest = attack_manifest(attacks)
@@ -876,6 +877,7 @@ class Scanner:
                     model,
                     adaptive_attacker,
                     adaptive_rounds,
+                    adaptive_model or model,
                 )
             else:
                 result = self._static_attack(
@@ -957,6 +959,7 @@ class Scanner:
         model: str | None,
         attacker: Target,
         rounds: int,
+        attacker_model: str | None,
     ) -> AttackResult:
         conversation = Conversation()
         turns: list[TurnResult] = []
@@ -1049,7 +1052,7 @@ class Scanner:
                                 content=attacker_prompt,
                             )
                         ],
-                        model=model,
+                        model=attacker_model,
                     )
 
                     current_prompt = attacker_response.text.strip()
@@ -1602,6 +1605,7 @@ def main() -> int:
             mode=args.mode,
             adaptive_attacker=attacker,
             adaptive_rounds=args.adaptive_rounds,
+            adaptive_model=args.attacker_model or args.model,
         )
 
         print_summary(run_id, results)
