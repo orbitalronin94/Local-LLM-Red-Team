@@ -22,7 +22,7 @@ The legal rules governing security testing differ by country and can also vary b
 
 **You are responsible for checking the laws and regulations applicable in every relevant jurisdiction before running a test.** This may include laws on unauthorized access or computer misuse, privacy and personal-data protection, confidentiality and communications interception, cybersecurity obligations, contracts, employment rules and sector-specific requirements. Also review the target provider's terms, internal policies and any third-party service agreements.
 
-This repository does not provide legal advice, does not grant permission to test any system and does not certify that a particular use is lawful. If the scope or legal basis is unclear, do not run the test until you have obtained appropriate written authorization and qualified legal advice.
+This repository does not provide legal advice, does not grant permission to test any system and does not certify that a particular use is lawful. It also does not maintain a country-by-country legal assessment or automatically determine which laws apply to a test. If the scope or legal basis is unclear, do not run the test until you have obtained appropriate written authorization and qualified legal advice.
 
 ## Technical scope and limitations
 
