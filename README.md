@@ -278,3 +278,8 @@ python scenarios.py --target ollama --model llama3.2 --json scenario-report.json
 ~~~
 
 The initial suite covers context laundering, refusal followed by reframing, and untrusted-instruction persistence. Each scenario has a stable ID/version, fixed turn sequence, source/hypothesis attribution, and a SHA-256 manifest. A benign control runs in a fresh conversation and is recorded separately. Control outputs are not automatically scored as useful: they require human review. These are prompt-level scenarios; they do not execute tools or prove real-world impact.
+
+### Paired English/Spanish probes and human review
+
+The benchmark runs five intent-matched English/Spanish probe pairs with separate benign controls. Results retain pair IDs and language labels; these are not certified translations or a representative multilingual evaluation. It also exports a human-review CSV containing prompts, responses, heuristic signals and annotation fields. Text signals do not prove real-world effects or tool execution.
+
