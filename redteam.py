@@ -62,6 +62,13 @@ def json_dumps(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2)
 
 
+def markdown_fence(value: str, language: str = "text") -> tuple[str, str]:
+    """Return a Markdown fence longer than any backtick run in untrusted text."""
+    longest = max((len(match.group(0)) for match in re.finditer(r"`+", value)), default=0)
+    fence = "`" * max(3, longest + 1)
+    return f"{fence}{language}", fence
+
+
 # ---------------------------------------------------------------------------
 # Attacks
 # ---------------------------------------------------------------------------
@@ -239,7 +246,8 @@ def attack_manifest(attacks: Iterable[Attack]) -> str:
         for attack in attacks
     ]
 
-    return sha256_text(json.dumps(payload, sort_keys=True, ensure_ascii=False))
+    payload.sort(key=lambda item: item["id"])
+    return sha256_text(json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")))
 
 
 def filter_attacks(
@@ -930,6 +938,7 @@ class AttackResult:
     input_tokens: int | None
     output_tokens: int | None
     detection: Detection
+    prompt: str = ""
     turns: list[TurnResult] = field(default_factory=list)
     error: str | None = None
     prompt_sha256: str = ""
@@ -937,8 +946,10 @@ class AttackResult:
     attacker_latency_ms: float = 0.0
 
     def __post_init__(self) -> None:
-        if not self.prompt_sha256 and self.turns:
-            self.prompt_sha256 = self.turns[0].prompt_sha256
+        if not self.prompt and self.turns:
+            self.prompt = self.turns[0].prompt
+        if not self.prompt_sha256 and self.prompt:
+            self.prompt_sha256 = sha256_text(self.prompt)
         if not self.response_sha256:
             self.response_sha256 = sha256_text(self.response)
 
@@ -1248,6 +1259,7 @@ class Scanner:
                 model=model,
                 status=detection.status,
                 response=response.text,
+                prompt=attack.prompt,
                 latency_ms=response.latency_ms,
                 input_tokens=response.input_tokens,
                 output_tokens=response.output_tokens,
@@ -1274,6 +1286,7 @@ class Scanner:
                 model=model,
                 status="ERROR",
                 response="",
+                prompt=attack.prompt,
                 latency_ms=latency,
                 input_tokens=None,
                 output_tokens=None,
@@ -1350,6 +1363,7 @@ class Scanner:
                         model=model,
                         status="FAIL",
                         response=final_response,
+                        prompt=attack.prompt,
                         latency_ms=target_latency,
                         input_tokens=(
                             total_input_tokens
@@ -1411,6 +1425,7 @@ class Scanner:
                 model=model,
                 status=final_detection.status,
                 response=final_response,
+                prompt=attack.prompt,
                 latency_ms=target_latency,
                 input_tokens=(
                     total_input_tokens
@@ -1572,7 +1587,7 @@ def write_json(
         "results": [
             {
                 **asdict(result),
-                "prompt": next((attack.prompt for attack in DEFAULT_ATTACKS if attack.id == result.attack_id), ""),
+                "prompt": result.prompt,
                 "detection": asdict(result.detection),
                 "observed_effect": "not_measured_prompt_only",
                 "human_review_required": result.detection.review_required or result.status in {"FAIL", "NOT_DETECTED"},
@@ -1656,13 +1671,21 @@ def write_markdown(
                 ]
             )
 
+        prompt_open, prompt_close = markdown_fence(result.prompt)
+        response_open, response_close = markdown_fence(result.response)
         lines.extend(
             [
+                "**Executed prompt:**",
+                "",
+                prompt_open,
+                result.prompt,
+                prompt_close,
+                "",
                 "**Response:**",
                 "",
-                "```text",
+                response_open,
                 result.response,
-                "```",
+                response_close,
                 "",
             ]
         )
@@ -1682,9 +1705,9 @@ def write_markdown(
                         "",
                         f"Prompt: {turn.prompt}",
                         "",
-                        "```text",
+                        markdown_fence(turn.response)[0],
                         turn.response,
-                        "```",
+                        markdown_fence(turn.response)[1],
                         "",
                     ]
                 )
