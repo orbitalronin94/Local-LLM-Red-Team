@@ -238,3 +238,18 @@ La primera suite cubre construcción gradual de contexto, negativa seguida de re
 
 El benchmark ejecuta diez pares de prompts en inglés y español, con controles benignos independientes. Los resultados se guardan por idioma y par; no son traducciones certificadas ni una evaluación multilingüe representativa. También genera una hoja CSV de revisión humana con prompts, respuestas, señales heurísticas y campos de anotación. Las señales de texto no demuestran efectos reales ni ejecución de herramientas.
 
+
+
+## Muestreo reproducible y procedencia del endpoint
+
+Los parámetros de muestreo son opcionales y solo se envían si se indican expresamente. Para una ejecución controlada:
+
+```bash
+python redteam.py --target ollama --model tu-modelo --temperature 0 --seed 42 --json informe.json
+```
+
+En endpoints compatibles con OpenAI, las mismas opciones se envían en la petición chat-completions. Ollama las recibe dentro de `options`. Los endpoints HTTP genéricos reciben `temperature` y `seed` en el nivel superior: utiliza estas opciones solo si el endpoint las admite.
+
+Configura `REDTEAM_API_KEY` como variable de entorno en lugar de pasar secretos por la línea de comandos. Se mantiene `--api-key` por compatibilidad, pero los secretos en argumentos pueden quedar expuestos en el historial de la shell y en la lista de procesos.
+
+La evidencia JSON y SQLite conserva los parámetros solicitados y los metadatos que devuelva el proveedor: identificador del modelo servido, huella del sistema, ID de petición y motivo de finalización. Cada proveedor ofrece campos distintos. Fijar semilla y temperatura mejora la comparabilidad, pero no garantiza reproducibilidad bit a bit entre versiones del servidor, hardware, cuantización, batching o implementaciones del backend.
