@@ -43,9 +43,22 @@ jobs:
           test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = "10f173b253173e9cca4e81a4803a0f01989d1b29"
           cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_BUILD_TESTS=OFF
           cmake --build /tmp/llama.cpp/build --config Release --target llama-server -j2
-          cmake --install /tmp/llama.cpp/build --prefix "$RUNNER_TEMP/llama-install"
-          /tmp/llama.cpp/build/bin/llama-server --version
-          git -C /tmp/llama.cpp rev-parse HEAD > "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT"
+          # Do not run the upstream all-target install: it also installs optional
+          # examples that are intentionally not built by the llama-server target.
+          # Bundle only the binaries and shared libraries produced by this build.
+          install_dir="$RUNNER_TEMP/llama-install"
+          mkdir -p "$install_dir/bin"
+          cp -a /tmp/llama.cpp/build/bin/. "$install_dir/bin/"
+          test -x "$install_dir/bin/llama-server"
+          echo "$RUNNER_TEMP/llama-install/bin" >> "$GITHUB_PATH"
+          export LD_LIBRARY_PATH="$install_dir/bin:${LD_LIBRARY_PATH:-}"
+          "$install_dir/bin/llama-server" --version
+          if ldd "$install_dir/bin/llama-server" | grep -q "not found"; then
+            ldd "$install_dir/bin/llama-server"
+            echo "llama-server has unresolved shared-library dependencies" >&2
+            exit 1
+          fi
+          git -C /tmp/llama.cpp rev-parse HEAD > "$install_dir/LLAMA_CPP_COMMIT"
           # Archive to preserve executable bits and shared-library symlinks.
           tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/llama-install.tar.gz" llama-install
 
@@ -184,7 +197,7 @@ jobs:
         run: |
           tar -xzf "$RUNNER_TEMP/llama-install.tar.gz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/llama-install/bin" >> "$GITHUB_PATH"
-          echo "LD_LIBRARY_PATH=$RUNNER_TEMP/llama-install/lib:$RUNNER_TEMP/llama-install/lib64:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$RUNNER_TEMP/llama-install/bin:$RUNNER_TEMP/llama-install/lib:$RUNNER_TEMP/llama-install/lib64:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
           test -x "$RUNNER_TEMP/llama-install/bin/llama-server"
           cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT"
           "$RUNNER_TEMP/llama-install/bin/llama-server" --version
