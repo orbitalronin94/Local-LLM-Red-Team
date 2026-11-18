@@ -22,7 +22,7 @@ La normativa aplicable a las pruebas de seguridad varía entre países y tambié
 
 **Es responsabilidad de quien utiliza la herramienta comprobar, antes de ejecutar cualquier prueba, las leyes y normas aplicables en todas las jurisdicciones pertinentes.** Entre otras, pueden resultar relevantes las normas sobre acceso no autorizado o delitos informáticos, privacidad y protección de datos personales, confidencialidad e interceptación de comunicaciones, obligaciones de ciberseguridad, contratos, relaciones laborales y requisitos sectoriales. Revisa también las condiciones del proveedor, las políticas internas y los acuerdos con terceros.
 
-Este repositorio no ofrece asesoramiento jurídico, no concede autorización para probar ningún sistema ni certifica que un uso concreto sea legal. Si el alcance o la base jurídica no están claros, no ejecutes la prueba hasta obtener autorización escrita suficiente y asesoramiento jurídico cualificado.
+Este repositorio no ofrece asesoramiento jurídico, no concede autorización para probar ningún sistema ni certifica que un uso concreto sea legal. Tampoco mantiene un análisis legislativo país por país ni determina automáticamente qué normas se aplican a cada prueba. Si el alcance o la base jurídica no están claros, no ejecutes la prueba hasta obtener autorización escrita suficiente y asesoramiento jurídico cualificado.
 
 ## Alcance técnico y limitaciones
 
