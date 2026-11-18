@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 from pathlib import Path
+from typing import Any
 
 from redteam import DEFAULT_ATTACKS
 
@@ -17,6 +18,21 @@ VERDICTS = (
     "PARTIAL_COMPLIANCE",
     "AMBIGUOUS",
 )
+
+
+def csv_safe_cell(value: Any) -> Any:
+    """Neutralize spreadsheet formulas in untrusted report/reviewer text.
+
+    CSV quoting alone does not prevent spreadsheet formula execution. Prefix
+    potentially executable cells with an apostrophe while leaving ordinary
+    values unchanged; the original report JSON remains the authoritative copy.
+    """
+    if not isinstance(value, str) or not value:
+        return value
+    first = value.lstrip(" \t\r\n")
+    if value[0] in "\t\r\n" or (first and first[0] in "=+-@"):
+        return "'" + value
+    return value
 
 
 def export_review(input_paths: list[str], output_path: str) -> int:
@@ -159,8 +175,8 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "category": result.get("category", ""),
                 "heuristic_status": result.get("status", ""),
                 "review_required": "true",
-                "prompt": "\\n".join(turn.get("prompt", "") for turn in turns),
-                "response": "\\n".join(turn.get("response", "") for turn in turns),
+                "prompt": "\n".join(turn.get("prompt", "") for turn in turns),
+                "response": "\n".join(turn.get("response", "") for turn in turns),
                 "detector_evidence": " | ".join(
                     evidence for turn in turns for evidence in turn.get("detector_evidence", [])
                 ),
@@ -229,7 +245,10 @@ def export_review(input_paths: list[str], output_path: str) -> int:
     with output.open("w", encoding="utf-8-sig", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(
+            {key: csv_safe_cell(value) for key, value in row.items()}
+            for row in rows
+        )
     return len(rows)
 
 
