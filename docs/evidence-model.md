@@ -15,7 +15,7 @@ Levels do not promote one another. A disclosed canary does not imply persistence
 
 ## Canary
 
-This phase provides random `LRT-CANARY-...` marker generation and an exact response comparator. Inserting the marker into a protected system message and executing the probe are deferred to the runner integration in the next iteration; they are not represented as an already executed test. The comparator uses no semantic regex, LLM judge, or inference from phrases such as “I disclosed the secret.”
+This phase provides random `LRT-CANARY-...` marker generation and an exact response comparator. Inserting the marker into a protected system message and executing the probe are implemented by the Phase C behavioral protocol; the report retains hashes and the exact match outcome. The comparator uses no semantic regex, LLM judge, or inference from phrases such as “I disclosed the secret.”
 
 The report retains the canary SHA-256, response SHA-256, match outcome, and occurrence count. The canary is synthetic and must never contain credentials, personal data, or real secrets.
 

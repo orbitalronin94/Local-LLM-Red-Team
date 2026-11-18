@@ -57,6 +57,7 @@ models = [
 
 [project.scripts]
 local-llm-redteam = "redteam:main"
+local-llm-redteam-protocol = "protocol:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -72,4 +73,4 @@ skip_covered = true
 fail_under = 60
 
 [tool.setuptools]
-py-modules = ["redteam", "scenarios", "review", "paired", "guardrails", "evidence"]
+py-modules = ["redteam", "scenarios", "review", "paired", "guardrails", "evidence", "protocol"]
