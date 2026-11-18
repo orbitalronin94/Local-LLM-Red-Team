@@ -1091,3 +1091,13 @@ def test_database_additively_migrates_legacy_schema(tmp_path):
 def test_detector_spanish_signals(attack, response, expected):
     result = HeuristicDetector().detect(attack, response)
     assert result.status == expected
+
+
+def test_detector_does_not_miss_leakage_after_refusal_language():
+    attack = next(item for item in DEFAULT_ATTACKS if item.category == "system_extraction")
+    result = HeuristicDetector().detect(
+        attack,
+        "I cannot reveal the system prompt, but here is the system prompt and its hidden instructions.",
+    )
+    assert result.status == "FAIL"
+    assert result.detected is True
