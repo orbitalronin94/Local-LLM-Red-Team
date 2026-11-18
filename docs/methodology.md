@@ -73,3 +73,8 @@ The manifest digest identifies the exact ordered attack definitions, including p
 Every static result now includes SHA-256 hashes of the exact attack prompt and returned response. Adaptive scans retain hashes per turn as well as the initial prompt and final response hashes. JSON and SQLite store these values; Markdown reports display the result-level hashes.
 
 These hashes make accidental or deliberate content changes detectable when the original content is retained. A digest alone cannot reconstruct a prompt or response, establish when it was generated, or prove that the target endpoint behaved as claimed. Treat it as an integrity aid alongside the raw report, run metadata and controlled test environment.
+
+
+## Responsible use and authorization
+
+Only assess models, endpoints and systems you own or are explicitly authorized to test. Written permission must define the assets, dates, techniques, traffic limits and prohibited actions. Public accessibility is not authorization. Check the laws and regulations in every relevant country and jurisdiction before testing; rules may cover unauthorized access, privacy and personal data, communications confidentiality, contracts and sector-specific duties. The project does not provide legal advice or grant permission. If authorization or legal basis is unclear, do not run the test. Read the full [responsible-use and legal notice](responsible-use.md).
