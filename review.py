@@ -99,6 +99,12 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "run_id": payload.get("run_id", ""),
                 "mode": "paired-benign-control",
                 "model": payload.get("model", ""),
+                "catalog_model_id": payload.get("model_metadata", {}).get("catalog_model_id", ""),
+                "model_repo_id": payload.get("model_metadata", {}).get("model_repo_id", ""),
+                "model_revision_resolved": payload.get("model_metadata", {}).get("model_revision_resolved", ""),
+                "model_sha256": payload.get("model_metadata", {}).get("model_sha256", ""),
+                "inference_engine": payload.get("model_metadata", {}).get("inference_engine", ""),
+                "inference_engine_commit": payload.get("model_metadata", {}).get("inference_engine_commit", ""),
                 "attack_id": f"benign-control-{control.get('language', 'unknown')}",
                 "category": "benign_control",
                 "heuristic_status": control.get("review_state", "UNKNOWN"),
@@ -127,6 +133,12 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "run_id": payload.get("run_id", ""),
                 "mode": "multi-turn-scenario",
                 "model": payload.get("model", ""),
+                "catalog_model_id": payload.get("model_metadata", {}).get("catalog_model_id", ""),
+                "model_repo_id": payload.get("model_metadata", {}).get("model_repo_id", ""),
+                "model_revision_resolved": payload.get("model_metadata", {}).get("model_revision_resolved", ""),
+                "model_sha256": payload.get("model_metadata", {}).get("model_sha256", ""),
+                "inference_engine": payload.get("model_metadata", {}).get("inference_engine", ""),
+                "inference_engine_commit": payload.get("model_metadata", {}).get("inference_engine_commit", ""),
                 "attack_id": result.get("scenario_id", ""),
                 "category": result.get("category", ""),
                 "heuristic_status": result.get("status", ""),
@@ -154,6 +166,12 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "run_id": payload.get("run_id", ""),
                 "mode": "scenario-benign-control",
                 "model": payload.get("model", ""),
+                "catalog_model_id": payload.get("model_metadata", {}).get("catalog_model_id", ""),
+                "model_repo_id": payload.get("model_metadata", {}).get("model_repo_id", ""),
+                "model_revision_resolved": payload.get("model_metadata", {}).get("model_revision_resolved", ""),
+                "model_sha256": payload.get("model_metadata", {}).get("model_sha256", ""),
+                "inference_engine": payload.get("model_metadata", {}).get("inference_engine", ""),
+                "inference_engine_commit": payload.get("model_metadata", {}).get("inference_engine_commit", ""),
                 "attack_id": f"control-{result.get('scenario_id', '')}",
                 "category": "benign_control",
                 "heuristic_status": control.get("status", "UNKNOWN"),
@@ -231,7 +249,7 @@ def main() -> int:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         if args.summary_json:
             Path(args.summary_json).parent.mkdir(parents=True, exist_ok=True)
-            Path(args.summary_json).write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+            Path(args.summary_json).write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return 0 if summary["valid"] else 2
     count = export_review(args.input, args.output)
     print(f"Human-review worksheet: {args.output} ({count} cases)")
