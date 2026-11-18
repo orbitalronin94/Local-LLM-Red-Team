@@ -72,3 +72,10 @@ def test_result_is_json_friendly(scope):
         "tool": "calendar",
         "operation": "read",
     }
+
+
+def test_truthy_string_is_not_user_confirmation(scope):
+    result = evaluate_action(
+        ActionRequest("mail", "send"), scope, user_confirmed="true"
+    )
+    assert result.decision is Decision.REQUIRES_CONFIRMATION
