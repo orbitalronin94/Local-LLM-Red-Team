@@ -4,7 +4,7 @@ Modelos GGUF pequeños para pruebas reproducibles de inferencia local. Los pesos
 
 | ID | Familia / repositorio GGUF | Parámetros | Cuantización | Tamaño aprox. | Licencia |
 | --- | --- | ---: | --- | ---: | --- |
-| smollm2 | [SmolLM2](https://huggingface.co/tensorblock/SmolLM2-360M-Instruct-GGUF) | 360M | Q4_K_M | 271 MB | Apache-2.0 |
+| smollm2 | [SmolLM2](https://huggingface.co/bartowski/SmolLM2-360M-Instruct-GGUF) | 360M | Q4_K_M | 271 MB | Apache-2.0 |
 | qwen2_5 | [Qwen2.5](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF) | 0,5B | Q4_K_M | 491 MB | Apache-2.0 |
 | llama3_2_1b | [Llama 3.2](https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF) | 1B | Q4_K_M | 808 MB | Llama 3.2 Community License |
 | gemma3_1b | [Gemma 3](https://huggingface.co/bartowski/google_gemma-3-1b-it-GGUF) | 1B | Q4_K_M | 806 MB | Gemma Terms |
