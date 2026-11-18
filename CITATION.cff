@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software in research or evaluation, please cite it as below."
+title: "Local LLM Red Team"
+type: software
+authors:
+  - family-names: Canalis
+    given-names: David Ferrández
+version: "0.1.0"
+date-released: 2026-10-04
+license: MIT
+repository-code: "https://github.com/orbitalronin94/Local-LLM-Red-Team"
+keywords:
+  - local large language models
+  - LLM red teaming
+  - AI security testing
+  - prompt injection
+  - jailbreak evaluation
+  - Ollama
+  - adversarial testing
