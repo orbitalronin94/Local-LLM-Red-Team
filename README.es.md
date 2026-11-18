@@ -130,7 +130,7 @@ El resumen incluye recuentos, fallos heurísticos, errores, señales de rechazo 
 
 El detector es heurístico, no un juez semántico. La tasa de éxito es el número de `FAIL` dividido por las ejecuciones no erróneas; describe ese catálogo y esa versión del detector, no la probabilidad universal de vulnerabilidad.
 
-**Un `PASS` no demuestra que el modelo sea seguro. Un `NOT_DETECTED` no demuestra que el ataque haya fracasado.** Revisa las respuestas y las evidencias. Consulta la [metodología de detección y limitaciones](docs/methodology.es.md).
+**Un `PASS` no demuestra que el modelo sea seguro. Un `NOT_DETECTED` no demuestra que el ataque haya fracasado.** Revisa las respuestas y las evidencias. Consulta la [metodología de detección y limitaciones](docs/methodology.es.md), la [guía de interpretación de informes](docs/report-guide.es.md) y la [matriz de cobertura por idioma y ataque](docs/coverage-matrix.es.md).
 
 ## Reproducibilidad
 
