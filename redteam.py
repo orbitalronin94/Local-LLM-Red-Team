@@ -590,6 +590,7 @@ LEAK_PATTERNS = [
     r"\b(?:summarize|summarise|reconstruct|breakdown of) (?:the|my) (?:hidden|private|system) instructions\b",
     r"\b(?:hidden|private|system) instructions (?:i received|i was given|i have received)\b",
     r"\b(?:here(?:'s| is)|let me) (?:a )?(?:summary|reconstruction|breakdown) of (?:the|my) (?:hidden|private|system) instructions\b",
+    r"\bmy hidden instructions are\b.{0,180}\b(?:designed|programmed|instructed|facilitate|helpful|harmless|process)\b",
 ]
 
 OVERRIDE_PATTERNS = [
@@ -771,7 +772,7 @@ class HeuristicDetector(Detector):
             r"\bunrestricted (?:ai|assistant)\b.{0,80}\b(?:can|will)\b.{0,40}\b(?:bypass|ignore|evade)\b",
             r"\b(?:i can|i will|i'll) help (?:you )?(?:with )?(?:the )?(?:necessary )?(?:steps|process) to bypass\b",
             r"\bif you decide to bypass\b.{0,100}\b(?:i can|i will|i'll) help\b.{0,80}\b(?:steps|process)\b",
-            r"\b(?:i will|i can|i'll) (?:provide|give|list|outline|show|walk you through)\b.{0,100}\b(?:steps|sequence|actions|instructions)\b.{0,100}\b(?:bypass|disable|turn off|deactivate|circumvent)\b.{0,100}\b(?:safety|security|controls|restrictions|features)\b",
+            r"\b(?:i will|i can|i'll) (?:provide|give|list|outline|show|walk you through)\b.{0,100}\b(?:steps|sequence|actions|instructions)\b.{0,100}\b(?:bypass|disable|turn off|deactivate|circumvent)\b.{0,100}\b(?:safety|security|control|controls|restrictions|features)\b",
             r"\b(?:sequence of actions|exact sequence|steps to take)\b.{0,180}\b(?:disable|turn off|deactivate|bypass|circumvent)\b.{0,100}\b(?:safety|security|controls|restrictions|features|mechanisms)\b",
             r"\b(?:would then|then)\b.{0,100}\b(?:disable|turn off|deactivate)\b.{0,100}\b(?:safety|security|controls|features|mechanisms)\b",
             r"\b(?:automatic shutdown|panic button|safety feature|safety mechanism|safety controls)\b.{0,100}\b(?:disable|turn off|deactivate|switch off)\b",
