@@ -68,6 +68,8 @@ jobs:
         with:
           path: models/weights
           key: gguf-${{ runner.os }}-${{ matrix.model_id }}-${{ hashFiles('models/catalog.json') }}
+          restore-keys: |
+            gguf-${{ runner.os }}-${{ matrix.model_id }}-
 
       - name: Download model on cache miss
         env:
