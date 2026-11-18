@@ -6,8 +6,6 @@
 
 **Language / Idioma:** [English](README.md) · [Español](README.es.md)
 
-**Language / Idioma:** [English](README.md) · [Español](README.es.md)
-
 **A lightweight, local-first Python harness for reproducible security testing of locally hosted large language models (LLMs).** Probe jailbreaks, prompt injection, instruction overrides, system-prompt extraction and multi-turn persistence against Ollama, OpenAI-compatible servers and generic HTTP JSON endpoints. Review heuristic findings as JSON, Markdown or SQLite records.
 
 **Project status:** Alpha, version 0.1.0. The public interface and attack catalogue may evolve before 1.0.
