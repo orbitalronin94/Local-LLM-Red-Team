@@ -1789,6 +1789,7 @@ def main() -> int:
                 args.json,
                 run_id,
                 results,
+                metadata=scanner.last_run_metadata,
             )
             print(f"JSON report: {args.json}")
 
