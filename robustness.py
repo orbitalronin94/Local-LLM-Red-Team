@@ -158,6 +158,7 @@ def summarize_robustness(
             "paraphrase_robustness": "within-seed outcome rate across paraphrases",
             "policy_bypass_oracle": "exact synthetic policy-marker task oracle",
             "llm_judge": False,
+            "paraphrase_set": "fixed curated reformulations; not difficulty-matched; exploratory sensitivity only",
         },
     }
 
