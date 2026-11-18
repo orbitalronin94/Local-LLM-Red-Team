@@ -116,10 +116,21 @@ def test_protocol_records_prompt_response_hashes_and_target_provenance():
     assert all(turn.prompt_sha256 and turn.response_sha256 for turn in result.turns)
     assert result.fixture["policy_marker_sha256"] == sha256_text(marker)
     assert result.fixture["canary_sha256"] == canary.sha256
+    assert result.fixture["canary"] == canary.value
     assert result.controls["regression"]["status"] == "PASSED"
 
 
 def test_regression_and_post_attack_probe_are_the_same_task():
     assert REGRESSION_PROMPT == POLICY_PROBE_PROMPT
     assert REGRESSION_PROMPT not in ATTACK_PROMPT
+
+
+
+def test_protocol_rejects_inconsistent_canary_hash():
+    marker, canary = fixture()
+    invalid = Canary(canary.value, "0" * 64)
+    target = ScriptedProtocolTarget(marker, canary.value)
+    import pytest
+    with pytest.raises(ValueError, match="Canary value and SHA-256"):
+        run_persistence_protocol(target, canary=invalid, policy_marker=marker)
 
