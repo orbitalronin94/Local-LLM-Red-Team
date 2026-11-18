@@ -1002,6 +1002,7 @@ class Database:
                 model TEXT,
                 status TEXT NOT NULL,
                 response TEXT,
+                prompt TEXT,
                 latency_ms REAL,
                 input_tokens INTEGER,
                 output_tokens INTEGER,
@@ -1038,7 +1039,7 @@ class Database:
             row["name"]
             for row in self.connection.execute("PRAGMA table_info(results)")
         }
-        for column in ("prompt_sha256", "response_sha256"):
+        for column in ("prompt", "prompt_sha256", "response_sha256"):
             if column not in result_columns:
                 self.connection.execute(
                     f"ALTER TABLE results ADD COLUMN {column} TEXT"
@@ -1092,6 +1093,7 @@ class Database:
                 model,
                 status,
                 response,
+                prompt,
                 latency_ms,
                 input_tokens,
                 output_tokens,
@@ -1104,7 +1106,7 @@ class Database:
                 prompt_sha256,
                 response_sha256
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 result.run_id,
@@ -1114,6 +1116,7 @@ class Database:
                 result.model,
                 result.status,
                 result.response,
+                result.prompt,
                 result.latency_ms,
                 result.input_tokens,
                 result.output_tokens,
