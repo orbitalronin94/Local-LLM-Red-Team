@@ -142,6 +142,8 @@ Cada ejecución recibe un ID. SQLite registra versión del escáner, destino, mo
 
 Para comparar modelos, conserva el manifiesto, configuración del endpoint, revisión del modelo, parámetros de generación y entorno. Documenta cualquier diferencia y cambia una variable cada vez cuando sea posible.
 
+Consulta el [catálogo automatizado de hallazgos](docs/findings-catalog.es.md) para obtener el índice comparativo de cada ejecución, con positivos heurísticos y casos inconclusos, prompts, respuestas y procedencia de los modelos.
+
 ## Kit de benchmark de modelos locales
 
 Los pesos GGUF se descargan bajo demanda a `models/weights/`; no se guardan en Git. Cada descarga genera metadatos con origen, ETag, tamaño y SHA-256.
