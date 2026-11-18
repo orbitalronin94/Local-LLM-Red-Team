@@ -10,6 +10,8 @@
 
 **Project status:** Alpha, version 0.1.0. The public interface and attack catalogue may evolve before 1.0.
 
+> **Responsible use — authorization required.** Only test systems, models and endpoints you own or have explicit prior permission to assess. Never scan third-party systems without authorization. Before testing, define a written scope and check the laws and regulations in **every relevant country and jurisdiction**. Public reachability is not permission. See [Responsible use and legal notice](docs/responsible-use.md).
+
 No cloud account, API subscription or runtime framework is required when testing a local endpoint.
 
 ## Why this project exists
