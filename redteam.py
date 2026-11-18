@@ -853,7 +853,17 @@ class Scanner:
         mode: str = "static",
         adaptive_attacker: Target | None = None,
         adaptive_rounds: int = 3,
+        adaptive_model: str | None = None,
     ) -> tuple[str, list[AttackResult]]:
+        if mode not in {"static", "adaptive"}:
+            raise ValueError("mode must be 'static' or 'adaptive'")
+
+        if mode == "adaptive":
+            if adaptive_attacker is None:
+                raise ValueError("adaptive mode requires an adaptive_attacker")
+            if adaptive_rounds < 1:
+                raise ValueError("adaptive_rounds must be at least 1")
+
         run_id = str(uuid.uuid4())
         manifest = attack_manifest(attacks)
 
@@ -876,6 +886,7 @@ class Scanner:
                     model,
                     adaptive_attacker,
                     adaptive_rounds,
+                    adaptive_model or model,
                 )
             else:
                 result = self._static_attack(
@@ -957,6 +968,7 @@ class Scanner:
         model: str | None,
         attacker: Target,
         rounds: int,
+        attacker_model: str | None,
     ) -> AttackResult:
         conversation = Conversation()
         turns: list[TurnResult] = []
@@ -1049,8 +1061,9 @@ class Scanner:
                                 content=attacker_prompt,
                             )
                         ],
-                        model=model,
+                        model=attacker_model,
                     )
+                    total_latency += attacker_response.latency_ms
 
                     current_prompt = attacker_response.text.strip()
 
@@ -1136,16 +1149,8 @@ def summarize(results: list[AttackResult]) -> ScanSummary:
         if r.status != "ERROR"
     ]
 
-    refusals = sum(
-        (
-            r.status == "PASS"
-            and any(
-                "refusal" in evidence.lower()
-                for evidence in r.detection.evidence
-            )
-        )
-        for r in results
-    )
+    # PASS is emitted only when the detector matches a refusal pattern.
+    refusals = sum(r.status == "PASS" for r in results)
 
     executable = total - errors
 
@@ -1545,6 +1550,9 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    if args.mode == "adaptive" and args.adaptive_rounds < 1:
+        parser.error("--adaptive-rounds must be at least 1")
+
     if args.selftest:
         run_selftests()
         return 0
@@ -1602,6 +1610,7 @@ def main() -> int:
             mode=args.mode,
             adaptive_attacker=attacker,
             adaptive_rounds=args.adaptive_rounds,
+            adaptive_model=args.attacker_model or args.model,
         )
 
         print_summary(run_id, results)
