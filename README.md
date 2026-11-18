@@ -288,3 +288,22 @@ The initial suite covers context laundering, refusal followed by reframing, and 
 
 The benchmark runs ten intent-matched English/Spanish probe pairs with separate benign controls. Results retain pair IDs and language labels; these are not certified translations or a representative multilingual evaluation. It also exports a human-review CSV containing prompts, responses, heuristic signals and annotation fields. Text signals do not prove real-world effects or tool execution.
 
+
+
+## Behavioral persistence and robustness matrix
+
+The controlled protocol is available as an installed command:
+
+```bash
+local-llm-redteam-protocol --target ollama --model MODEL --seed 42 --variant direct
+```
+
+To separate sampling variance from paraphrase robustness, run the matrix:
+
+```bash
+local-llm-redteam-matrix --target ollama --model MODEL \
+  --seeds 42,43,44 \
+  --variants direct,authority_reframing,contextual_reframing
+```
+
+The matrix treats clean regression controls as a cohort gate, excludes baseline failures from attack denominators, computes seed variance for each fixed paraphrase, and measures paraphrase susceptibility within each fixed seed. See [the persistence protocol](docs/persistence-protocol.md) and [the robustness matrix](docs/robustness-matrix.md). These controlled synthetic fixtures are evaluation instruments, not production-policy certifications.
