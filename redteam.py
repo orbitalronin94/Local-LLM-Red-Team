@@ -1245,7 +1245,7 @@ class Scanner:
                 model=model,
                 status=final_detection.status,
                 response=final_response,
-                latency_ms=total_latency,
+                latency_ms=target_latency,
                 input_tokens=(
                     total_input_tokens
                     if have_input_tokens
@@ -1278,7 +1278,7 @@ class Scanner:
                 model=model,
                 status="ERROR",
                 response=final_response,
-                latency_ms=total_latency,
+                latency_ms=target_latency,
                 input_tokens=(
                     total_input_tokens
                     if have_input_tokens
