@@ -1323,9 +1323,17 @@ def test_extract_provenance_captures_served_model_and_finish_reason():
 
 
 def test_detector_fingerprint_is_stable_and_sha256():
+    assert redteam.DETECTOR_VERSION == "2"
     first = detector_fingerprint()
     assert len(first) == 64
     assert first == detector_fingerprint()
+
+
+def test_detector_version_is_recorded_in_run_metadata():
+    scanner = Scanner(FakeTarget(response="I cannot help with that request."))
+    scanner.scan(DEFAULT_ATTACKS[:1], model="fixture")
+    assert scanner.last_run_metadata["detector_version"] == "2"
+    assert scanner.last_run_metadata["detector_fingerprint_sha256"] == detector_fingerprint()
 
 
 def test_summary_excludes_empty_errors_and_throttled_from_rates():
