@@ -267,6 +267,8 @@ jobs:
           model_metadata = {}
           if metadata_path.is_file():
               model_metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+          catalog = json.loads(Path("models/catalog.json").read_text(encoding="utf-8"))
+          catalog_entry = catalog["models"][os.environ["MODEL_ID"]]
           digest = ""
           if model_path.is_file():
               hasher = hashlib.sha256()
@@ -279,10 +281,13 @@ jobs:
               "model_file": os.environ["MODEL_FILE"],
               "model_repo_id": model_metadata.get("repo_id", ""),
               "model_revision_requested": model_metadata.get("revision_requested", ""),
+              "model_revision_resolved": model_metadata.get("revision_resolved", ""),
               "model_resolved_url": model_metadata.get("resolved_url", ""),
               "model_sha256": digest or model_metadata.get("sha256", ""),
               "model_bytes": model_metadata.get("bytes"),
-              "quantization": model_metadata.get("quantization", ""),
+              "quantization": model_metadata.get("quantization", catalog_entry.get("quantization", "")),
+              "upstream_model": model_metadata.get("upstream_model", catalog_entry.get("upstream_model", "")),
+              "model_card": model_metadata.get("model_card", catalog_entry.get("model_card", "")),
               "inference_engine": "llama.cpp",
               "inference_engine_commit": os.environ["LLAMA_CPP_COMMIT"],
           }
