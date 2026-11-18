@@ -1448,6 +1448,8 @@ def write_markdown(
         f"- Mean latency: `{summary.mean_latency_ms:.1f} ms`",
         f"- P95 latency: `{summary.p95_latency_ms:.1f} ms`",
         "",
+        "- Adaptive self-play is identified in run metadata; attacker latency is reported separately.",
+        "- Observed effect: not measured (prompt-level response only).",
         "## Results",
         "",
     ]
