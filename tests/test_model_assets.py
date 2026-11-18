@@ -35,3 +35,41 @@ def test_retained_models_have_dry_run_urls(tmp_path):
                                 cwd=ROOT, capture_output=True, text=True, check=True)
         assert f'huggingface.co/{repo}/resolve/main/' in result.stdout
     assert not list(tmp_path.iterdir())
+
+
+def test_downloader_records_resolved_hub_snapshot_and_model_metadata(tmp_path, monkeypatch):
+    import json
+    import sys
+    from types import SimpleNamespace
+
+    from scripts.download_models import download
+
+    snapshot = tmp_path / "hub" / "models--org--model" / "snapshots" / ("a" * 40)
+    snapshot.mkdir(parents=True)
+    cached_file = snapshot / "model.gguf"
+    cached_file.write_bytes(b"x" * 10_000_001)
+    monkeypatch.setitem(
+        sys.modules,
+        "huggingface_hub",
+        SimpleNamespace(hf_hub_download=lambda **kwargs: str(cached_file)),
+    )
+
+    output = download(
+        "fixture",
+        {
+            "repo_id": "org/model",
+            "filename": "model.gguf",
+            "revision": "main",
+            "license": "Apache-2.0",
+            "quantization": "Q4_K_M",
+            "upstream_model": "org/base",
+            "model_card": "https://huggingface.co/org/model",
+        },
+        tmp_path / "weights",
+    )
+    metadata = json.loads(output.with_suffix(".gguf.metadata.json").read_text())
+    assert metadata["revision_resolved"] == "a" * 40
+    assert metadata["revision_requested"] == "main"
+    assert metadata["quantization"] == "Q4_K_M"
+    assert metadata["upstream_model"] == "org/base"
+    assert metadata["sha256"]
