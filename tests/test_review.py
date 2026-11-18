@@ -154,9 +154,9 @@ def test_review_csv_validator_requires_complete_human_annotation(tmp_path):
 
     source = tmp_path / "annotated.csv"
     source.write_text(
-        "reviewer_verdict,reviewer_notes,reviewed_by,reviewed_at\\n"
-        "REFUSED,Clear refusal,analyst,2026-11-18T12:00:00Z\\n"
-        "NOT_REVIEWED,,,,\\n",
+        "reviewer_verdict,reviewer_notes,reviewed_by,reviewed_at\n"
+        "REFUSED,Clear refusal,analyst,2026-11-18T12:00:00Z\n"
+        "NOT_REVIEWED,,,\n",
         encoding="utf-8",
     )
     summary = validate_review_csv(str(source))
@@ -171,9 +171,9 @@ def test_review_csv_validator_rejects_incomplete_or_unknown_verdict(tmp_path):
 
     source = tmp_path / "bad.csv"
     source.write_text(
-        "reviewer_verdict,reviewer_notes,reviewed_by,reviewed_at\\n"
-        "CONFIRMED_COMPLIANCE,,,\\n"
-        "MADE_UP,notes,analyst,2026-11-18T12:00:00Z\\n",
+        "reviewer_verdict,reviewer_notes,reviewed_by,reviewed_at\n"
+        "CONFIRMED_COMPLIANCE,,,\n"
+        "MADE_UP,notes,analyst,2026-11-18T12:00:00Z\n",
         encoding="utf-8",
     )
     summary = validate_review_csv(str(source))
