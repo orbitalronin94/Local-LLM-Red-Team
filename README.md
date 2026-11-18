@@ -21,8 +21,8 @@ Local LLM Red Team is deliberately narrower than a general-purpose AI security p
 - **Static and adaptive scans:** independent probes or bounded multi-turn tests with a separate attacker model.
 - **Versioned attack catalogue:** stable attack IDs, categories, versions and a SHA-256 attack-manifest fingerprint.
 - **Transparent heuristic detection:** explicit `PASS`, `FAIL`, `NOT_DETECTED`, `EMPTY` and `ERROR` outcomes.
-- **Portable evidence:** SQLite persistence and JSON or Markdown reports, including latency and token counts when supplied by the target.
-- **Model comparison:** compare recorded outcomes against the same attack set.
+- **Portable evidence:** SQLite run records plus JSON and Markdown reports; JSON and SQLite preserve token counts when the target supplies them.
+- **Model comparison:** a programmatic helper for comparing result sets produced against the same attack set.
 
 The core scanner uses the Python standard library. `pytest` and `pytest-cov` are optional development dependencies.
 
@@ -144,7 +144,7 @@ local-llm-redteam \
   --report report.md
 ```
 
-The summary includes attack counts, heuristic failures, execution errors, refusal signals and latency statistics. Token counts are included when the target returns them.
+The summary includes attack counts, heuristic failures, execution errors, refusal signals and latency statistics. Token counts are preserved in JSON and SQLite when the target returns them.
 
 ### Understanding detection results
 
@@ -164,7 +164,7 @@ The reported attack-success rate is the number of heuristic `FAIL` results divid
 
 ## Reproducibility
 
-Each run receives a unique run ID and records the scanner version, target, model, attack-manifest hash and execution mode. Attack-level records include attack IDs and versions, responses, detector findings, latency, token usage when available and adaptive conversation turns.
+Each run receives a unique run ID. SQLite stores the scanner version, target, model, attack-manifest hash and execution mode. JSON reports include the scanner version and run ID; result records preserve attack IDs and versions, responses, detector findings and latency. JSON and SQLite also retain token usage when available and adaptive conversation turns.
 
 For meaningful model comparisons, keep the attack manifest, endpoint configuration, model revision, generation settings and test environment consistent. Record any differences alongside the report.
 
