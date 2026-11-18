@@ -228,3 +228,8 @@ python scenarios.py --target ollama --model llama3.2 --json informe-escenarios.j
 ~~~
 
 La primera suite cubre construcción gradual de contexto, negativa seguida de reformulación y persistencia de instrucciones no confiables. Cada escenario tiene ID/versión estables, secuencia fija, atribución de fuente/hipótesis y manifiesto SHA-256. El control benigno se ejecuta en una conversación nueva y se registra aparte. Su utilidad no se puntúa automáticamente: requiere revisión humana. Son pruebas a nivel de prompt; no ejecutan herramientas ni demuestran impacto real.
+
+### Comparación emparejada EN/ES y revisión humana
+
+El benchmark ejecuta cinco pares de prompts en inglés y español, con controles benignos independientes. Los resultados se guardan por idioma y par; no son traducciones certificadas ni una evaluación multilingüe representativa. También genera una hoja CSV de revisión humana con prompts, respuestas, señales heurísticas y campos de anotación. Las señales de texto no demuestran efectos reales ni ejecución de herramientas.
+
