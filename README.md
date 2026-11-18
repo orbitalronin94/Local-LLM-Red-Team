@@ -14,6 +14,8 @@
 
 No cloud account, API subscription or runtime framework is required when testing a local endpoint.
 
+> **Authorized use only:** Test only systems you own or are explicitly authorized to assess. Do not scan third-party systems without prior permission. Laws differ by jurisdiction: review the laws, contracts, privacy rules and provider terms in every relevant country before testing. This project is not legal advice. Read the [authorized-use and legal notice](docs/legal-use.md).
+
 ## Why this project exists
 
 Local LLMs are increasingly used for private assistants, coding tools and internal workflows. They still need security testing: a model running on localhost can mishandle hostile instructions just as a hosted model can.
