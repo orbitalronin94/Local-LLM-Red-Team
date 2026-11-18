@@ -7,6 +7,16 @@ from typing import Any
 
 STATUSES = {"FAIL", "NOT_DETECTED", "PASS", "ERROR", "EMPTY"}
 
+def csv_safe_cell(value: Any) -> Any:
+    """Neutralize spreadsheet formulas in untrusted catalogue text."""
+    if not isinstance(value, str) or not value:
+        return value
+    first = value.lstrip(" \\t\\r\\n")
+    if value[0] in "\\t\\r\\n" or (first and first[0] in "=+-@"):
+        return "'" + value
+    return value
+
+
 def load_json(path: Path) -> dict[str, Any] | None:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -186,7 +196,11 @@ def main() -> int:
         writer = csv.DictWriter(stream, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         for row in positives + review + invalid_controls:
-            writer.writerow({**row, "evidence": json.dumps(row["evidence"], ensure_ascii=False)})
+            csv_row = {**row, "evidence": json.dumps(row["evidence"], ensure_ascii=False)}
+            writer.writerow({
+                key: csv_safe_cell(value)
+                for key, value in csv_row.items()
+            })
     print(f"catalogue: {len(positives)} heuristic positives; {len(review)} inconclusive review candidates")
     return 0
 
