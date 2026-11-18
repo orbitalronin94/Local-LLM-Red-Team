@@ -23,11 +23,10 @@ Before running probes:
    benchmark uses loopback HTTP; do not copy that transport setting to a
    remotely reachable service.
 5. Use a dedicated, least-privilege test credential. Do not commit credentials,
-   put them in reports, or paste them into issue comments. The current CLI
-   accepts `--api-key` for OpenAI-compatible endpoints; take care that command
-   arguments may be visible to local process inspection. For sensitive
-   deployments, invoke the CLI from a controlled secret-injection wrapper and
-   avoid shell tracing.
+   put them in reports, or paste them into issue comments. Prefer the
+   environment-backed wrapper below: it keeps the key out of the operating
+   system command line. The secret still exists in process memory and the
+   environment, so use a protected runner and avoid shell tracing.
 
 Public reachability is not authorization. See
 [Responsible use](responsible-use.md) and [legal use](legal-use.md).
@@ -40,15 +39,17 @@ The `openai` target sends a POST request to
 `messages`, and adds `Authorization: Bearer ...` when `--api-key` is
 provided. Responses may use the standard `choices[0].message.content` shape.
 
-Example for an **authorized staging endpoint**:
+Example for an **authorized staging endpoint** using the environment-backed
+runner:
 
 ```bash
+# Inject this variable through your CI secret store or protected shell.
 export REDTEAM_API_KEY='injected-by-your-secret-manager'
-python redteam.py \
+python scripts/secure_endpoint_scan.py \
+  --api-key-env REDTEAM_API_KEY \
   --target openai \
   --url https://staging.example.invalid/v1 \
   --model chatbot-staging \
-  --api-key "$REDTEAM_API_KEY" \
   --timeout 45 \
   --db reports/staging.db \
   --json reports/staging-static.json \
@@ -56,10 +57,11 @@ python redteam.py \
 ```
 
 The example hostname is intentionally non-routable. Replace it only with an
-endpoint explicitly included in your authorization. The current CLI does not
-provide a dedicated environment-variable option for API keys; the shell
-expansion above avoids typing the secret literal into shell history, but the
-expanded argument may still be visible to local process inspection.
+endpoint explicitly included in your authorization. The wrapper also accepts
+`--runner scenarios` to run the deterministic multi-turn suite. It does not
+print the key or place it in the OS process command line; it passes the value
+to the existing scanner in-process. The original CLI `--api-key` option
+remains available, but the wrapper rejects it to prevent accidental exposure.
 
 For a generic JSON endpoint, `--target http` expects a JSON request with
 `model` and `messages`. It currently has no built-in API-key or custom-header
@@ -89,21 +91,20 @@ Run each stage separately and retain the exact report bundle:
    Verify that denied actions were actually blocked by the application. The
    prompt-only scanner cannot establish that a tool ran or that data changed.
 
-For multi-turn scenarios:
+For multi-turn scenarios, use the same wrapper with
+`--runner scenarios`:
 
 ```bash
-python scenarios.py \
+python scripts/secure_endpoint_scan.py \
+  --api-key-env REDTEAM_API_KEY \
+  --runner scenarios \
   --target openai \
   --url https://staging.example.invalid/v1 \
   --model chatbot-staging \
-  --api-key "$REDTEAM_API_KEY" \
   --timeout 45 \
   --json reports/staging-scenarios.json \
   --report reports/staging-scenarios.md
 ```
-
-Check `python scenarios.py --help` for the options available in the installed
-revision.
 
 ## What a finding means
 
