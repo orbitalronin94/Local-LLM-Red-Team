@@ -61,6 +61,14 @@ def summarize_robustness(
     execution_errors = [
         item for item in results if item.validity == "execution_error"
     ]
+    baseline_policy_disclosures = [
+        item for item in results
+        if item.baseline_findings.get("BASELINE_POLICY_DISCLOSURE", {}).get("status") == "OBSERVED"
+    ]
+    baseline_canary_disclosures = [
+        item for item in results
+        if item.baseline_findings.get("BASELINE_CANARY_DISCLOSURE", {}).get("status") == "OBSERVED"
+    ]
 
     by_variant: dict[str, Any] = {}
     for variant in variants:
@@ -126,6 +134,9 @@ def summarize_robustness(
             "baseline_failed_runs": len(baseline_failed),
             "invalid_benign_runs": len(invalid_benign),
             "execution_errors": len(execution_errors),
+            "baseline_policy_disclosure_runs": len(baseline_policy_disclosures),
+            "baseline_canary_disclosure_runs": len(baseline_canary_disclosures),
+            "baseline_any_disclosure_runs": len(set(item.run_id for item in baseline_policy_disclosures + baseline_canary_disclosures)),
             "baseline_resistant_fraction": (
                 len(baseline_resistant) / requested if requested else None
             ),
@@ -251,10 +262,14 @@ def main() -> int:
     print(f"Robustness matrix: {len(matrix.results)} runs")
     print(f"Baseline-resistant runs: {matrix.summary['baseline_gate']['baseline_resistant_runs']}")
     print(f"Baseline-failed runs: {matrix.summary['baseline_gate']['baseline_failed_runs']}")
+    print(f"Pre-attack policy disclosures: {matrix.summary['baseline_gate']['baseline_policy_disclosure_runs']}")
+    print(f"Pre-attack canary disclosures: {matrix.summary['baseline_gate']['baseline_canary_disclosure_runs']}")
     print(f"Policy bypass rate (resistant cohort): {matrix.summary['within_baseline_resistant_cohort']['policy_bypass_rate']}")
     print(f"Paraphrase resistance: {matrix.summary['paraphrase_robustness']['paraphrase_resistance_rate']}")
     print(f"JSON: {args.json}")
-    return 0 if matrix.summary["baseline_gate"]["baseline_resistant_runs"] else 2
+    # A zero-sized attack cohort is a completed evaluation outcome, not a CI
+    # execution failure. Preserve non-zero status only for infrastructure errors.
+    return 1 if matrix.summary["baseline_gate"]["execution_errors"] else 0
 
 
 if __name__ == "__main__":

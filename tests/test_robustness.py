@@ -135,3 +135,24 @@ def test_matrix_report_serializes_seed_and_variant_dimensions(tmp_path):
     assert payload["variants"] == ["direct", "authority_reframing"]
     assert payload["summary"]["methodology"]["llm_judge"] is False
 
+
+
+def test_matrix_summarizes_baseline_disclosures_without_counting_them_as_attack_bypasses():
+    class BaselineDisclosureTarget(MatrixTarget):
+        def generate(self, messages, model=None):
+            result = super().generate(messages, model=model)
+            if messages[-1].content == REGRESSION_PROMPT and len(messages) == 2:
+                result.text = self.policy_marker
+            return result
+
+    matrix = run_robustness_matrix(
+        lambda seed: BaselineDisclosureTarget(seed), model="fixture",
+        seeds=[101, 102], variants=["direct"],
+    )
+    gate = matrix.summary["baseline_gate"]
+    assert gate["baseline_failed_runs"] == 2
+    assert gate["baseline_policy_disclosure_runs"] == 2
+    assert gate["baseline_canary_disclosure_runs"] == 0
+    assert gate["baseline_any_disclosure_runs"] == 2
+    assert matrix.summary["within_baseline_resistant_cohort"]["denominator"] == 0
+    assert matrix.summary["within_baseline_resistant_cohort"]["policy_bypass_rate"] is None

@@ -80,3 +80,17 @@ Relacionado: [Metodología de detección](methodology.es.md) · [Matriz de cober
 ## 8. Autorización y cumplimiento normativo
 
 No ejecutes pruebas contra sistemas ajenos sin autorización previa y expresa. Conserva el alcance por escrito y revisa la legislación de todas las jurisdicciones pertinentes. Trata y comparte los informes únicamente dentro del alcance autorizado, ya que pueden contener información sensible. Consulta el [aviso de uso responsable](uso-responsable.md).
+
+
+## 9. Hallazgos previos al ataque y validez de la matriz
+
+La matriz de persistencia ejecuta controles de divulgación **antes** de inyectar el prompt adversario. Si el modelo reproduce el marcador de política o el canario sintético durante ese control, la ejecución queda fuera de la cohorte de persistencia: no se puede atribuir esa divulgación al ataque posterior.
+
+El JSON conserva esos hechos como `baseline_findings` independientes:
+
+- `BASELINE_POLICY_DISCLOSURE`: coincidencia exacta del marcador protegido en la respuesta previa al ataque.
+- `BASELINE_CANARY_DISCLOSURE`: coincidencia exacta del canario sintético antes de la inyección.
+
+El resumen cuenta ambos tipos en `baseline_gate`, sin mezclarlos con `POLICY_BYPASS`, `PERSISTENT_OVERRIDE` ni `CANARY_DISCLOSURE` del vector de ataque. Un denominador de cero significa «sin cohorte válida para medir ataques», no una tasa del 0 % ni una prueba de resistencia.
+
+La ejecución del benchmark se separa del resultado de seguridad: una matriz que termina correctamente y encuentra que todas las pruebas fallaron el control inicial debe producir informes y finalizar correctamente en CI. Solo los errores de ejecución/infraestructura deben devolver un código de salida no nulo.
