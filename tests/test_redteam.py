@@ -1273,3 +1273,25 @@ def test_markdown_report_uses_fence_longer_than_untrusted_content(tmp_path):
     assert "``````text" in report
     assert custom.prompt in report
     assert response in report
+
+
+
+def test_database_persists_exact_executed_prompt(tmp_path):
+    custom = Attack(
+        id="sqlite-custom-prompt",
+        category="instruction_override",
+        name="SQLite custom prompt",
+        prompt="The exact custom prompt stored in the evidence database.",
+    )
+    database = Database(str(tmp_path / "prompt-evidence.db"))
+    try:
+        scanner = Scanner(FakeTarget(response="I cannot comply."), database=database)
+        run_id, _ = scanner.scan([custom], model="fixture")
+        row = database.connection.execute(
+            "SELECT prompt, prompt_sha256 FROM results WHERE run_id = ?",
+            (run_id,),
+        ).fetchone()
+        assert row["prompt"] == custom.prompt
+        assert row["prompt_sha256"] == sha256_text(custom.prompt)
+    finally:
+        database.close()
