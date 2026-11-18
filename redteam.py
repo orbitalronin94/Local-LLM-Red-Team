@@ -343,10 +343,11 @@ class TargetResponse:
 
 class TargetError(RuntimeError):
     def __init__(self, message: str, status_code: int | None = None,
-                 retry_after: str | None = None):
+                 retry_after: str | None = None, location: str | None = None):
         super().__init__(message)
         self.status_code = status_code
         self.retry_after = retry_after
+        self.location = location
 
 
 class Target:
@@ -393,6 +394,7 @@ def open_http_request(request, timeout: float, max_attempts: int = 2):
                 raise TargetError(
                     f"HTTP {exc.code}", status_code=exc.code,
                     retry_after=exc.headers.get("Retry-After"),
+                    location=exc.headers.get("Location"),
                 ) from exc
             delay = 0.5 * (2 ** attempt)
             retry_after = exc.headers.get("Retry-After")
@@ -1418,6 +1420,11 @@ class Scanner:
         except Exception as exc:
             latency = (time.perf_counter() - started) * 1000.0
             status = "THROTTLED" if getattr(exc, "status_code", None) in (429, 503) else "ERROR"
+            error_provenance = {
+                "http_status": getattr(exc, "status_code", None),
+                "retry_after": getattr(exc, "retry_after", None),
+                "location": getattr(exc, "location", None),
+            }
             detection = Detection(
                 detected=False,
                 status="ERROR",
@@ -1440,6 +1447,7 @@ class Scanner:
                 output_tokens=None,
                 detection=detection,
                 error=str(exc),
+                provenance={key: value for key, value in error_provenance.items() if value is not None},
                 prompt_sha256=sha256_text(attack.prompt),
             )
 
@@ -1650,6 +1658,13 @@ class Scanner:
                 turns=turns,
                 attacker_latency_ms=attacker_latency,
                 error=str(exc),
+                provenance={
+                    key: value for key, value in {
+                        "http_status": getattr(exc, "status_code", None),
+                        "retry_after": getattr(exc, "retry_after", None),
+                        "location": getattr(exc, "location", None),
+                    }.items() if value is not None
+                },
                 adaptive_stop_reason="target_error",
             )
 
