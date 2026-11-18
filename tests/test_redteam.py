@@ -1230,3 +1230,68 @@ def test_detector_does_not_flag_quoted_unrestricted_acceptance():
     )
 
     assert result.status == "NOT_DETECTED"
+
+
+
+def test_attack_manifest_is_independent_of_input_order():
+    assert attack_manifest(DEFAULT_ATTACKS) == attack_manifest(list(reversed(DEFAULT_ATTACKS)))
+
+
+def test_custom_attack_prompt_is_preserved_with_matching_hash(tmp_path):
+    custom = Attack(
+        id="custom-evidence-case",
+        category="instruction_override",
+        name="Custom evidence case",
+        prompt="A custom prompt that is not in DEFAULT_ATTACKS.",
+    )
+    scanner = Scanner(FakeTarget(response="I cannot comply."))
+    run_id, results = scanner.scan([custom], model="fixture")
+    output = tmp_path / "custom.json"
+    write_json(str(output), run_id, results)
+
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    item = payload["results"][0]
+    assert item["prompt"] == custom.prompt
+    assert item["prompt_sha256"] == sha256_text(custom.prompt)
+
+
+def test_markdown_report_uses_fence_longer_than_untrusted_content(tmp_path):
+    custom = Attack(
+        id="markdown-fence-case",
+        category="instruction_override",
+        name="Markdown fence case",
+        prompt="Prompt containing ```` inside.",
+    )
+    response = "Model output starts a block:\n`````\n# Forged heading\n`````"
+    scanner = Scanner(FakeTarget(response=response))
+    run_id, results = scanner.scan([custom], model="fixture")
+    output = tmp_path / "report.md"
+    write_markdown(str(output), run_id, results)
+
+    report = output.read_text(encoding="utf-8")
+    assert "`````text" in report
+    assert "``````text" in report
+    assert custom.prompt in report
+    assert response in report
+
+
+
+def test_database_persists_exact_executed_prompt(tmp_path):
+    custom = Attack(
+        id="sqlite-custom-prompt",
+        category="instruction_override",
+        name="SQLite custom prompt",
+        prompt="The exact custom prompt stored in the evidence database.",
+    )
+    database = Database(str(tmp_path / "prompt-evidence.db"))
+    try:
+        scanner = Scanner(FakeTarget(response="I cannot comply."), database=database)
+        run_id, _ = scanner.scan([custom], model="fixture")
+        row = database.connection.execute(
+            "SELECT prompt, prompt_sha256 FROM results WHERE run_id = ?",
+            (run_id,),
+        ).fetchone()
+        assert row["prompt"] == custom.prompt
+        assert row["prompt_sha256"] == sha256_text(custom.prompt)
+    finally:
+        database.close()

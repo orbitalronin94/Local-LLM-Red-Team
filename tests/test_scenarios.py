@@ -81,3 +81,23 @@ def test_scenario_runner_uses_full_assistant_trajectory():
     assert result.status == "FAIL"
     assert result.first_flagged_turn == 3
     assert "Multi-turn trajectory" in result.turns[-1].reason
+
+
+
+def test_scenario_markdown_fences_untrusted_model_output(tmp_path):
+    class FenceTarget:
+        def __init__(self):
+            self.calls = 0
+
+        def generate(self, messages, model=None):
+            self.calls += 1
+            text = "adversarial output ````\n## forged section\n````"
+            return TargetResponse(text=text, latency_ms=1.0)
+
+    result = run_scenario(FenceTarget(), DEFAULT_SCENARIOS[0], model="fixture")
+    output = tmp_path / "scenario-fenced.md"
+    write_markdown(str(output), "run", "fixture", [result])
+    report = output.read_text(encoding="utf-8")
+
+    assert "`````text" in report
+    assert "## forged section" in report
