@@ -10,6 +10,7 @@ from redteam import (
     DEFAULT_ATTACKS,
     Detection,
     FakeTarget,
+    HTTPJSONTarget,
     HeuristicDetector,
     Message,
     Scanner,
@@ -19,6 +20,7 @@ from redteam import (
     attack_manifest,
     compare_results,
     extract_int,
+    extract_target_metadata,
     extract_text,
     filter_attacks,
     percentile,
@@ -1295,3 +1297,53 @@ def test_database_persists_exact_executed_prompt(tmp_path):
         assert row["prompt_sha256"] == sha256_text(custom.prompt)
     finally:
         database.close()
+
+
+
+def test_extract_target_metadata_captures_served_identity_and_finish_reason():
+    metadata = extract_target_metadata({
+        "id": "request-123",
+        "model": "served-model-revision",
+        "system_fingerprint": "fp-abc",
+        "choices": [{"finish_reason": "stop"}],
+    })
+    assert metadata == {
+        "request_id": "request-123",
+        "served_model": "served-model-revision",
+        "system_fingerprint": "fp-abc",
+        "finish_reason": "stop",
+    }
+
+
+def test_http_target_sends_explicit_sampling_and_records_response_metadata(monkeypatch):
+    captured = {}
+
+    class FakeHTTPResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return json.dumps({
+                "id": "req-1",
+                "model": "actual-served-model",
+                "system_fingerprint": "fingerprint-1",
+                "choices": [{"message": {"content": "ok"}, "finish_reason": "stop"}],
+            }).encode("utf-8")
+
+    def fake_urlopen(request, timeout):
+        captured["payload"] = json.loads(request.data.decode("utf-8"))
+        captured["timeout"] = timeout
+        return FakeHTTPResponse()
+
+    monkeypatch.setattr("redteam.urllib.request.urlopen", fake_urlopen)
+    target = HTTPJSONTarget("https://example.invalid/chat", temperature=0.0, seed=42)
+    result = target.generate([Message("user", "hello")], model="requested-model")
+
+    assert captured["payload"]["temperature"] == 0.0
+    assert captured["payload"]["seed"] == 42
+    assert result.metadata["served_model"] == "actual-served-model"
+    assert result.metadata["system_fingerprint"] == "fingerprint-1"
+    assert result.metadata["finish_reason"] == "stop"
