@@ -57,3 +57,12 @@ Change one variable at a time where possible. Review individual responses and ev
 ## Responsible use
 
 Run tests only against models and endpoints you own or are authorized to assess. Protect reports because they may contain prompts, model responses, internal instructions or other sensitive material. Keep inference endpoints private and avoid including credentials in shared reports.
+
+
+## Expanded prompt-level coverage and run provenance
+
+The starter catalogue includes probes for indirect instructions embedded in retrieved passages and simulated tool output, delimiter-boundary confusion, multilingual instruction overrides, refusal suppression and persistence-oriented prompts. These are prompt-level probes: they do not exercise an actual retrieval pipeline, tool runtime or external side effect. Use an integration harness for those boundaries.
+
+Each scan now records a provenance envelope: scanner and Python versions, platform, target type, model, detector, mode, selected attack IDs, and the SHA-256 digest of the exact attack manifest. Adaptive runs also record attacker type/model and round limit. JSON exports carry this envelope under `run_metadata`; Markdown reports expose the principal comparison fields; SQLite stores it with the run. Existing databases are migrated additively.
+
+The manifest digest identifies the exact ordered attack definitions, including prompts and versions. It is a reproducibility identifier, not proof that the target configuration or environment is unchanged. Endpoint URLs and credentials are deliberately excluded from provenance to avoid leaking secrets; record sanitized deployment details separately when required.
