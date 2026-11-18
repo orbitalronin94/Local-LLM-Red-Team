@@ -184,6 +184,40 @@ Each run receives a unique run ID. SQLite stores the scanner version, target, mo
 
 For meaningful model comparisons, keep the attack manifest, endpoint configuration, model revision, generation settings and test environment consistent. Record any differences alongside the report.
 
+
+## Local model benchmark kit
+
+A small-model download manifest and reproducible local benchmark recipe are included. Model weights are not stored in Git: download them into models/weights/ on demand. A sidecar JSON records the resolved URL, ETag, byte count and SHA-256 digest for each downloaded file.
+
+| Model | Parameters | Quantization | Approx. download | License |
+| --- | ---: | --- | ---: | --- |
+| SmolLM2 360M Instruct | 360M | Q4_K_M | 271 MB | Apache-2.0 |
+| Qwen2.5 0.5B Instruct | 0.5B | Q4_K_M | 398 MB | Apache-2.0 |
+
+SmolLM2 is primarily English; Qwen2.5 has broader multilingual support. These compact models are smoke-test targets, not a representative benchmark of all model sizes or languages. Check upstream model cards and license before redistribution.
+
+```bash
+python scripts/download_models.py --list
+python scripts/download_models.py --model smollm2
+python scripts/download_models.py --model qwen2.5
+python scripts/download_models.py --model all
+```
+
+Serve a downloaded GGUF with a local llama.cpp installation:
+
+```bash
+llama-server --model models/weights/SmolLM2-360M-Instruct-Q4_K_M.gguf --host 127.0.0.1 --port 8080
+```
+
+Then generate a report bundle:
+
+```bash
+mkdir -p reports
+python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --db reports/smollm2.db --json reports/smollm2.json --report reports/smollm2.md
+```
+
+Repeat with Qwen2.5 and distinct report names. Keep the attack manifest, inference server version, context size, generation settings and hardware consistent. Record unavoidable differences. See [Local model benchmark kit](models/README.md) for details and limitations.
+
 ## Development and tests
 
 ```bash

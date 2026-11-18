@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "models": {
+    "smollm2": {
+      "name": "SmolLM2-360M-Instruct Q4_K_M",
+      "parameters": "360M",
+      "repo_id": "QuantFactory/SmolLM2-360M-Instruct-GGUF",
+      "revision": "main",
+      "filename": "SmolLM2-360M-Instruct-Q4_K_M.gguf",
+      "quantization": "Q4_K_M",
+      "approx_size": "271 MB",
+      "license": "Apache-2.0",
+      "upstream_model": "HuggingFaceTB/SmolLM2-360M-Instruct",
+      "model_card": "https://huggingface.co/QuantFactory/SmolLM2-360M-Instruct-GGUF"
+    },
+    "qwen2.5": {
+      "name": "Qwen2.5-0.5B-Instruct Q4_K_M",
+      "parameters": "0.5B",
+      "repo_id": "tensorblock/Qwen2.5-0.5B-Instruct-GGUF",
+      "revision": "main",
+      "filename": "Qwen2.5-0.5B-Instruct-Q4_K_M.gguf",
+      "quantization": "Q4_K_M",
+      "approx_size": "398 MB",
+      "license": "Apache-2.0",
+      "upstream_model": "Qwen/Qwen2.5-0.5B-Instruct",
+      "model_card": "https://huggingface.co/tensorblock/Qwen2.5-0.5B-Instruct-GGUF"
+    }
+  }
+}
