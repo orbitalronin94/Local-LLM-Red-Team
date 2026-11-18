@@ -4,6 +4,8 @@
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+**Language / Idioma:** [English](README.md) · [Español](README.es.md)
+
 **A lightweight, local-first Python harness for reproducible security testing of locally hosted large language models (LLMs).** Probe jailbreaks, prompt injection, instruction overrides, system-prompt extraction and multi-turn persistence against Ollama, OpenAI-compatible servers and generic HTTP JSON endpoints. Review heuristic findings as JSON, Markdown or SQLite records.
 
 **Project status:** Alpha, version 0.1.0. The public interface and attack catalogue may evolve before 1.0.
@@ -192,14 +194,19 @@ A small-model download manifest and reproducible local benchmark recipe are incl
 | Model | Parameters | Quantization | Approx. download | License |
 | --- | ---: | --- | ---: | --- |
 | SmolLM2 360M Instruct | 360M | Q4_K_M | 271 MB | Apache-2.0 |
-| Qwen2.5 0.5B Instruct | 0.5B | Q4_K_M | 398 MB | Apache-2.0 |
+| Qwen2.5 0.5B Instruct | 0.5B | Q4_K_M | 491 MB | Apache-2.0 |
+| Llama 3.2 1B Instruct | 1B | Q4_K_M | 808 MB | Llama 3.2 Community License |
+| Gemma 3 1B IT | 1B | Q4_K_M | 806 MB | Gemma Terms |
+| Granite 3.3 2B Instruct | 2B | Q4_K_M | 1.55 GB | Apache-2.0 |
+| Phi-3.5 Mini Instruct | 3.8B | Q4_K_M | 2.39 GB | MIT |
+| Ministral 3B Instruct | 3B | Q4_K_M | 1.86 GB | Apache-2.0 |
 
-SmolLM2 is primarily English; Qwen2.5 has broader multilingual support. These compact models are smoke-test targets, not a representative benchmark of all model sizes or languages. Check upstream model cards and license before redistribution.
+SmolLM2 is primarily English; Qwen2.5 has broader multilingual support. These compact models are smoke-test targets, not a representative benchmark of all model sizes or languages. GGUF files are community quantizations: check each upstream model card and license before redistribution or commercial use. See [Local model benchmark kit](models/README.md) for the complete manifest.
 
 ```bash
 python scripts/download_models.py --list
 python scripts/download_models.py --model smollm2
-python scripts/download_models.py --model qwen2.5
+python scripts/download_models.py --model qwen2_5
 python scripts/download_models.py --model all
 ```
 
