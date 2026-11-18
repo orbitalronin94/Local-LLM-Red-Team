@@ -62,3 +62,8 @@ El digest identifica las definiciones ordenadas exactas, incluidos prompts y ver
 Cada resultado estático incluye SHA-256 del prompt exacto y de la respuesta. El modo adaptativo conserva hashes por turno, además de los del prompt inicial y la respuesta final. JSON y SQLite almacenan estos valores; Markdown muestra hashes por resultado.
 
 Los hashes permiten detectar cambios si se conserva el contenido original. Un digest no reconstruye el contenido, no establece cuándo se generó ni demuestra el comportamiento del endpoint. Úsalo como ayuda de integridad junto con el informe, metadatos y entorno controlado.
+
+
+## Uso responsable y autorización
+
+Evalúa únicamente modelos, endpoints y sistemas propios o cuyo análisis tengas expresamente autorizado. El permiso escrito debe delimitar activos, fechas, técnicas, límites de tráfico y acciones prohibidas. La accesibilidad pública no equivale a autorización. Antes de probar, revisa la legislación y normativa de todos los países y jurisdicciones pertinentes; pueden resultar aplicables normas sobre acceso no autorizado, privacidad y datos personales, confidencialidad de comunicaciones, contratos y obligaciones sectoriales. El proyecto no ofrece asesoramiento jurídico ni concede permisos. Si la autorización o la base jurídica no están claras, no ejecutes la prueba. Consulta el [aviso completo de uso responsable y legal](uso-responsable.md).
