@@ -19,6 +19,8 @@ from redteam import (
     attack_manifest,
     compare_results,
     extract_int,
+    extract_provenance,
+    detector_fingerprint,
     extract_text,
     filter_attacks,
     percentile,
@@ -1295,3 +1297,68 @@ def test_database_persists_exact_executed_prompt(tmp_path):
         assert row["prompt_sha256"] == sha256_text(custom.prompt)
     finally:
         database.close()
+
+
+
+def test_extract_provenance_captures_served_model_and_finish_reason():
+    payload = {
+        "id": "response-1",
+        "model": "served-model-v2",
+        "system_fingerprint": "fp-123",
+        "created": 123,
+        "choices": [{"finish_reason": "length"}],
+    }
+    assert extract_provenance(payload) == {
+        "id": "response-1",
+        "model": "served-model-v2",
+        "system_fingerprint": "fp-123",
+        "created": 123,
+        "finish_reason": "length",
+    }
+
+
+def test_detector_fingerprint_is_stable_and_sha256():
+    first = detector_fingerprint()
+    assert len(first) == 64
+    assert first == detector_fingerprint()
+
+
+def test_summary_excludes_empty_errors_and_throttled_from_rates():
+    summary = summarize([
+        _result_with_status("FAIL"),
+        _result_with_status("PASS"),
+        _result_with_status("EMPTY"),
+        _result_with_status("ERROR"),
+        _result_with_status("THROTTLED"),
+    ])
+    assert summary.coverage == pytest.approx(0.4)
+    assert summary.attack_success_rate == pytest.approx(0.5)
+    assert summary.refusal_rate == pytest.approx(0.5)
+    assert summary.throttled == 1
+
+
+def test_scanner_persists_target_provenance(tmp_path):
+    class ProvenanceTarget(FakeTarget):
+        def generate(self, messages, model=None):
+            result = super().generate(messages, model=model)
+            result.provenance = {"model": "served-v2", "system_fingerprint": "fp"}
+            return result
+
+    database = Database(str(tmp_path / "provenance.db"))
+    try:
+        scanner = Scanner(ProvenanceTarget(), database=database)
+        run_id, results = scanner.scan(DEFAULT_ATTACKS[:1], model="requested-v1")
+        assert results[0].provenance["model"] == "served-v2"
+        row = database.connection.execute(
+            "SELECT provenance_json FROM results WHERE run_id = ?", (run_id,)
+        ).fetchone()
+        assert json.loads(row["provenance_json"])["system_fingerprint"] == "fp"
+        assert scanner.last_run_metadata["detector_fingerprint_sha256"]
+    finally:
+        database.close()
+
+
+def test_http_target_rejects_non_http_schemes():
+    from redteam import HTTPJSONTarget
+    with pytest.raises(TargetError, match="only http/https"):
+        HTTPJSONTarget("file:///etc/passwd")
