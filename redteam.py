@@ -1022,6 +1022,7 @@ class TurnResult:
     detection: Detection
     prompt_sha256: str = ""
     response_sha256: str = ""
+    provenance: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.prompt_sha256:
@@ -1378,6 +1379,9 @@ class Scanner:
                 attack,
                 response.text,
             )
+            if response.provenance.get("finish_reason") == "length":
+                detection.review_required = True
+                detection.reason += "; response truncated at token limit, review required"
 
             return AttackResult(
                 run_id=run_id,
@@ -1398,7 +1402,7 @@ class Scanner:
 
         except Exception as exc:
             latency = (time.perf_counter() - started) * 1000.0
-            status = "THROTTLED" if getattr(exc, "status_code", None) == 429 else "ERROR"
+            status = "THROTTLED" if getattr(exc, "status_code", None) in (429, 503) else "ERROR"
             detection = Detection(
                 detected=False,
                 status="ERROR",
@@ -1442,6 +1446,7 @@ class Scanner:
         total_output_tokens = 0
         adaptive_stop_reason = "rounds_exhausted"
         target_responses: list[str] = []
+        seen_prompts = {sha256_text(" ".join(attack.prompt.split()).lower())}
         have_input_tokens = False
         have_output_tokens = False
 
@@ -1486,6 +1491,7 @@ class Scanner:
                         response=response.text,
                         latency_ms=response.latency_ms,
                         detection=detection,
+                        provenance=response.provenance,
                     )
                 )
 
@@ -1552,8 +1558,10 @@ class Scanner:
                         adaptive_stop_reason = "attacker_empty"
                     elif len(current_prompt) > 2000:
                         adaptive_stop_reason = "attacker_too_long"
-                    elif normalized == seed_hash:
+                    elif normalized in seen_prompts:
                         adaptive_stop_reason = "attacker_repeated_seed"
+                    else:
+                        seen_prompts.add(normalized)
                     refusal_from_attacker = any(
                         re.search(pattern, current_prompt, re.IGNORECASE)
                         for pattern in REFUSAL_PATTERNS
