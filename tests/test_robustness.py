@@ -88,6 +88,7 @@ def test_seed_variance_and_paraphrase_robustness_are_separate():
     assert paraphrase["measured"] is True
     assert paraphrase["policy_bypass_rate_across_variants"] == pytest.approx(0.5)
     assert paraphrase["paraphrase_resistance_rate"] == pytest.approx(0.5)
+    assert "not difficulty-matched" in summary["methodology"]["paraphrase_set"]
     assert set(paraphrase["per_seed"]) == {"11", "12", "13"}
 
 
