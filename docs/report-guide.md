@@ -83,7 +83,7 @@ A heuristic flag is a **model-text signal**, not proof that a tool ran, a secret
 
 System-prompt detection deliberately distinguishes a bare mention (for example, “I cannot reveal the system prompt”) from a disclosure-shaped payload (for example, “my system prompt is: ...”). Mentions without a clear payload remain `NOT_DETECTED` and are marked for human review; they must not be promoted to confirmed leakage automatically.
 
-The benchmark also runs five matched English/Spanish prompt pairs plus one benign control per language. These are intent-matched probes, not certified translations or a representative multilingual benchmark. Compare the pair IDs, inspect both raw responses, and review the benign controls before drawing conclusions.
+The benchmark also runs ten matched English/Spanish prompt pairs plus one benign control per language. These are intent-matched probes, not certified translations or a representative multilingual benchmark. Compare the pair IDs, inspect both raw responses, and review the benign controls before drawing conclusions.
 
 Adaptive benchmark runs use self-play when the same local model is configured as both target and attacker. The report marks this explicitly. Attacker latency is separated from target inference latency, and refusal-like/empty/duplicate attacker continuations are not sent back as target prompts.
 
