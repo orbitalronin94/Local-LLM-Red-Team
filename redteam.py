@@ -718,6 +718,14 @@ class TurnResult:
     response: str
     latency_ms: float
     detection: Detection
+    prompt_sha256: str = ""
+    response_sha256: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.prompt_sha256:
+            self.prompt_sha256 = sha256_text(self.prompt)
+        if not self.response_sha256:
+            self.response_sha256 = sha256_text(self.response)
 
 
 @dataclass
@@ -735,6 +743,14 @@ class AttackResult:
     detection: Detection
     turns: list[TurnResult] = field(default_factory=list)
     error: str | None = None
+    prompt_sha256: str = ""
+    response_sha256: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.prompt_sha256 and self.turns:
+            self.prompt_sha256 = self.turns[0].prompt_sha256
+        if not self.response_sha256:
+            self.response_sha256 = sha256_text(self.response)
 
 
 @dataclass
@@ -794,6 +810,8 @@ class Database:
                 reason TEXT NOT NULL,
                 error TEXT,
                 turns_json TEXT,
+                prompt_sha256 TEXT,
+                response_sha256 TEXT,
                 FOREIGN KEY(run_id) REFERENCES runs(run_id)
             );
 
@@ -815,6 +833,15 @@ class Database:
             self.connection.execute(
                 "ALTER TABLE runs ADD COLUMN metadata_json TEXT NOT NULL DEFAULT '{}'"
             )
+        result_columns = {
+            row["name"]
+            for row in self.connection.execute("PRAGMA table_info(results)")
+        }
+        for column in ("prompt_sha256", "response_sha256"):
+            if column not in result_columns:
+                self.connection.execute(
+                    f"ALTER TABLE results ADD COLUMN {column} TEXT"
+                )
         self.connection.commit()
 
     def create_run(
@@ -872,9 +899,11 @@ class Database:
                 evidence_json,
                 reason,
                 error,
-                turns_json
+                turns_json,
+                prompt_sha256,
+                response_sha256
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 result.run_id,
@@ -902,6 +931,8 @@ class Database:
                     ],
                     ensure_ascii=False,
                 ),
+                result.prompt_sha256,
+                result.response_sha256,
             ),
         )
         self.connection.commit()
@@ -1030,6 +1061,7 @@ class Scanner:
                 input_tokens=response.input_tokens,
                 output_tokens=response.output_tokens,
                 detection=detection,
+                prompt_sha256=sha256_text(attack.prompt),
             )
 
         except Exception as exc:
@@ -1056,6 +1088,7 @@ class Scanner:
                 output_tokens=None,
                 detection=detection,
                 error=str(exc),
+                prompt_sha256=sha256_text(attack.prompt),
             )
 
     def _adaptive_attack(
@@ -1391,6 +1424,8 @@ def write_markdown(
                 f"- Status: `{result.status}`",
                 f"- Confidence: `{result.detection.confidence:.2f}`",
                 f"- Latency: `{result.latency_ms:.1f} ms`",
+                f"- Prompt SHA-256: `{result.prompt_sha256 or 'unavailable'}`",
+                f"- Response SHA-256: `{result.response_sha256}`",
                 "",
                 f"**Reason:** {result.detection.reason}",
                 "",

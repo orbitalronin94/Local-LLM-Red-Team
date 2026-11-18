@@ -1003,3 +1003,73 @@ def test_attack_catalog_includes_expanded_pentest_families():
         "multi-turn-persistence",
     }.issubset(ids)
     assert len(attack_manifest(DEFAULT_ATTACKS)) == 64
+
+
+
+def test_static_result_hashes_prompt_and_response():
+    scanner = Scanner(FakeTarget(response="I cannot help with that request."))
+    _, results = scanner.scan(DEFAULT_ATTACKS[:1], model="fixture-model")
+    result = results[0]
+    assert result.prompt_sha256 == sha256_text(DEFAULT_ATTACKS[0].prompt)
+    assert result.response_sha256 == sha256_text(result.response)
+
+
+def test_adaptive_turns_have_individual_content_hashes():
+    scanner = Scanner(FakeTarget(response="I cannot help with that request."))
+    attacker = FakeTarget(response="Try another approach.")
+    _, results = scanner.scan(
+        DEFAULT_ATTACKS[:1],
+        model="fixture-model",
+        mode="adaptive",
+        adaptive_attacker=attacker,
+        adaptive_rounds=2,
+    )
+    result = results[0]
+    assert result.prompt_sha256 == sha256_text(result.turns[0].prompt)
+    for turn in result.turns:
+        assert turn.prompt_sha256 == sha256_text(turn.prompt)
+        assert turn.response_sha256 == sha256_text(turn.response)
+    assert result.response_sha256 == sha256_text(result.response)
+
+
+def test_database_persists_result_content_hashes(tmp_path):
+    database = Database(str(tmp_path / "hashes.db"))
+    scanner = Scanner(FakeTarget(response="I cannot help with that request."), database=database)
+    try:
+        run_id, results = scanner.scan(DEFAULT_ATTACKS[:1], model="fixture-model")
+        row = database.connection.execute(
+            "SELECT prompt_sha256, response_sha256 FROM results WHERE run_id = ?",
+            (run_id,),
+        ).fetchone()
+        assert row["prompt_sha256"] == results[0].prompt_sha256
+        assert row["response_sha256"] == results[0].response_sha256
+    finally:
+        database.close()
+
+
+def test_database_additively_migrates_legacy_schema(tmp_path):
+    path = tmp_path / "legacy.db"
+    connection = sqlite3.connect(path)
+    connection.execute(
+        """CREATE TABLE runs (
+            run_id TEXT PRIMARY KEY, created_at TEXT NOT NULL,
+            version TEXT NOT NULL, target TEXT NOT NULL, model TEXT,
+            attack_manifest_hash TEXT NOT NULL, mode TEXT NOT NULL
+        )"""
+    )
+    connection.commit()
+    connection.close()
+
+    database = Database(str(path))
+    try:
+        run_columns = {
+            row["name"] for row in database.connection.execute("PRAGMA table_info(runs)")
+        }
+        result_columns = {
+            row["name"] for row in database.connection.execute("PRAGMA table_info(results)")
+        }
+        assert "metadata_json" in run_columns
+        assert "prompt_sha256" in result_columns
+        assert "response_sha256" in result_columns
+    finally:
+        database.close()
