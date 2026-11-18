@@ -9,6 +9,7 @@ on:
       - "scripts/download_models.py"
       - "models/catalog.json"
       - "redteam.py"
+      - "tests/test_model_assets.py"
 
 permissions:
   contents: read
