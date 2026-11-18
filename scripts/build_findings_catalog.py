@@ -42,8 +42,8 @@ def make_row(base: dict[str, Any], item: dict[str, Any], path: Path,
         "turns": turns, "review_state": "PENDING",
     }
 
-def collect(input_dir: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    positives, review = [], []
+def collect(input_dir: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    positives, review, invalid_controls = [], [], []
     for path in sorted(input_dir.rglob("*.json")):
         if path.name in {"model-provenance.json", "warmup.json"}:
             continue
@@ -62,6 +62,10 @@ def collect(input_dir: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
                 row = make_row(base, item, path, mode,
                                item.get("attack_id", item.get("scenario_id", "")),
                                item.get("attack_category", item.get("category", "")))
+                row["validity"] = item.get("validity", "valid")
+                if row["validity"] == "invalid_control":
+                    invalid_controls.append(row)
+                    continue
                 if status == "FAIL":
                     positives.append(row)
                 elif status == "NOT_DETECTED" and item.get("human_review_required", True):
@@ -88,9 +92,10 @@ def collect(input_dir: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
                 seen.add(key)
                 result.append(row)
         return result
-    return dedupe(positives), dedupe(review)
+    return dedupe(positives), dedupe(review), dedupe(invalid_controls)
 
-def render(positives: list[dict[str, Any]], review: list[dict[str, Any]], run_label: str) -> str:
+def render(positives: list[dict[str, Any]], review: list[dict[str, Any]],
+           invalid_controls: list[dict[str, Any]], run_label: str) -> str:
     lines = [
         "# Automated Red-Team Findings Catalogue", "",
         f"- Benchmark run: {run_label or 'not supplied'}",
@@ -126,6 +131,10 @@ def render(positives: list[dict[str, Any]], review: list[dict[str, Any]], run_la
                   f"- Source: {row['source']} · category: {row['category']} · run: {row['run_id']}", "",
                   "**Prompt**", "", "    " + row["prompt"].replace("\n", "\n    "), "",
                   "**Response**", "", "    " + row["response"].replace("\n", "\n    "), ""]
+    lines += ["## Excluded: invalid benign controls", "",
+              "These scenario runs failed their benign recall/control check and are excluded from findings and any effectiveness-rate aggregation.", ""]
+    for row in invalid_controls:
+        lines += [f"- {row['model_id']} / {row['attack_id']} · run {row['run_id']} · {row['status']} (invalid_control)", ""]
     lines += ["## Limitations", "",
               "- Prompt-level evidence only: no proof of tool execution, secret access, state change, or production impact.",
               "- Review FAIL entries manually before calling them confirmed vulnerabilities.",
@@ -139,21 +148,22 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--run-label", default="")
     args = parser.parse_args()
-    positives, review = collect(args.input_dir)
+    positives, review, invalid_controls = collect(args.input_dir)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     payload = {"schema_version": 1, "benchmark_run": args.run_label,
-               "positive_findings": positives, "human_review_queue": review}
+               "positive_findings": positives, "human_review_queue": review,
+               "invalid_controls_excluded": invalid_controls}
     (args.output_dir / "findings-catalog.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (args.output_dir / "findings-catalog.md").write_text(
-        render(positives, review, args.run_label), encoding="utf-8")
+        render(positives, review, invalid_controls, args.run_label), encoding="utf-8")
     fields = ["model_id", "model_repo_id", "model_revision", "model_sha256", "run_id",
               "source", "mode", "attack_id", "category", "status", "language",
-              "prompt_sha256", "prompt", "response", "confidence", "evidence", "review_state"]
+              "prompt_sha256", "prompt", "response", "confidence", "evidence", "review_state", "validity"]
     with (args.output_dir / "findings-catalog.csv").open("w", newline="", encoding="utf-8-sig") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
-        for row in positives + review:
+        for row in positives + review + invalid_controls:
             writer.writerow({**row, "evidence": json.dumps(row["evidence"], ensure_ascii=False)})
     print(f"catalogue: {len(positives)} heuristic positives; {len(review)} inconclusive review candidates")
     return 0
