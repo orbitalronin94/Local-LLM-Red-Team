@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import platform
+import re
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -119,6 +120,13 @@ DEFAULT_SCENARIOS = (
 
 def sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def markdown_fence(value: str) -> tuple[str, str]:
+    """Choose a fence longer than any backtick run in untrusted model text."""
+    longest = max((len(match.group(0)) for match in re.finditer(r"`+", value)), default=0)
+    fence = "`" * max(3, longest + 1)
+    return f"{fence}text", fence
 
 
 def scenario_manifest(scenarios=DEFAULT_SCENARIOS) -> str:
@@ -313,8 +321,10 @@ def write_markdown(path: str, run_id: str, model: str | None,
                 f"- Detector: {turn.status} (confidence {turn.confidence:.2f})",
                 f"- Prompt SHA-256: {turn.prompt_sha256}",
                 f"- Response SHA-256: {turn.response_sha256}", "",
-                "**Prompt**", "", "~~~text", turn.prompt, "~~~", "",
-                "**Response**", "", "~~~text", turn.response, "~~~", "",
+                "**Prompt**", "",
+                markdown_fence(turn.prompt)[0], turn.prompt, markdown_fence(turn.prompt)[1], "",
+                "**Response**", "",
+                markdown_fence(turn.response)[0], turn.response, markdown_fence(turn.response)[1], "",
             ])
         control = item.benign_control
         lines.extend([
@@ -323,7 +333,7 @@ def write_markdown(path: str, run_id: str, model: str | None,
             f"- Prompt SHA-256: {control.get('prompt_sha256', 'unavailable')}", "",
         ])
         if control.get("response"):
-            lines.extend(["~~~text", control["response"], "~~~", ""])
+            lines.extend([markdown_fence(control["response"])[0], control["response"], markdown_fence(control["response"])[1], ""])
         if item.error:
             lines.extend([f"**Execution error:** {item.error}", ""])
     Path(path).write_text("\n".join(lines), encoding="utf-8")
