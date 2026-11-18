@@ -188,7 +188,11 @@ def test_review_export_includes_model_fingerprint_for_scenario_and_pair_rows(tmp
     identity = {
         "catalog_model_id": "llama3_2_1b",
         "model_repo_id": "example/model",
+        "model_revision_requested": "main",
         "model_revision_resolved": "abc123",
+        "model_resolved_url": "https://huggingface.co/example/model/resolve/main/model.gguf",
+        "quantization": "Q4_K_M",
+        "upstream_model": "example/base",
         "model_sha256": "f" * 64,
         "inference_engine": "llama.cpp",
         "inference_engine_commit": "d" * 40,
@@ -208,5 +212,8 @@ def test_review_export_includes_model_fingerprint_for_scenario_and_pair_rows(tmp
     with output.open(encoding="utf-8-sig", newline="") as stream:
         rows = list(csv.DictReader(stream))
     assert all(row["catalog_model_id"] == "llama3_2_1b" for row in rows)
+    assert all(row["model_revision_resolved"] == "abc123" for row in rows)
+    assert all(row["quantization"] == "Q4_K_M" for row in rows)
+    assert all(row["upstream_model"] == "example/base" for row in rows)
     assert all(row["model_sha256"] == "f" * 64 for row in rows)
     assert all(row["inference_engine_commit"] == "d" * 40 for row in rows)
