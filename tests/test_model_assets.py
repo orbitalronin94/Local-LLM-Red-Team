@@ -48,10 +48,19 @@ def test_downloader_records_resolved_hub_snapshot_and_model_metadata(tmp_path, m
     snapshot.mkdir(parents=True)
     cached_file = snapshot / "model.gguf"
     cached_file.write_bytes(b"x" * 10_000_001)
+    class FakeHubApi:
+        def model_info(self, repo_id, revision):
+            assert repo_id == "org/model"
+            assert revision == "main"
+            return SimpleNamespace(sha="a" * 40)
+
     monkeypatch.setitem(
         sys.modules,
         "huggingface_hub",
-        SimpleNamespace(hf_hub_download=lambda **kwargs: str(cached_file)),
+        SimpleNamespace(
+            HfApi=FakeHubApi,
+            hf_hub_download=lambda **kwargs: str(cached_file),
+        ),
     )
 
     output = download(
