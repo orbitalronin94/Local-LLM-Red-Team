@@ -212,3 +212,8 @@ Prueba solo modelos y endpoints propios o autorizados. Mantén privados los endp
 ## Licencia
 
 MIT. Consulta [LICENSE](LICENSE).
+
+
+## Investigación y evolución
+
+Consulta la [hoja de ruta de ampliación basada en papers recientes](docs/research-roadmap.es.md) para conocer las próximas familias de ataques, el plan de evaluación y las referencias científicas. La [versión en inglés](docs/research-roadmap.md) está disponible también.
