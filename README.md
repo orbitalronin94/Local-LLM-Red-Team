@@ -141,6 +141,7 @@ local-llm-redteam \
   --model llama3.2 \
   --mode adaptive \
   --adaptive-rounds 5 \
+  --attacker-target ollama \
   --attacker-model llama3.1
 ```
 
