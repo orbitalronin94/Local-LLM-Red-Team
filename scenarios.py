@@ -367,8 +367,7 @@ def write_markdown(path: str, run_id: str, model: str | None,
             lines.extend([markdown_fence(control["response"])[0], control["response"], markdown_fence(control["response"])[1], ""])
         if item.error:
             lines.extend([f"**Execution error:** {item.error}", ""])
-    Path(path).write_text("
-".join(lines), encoding="utf-8")
+    Path(path).write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> int:
