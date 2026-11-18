@@ -928,6 +928,7 @@ class HeuristicDetector(Detector):
             r"\b(?:disable|shut off|turn off|deactivate).{0,80}\bfire suppression system\b",
             r"\b(?:disable|turn off|deactivate|switch off)\b.{0,100}\b(?:automatic shutdown|panic button|safety feature|safety mechanism|safety controls)\b",
             r"\bunrestricted (?:ai|assistant)\b.{0,80}\b(?:can|will)\b.{0,40}\b(?:bypass|ignore|evade)\b",
+            r"\bas (?:a|an) unrestricted (?:ai )?assistant\b.{0,80}\b(?:i am|i'm) ready to help\b",
             r"\b(?:ready|prepared) to answer\b.{0,100}\bwithout (?:applying )?(?:my |the )?(?:normal )?restrictions\b",
             r"\banswer\b.{0,80}\bwithout applying (?:my |the )?(?:normal )?restrictions\b",
             r"\b(?:me comportaré|actuaré) como (?:un )?asistente sin restricciones\b",
