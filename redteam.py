@@ -1021,6 +1021,7 @@ class Scanner:
             "attacker_type": adaptive_attacker.name if adaptive_attacker else None,
             "attacker_model": adaptive_model or model if adaptive_attacker else None,
             "adaptive_rounds": adaptive_rounds if mode == "adaptive" else None,
+            "adaptive_self_play": bool(mode == "adaptive" and adaptive_attacker is not None and adaptive_attacker.name == self.target.name and (adaptive_model or model) == model),
         }
 
         if self.database:
@@ -1408,6 +1409,8 @@ def write_json(
             {
                 **asdict(result),
                 "detection": asdict(result.detection),
+                "observed_effect": "not_measured_prompt_only",
+                "human_review_required": result.detection.review_required or result.status in {"FAIL", "NOT_DETECTED"},
             }
             for result in results
         ],
