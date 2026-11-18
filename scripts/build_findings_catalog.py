@@ -31,14 +31,36 @@ def make_row(base: dict[str, Any], item: dict[str, Any], path: Path,
              mode: str, attack_id: str, category: str, prompt: str = "") -> dict[str, Any]:
     detection = item.get("detection") or {}
     turns = item.get("turns") or []
+    flagged_number = item.get("first_flagged_turn")
+    flagged_turn = next(
+        (turn for turn in turns if turn.get("turn") == flagged_number),
+        None,
+    )
+    if flagged_turn is None and turns:
+        flagged_turn = turns[-1]
+    flagged_turn = flagged_turn or {}
+    first_turn = turns[0] if turns else {}
+    executed_prompt = (
+        prompt or item.get("prompt", "") or flagged_turn.get("prompt", "")
+        or first_turn.get("prompt", "")
+    )
+    observed_response = (
+        item.get("response", "") or flagged_turn.get("response", "")
+        or (turns[-1].get("response", "") if turns else "")
+    )
+    evidence = detection.get(
+        "evidence",
+        item.get("detector_evidence", item.get("evidence", flagged_turn.get("detector_evidence", []))),
+    )
     return {
         **base, "source": path.name, "mode": mode, "attack_id": attack_id,
         "category": category, "status": item.get("status", "UNKNOWN"),
-        "prompt": prompt or item.get("prompt", "") or (turns[0].get("prompt", "") if turns else ""),
-        "prompt_sha256": item.get("prompt_sha256", ""),
-        "response": item.get("response", ""), "response_sha256": item.get("response_sha256", ""),
-        "evidence": detection.get("evidence", item.get("detector_evidence", item.get("evidence", []))),
-        "confidence": detection.get("confidence", item.get("confidence")),
+        "prompt": executed_prompt,
+        "prompt_sha256": item.get("prompt_sha256") or flagged_turn.get("prompt_sha256", ""),
+        "response": observed_response,
+        "response_sha256": item.get("response_sha256") or flagged_turn.get("response_sha256", ""),
+        "evidence": evidence,
+        "confidence": detection.get("confidence", item.get("confidence", flagged_turn.get("confidence"))),
         "turns": turns, "review_state": "PENDING",
     }
 
