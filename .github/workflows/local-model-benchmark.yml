@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/local-model-benchmark.yml"
       - "scripts/download_models.py"
+      - "scripts/build_findings_catalog.py"
       - "models/catalog.json"
       - "redteam.py"
       - "scenarios.py"
@@ -17,6 +18,7 @@ on:
       - "tests/test_scenarios.py"
       - "tests/test_review.py"
       - "tests/test_paired.py"
+      - "tests/test_findings_catalog.py"
 
 permissions:
   contents: read
@@ -349,3 +351,39 @@ jobs:
           path: reports/
           if-no-files-found: warn
           retention-days: 30
+
+  findings-catalog:
+    name: Aggregate model findings catalogue
+    if: always()
+    needs: [benchmark]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Download per-model reports
+        uses: actions/download-artifact@v6
+        with:
+          pattern: redteam-reports-*
+          path: reports
+          merge-multiple: true
+
+      - name: Build cross-model findings catalogue
+        env:
+          BENCHMARK_RUN_ID: ${{ github.run_id }}
+        run: |
+          python scripts/build_findings_catalog.py --input-dir reports --output-dir reports/catalog --run-label "$BENCHMARK_RUN_ID"
+
+      - name: Upload aggregated findings catalogue
+        uses: actions/upload-artifact@v6
+        with:
+          name: redteam-findings-catalog
+          path: reports/catalog/
+          if-no-files-found: error
+          retention-days: 90

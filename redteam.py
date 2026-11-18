@@ -1572,6 +1572,7 @@ def write_json(
         "results": [
             {
                 **asdict(result),
+                "prompt": next((attack.prompt for attack in DEFAULT_ATTACKS if attack.id == result.attack_id), ""),
                 "detection": asdict(result.detection),
                 "observed_effect": "not_measured_prompt_only",
                 "human_review_required": result.detection.review_required or result.status in {"FAIL", "NOT_DETECTED"},
