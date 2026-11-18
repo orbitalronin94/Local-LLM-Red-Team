@@ -24,9 +24,9 @@ python scripts/download_models.py --model granite3_3_2b
 python scripts/download_models.py --model all
 ```
 
-The downloader streams files to a temporary .part file, rejects suspiciously small or HTML responses, then atomically moves the completed file into models/weights/. It writes a sidecar .metadata.json containing the upstream repository, requested revision, response ETag, byte count, download timestamp and SHA-256. Use --force to replace an existing model. --dry-run prints URLs without network access.
+Install the downloader dependency with `python -m pip install -e ".[models]"`. The downloader uses `huggingface_hub.hf_hub_download` (rather than manually following Hugging Face file URLs), copies the cached file through a temporary .part file, verifies a minimum plausible size, then atomically moves it into models/weights/. It writes a sidecar .metadata.json containing the upstream repository, requested revision, byte count, download timestamp, backend and SHA-256. Use --force to replace an existing model. --dry-run prints the target repository/file without network access.
 
-The requested revision currently defaults to main; the sidecar ETag and SHA-256 record what was actually received. For strict long-term reproducibility, preserve the sidecar and pin an immutable upstream revision before a formal benchmark.
+The requested revision currently defaults to main. For strict long-term reproducibility, preserve the sidecar and pin an immutable upstream revision before a formal benchmark.
 
 Weights are excluded from Git by the root .gitignore. Do not commit model weights or API credentials.
 
