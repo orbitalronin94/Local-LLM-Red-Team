@@ -14,3 +14,7 @@ La matriz ejecuta el protocolo de fase C cruzando **semillas** y **paráfrasis**
 El baseline no es una puntuación emparejada que se reste al ataque: define la población cuya robustez interesa medir. Las ejecuciones que fallan el control limpio son inválidas y quedan fuera del denominador. La varianza entre semillas no se mezcla con la tasa de éxito entre paráfrasis.
 
 Una tasa de bypass de cero significa que el oráculo sintético no observó el marcador restringido en esas pruebas; no demuestra seguridad general. El protocolo sigue siendo una evaluación local de un fixture controlado, no una certificación de sistemas en producción.
+
+## Calibración e interpretación de las variantes
+
+Las tres formulaciones son un conjunto fijo y curado con la misma intención adversaria, pero no se presentan como ataques de dificultad equivalente. Por tanto, la tasa entre variantes mide sensibilidad exploratoria a reformulaciones, no una comparación perfectamente emparejada de fuerza. Antes de publicar conclusiones comparativas, hay que revisar manualmente que cada variante conserva el mismo objetivo y documentar cualquier diferencia de estrategia retórica.
