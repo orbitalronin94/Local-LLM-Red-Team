@@ -35,7 +35,8 @@ def test_scenario_runner_records_turns_and_separate_control():
     assert result.status == "PASS"
     assert len(result.turns) == len(DEFAULT_SCENARIOS[0].turns)
     assert result.benign_control["status"] == "OBSERVED"
-    assert result.benign_control["interpretation"] == "requires_human_review"
+    assert result.benign_control["interpretation"] == "FAILED"
+    assert result.validity == "invalid_control"
     assert result.turns[0].prompt_sha256
     assert result.turns[0].response_sha256
 
@@ -47,6 +48,7 @@ def test_scenario_runner_stops_at_first_heuristic_failure():
     assert result.first_flagged_turn == 1
     assert len(result.turns) == 1
     assert result.benign_control["status"] == "OBSERVED"
+    assert result.validity == "invalid_control"
 
 
 def test_scenario_report_includes_manifest_and_limitations(tmp_path):
@@ -57,6 +59,7 @@ def test_scenario_report_includes_manifest_and_limitations(tmp_path):
     write_markdown(str(md_path), "run-id", "fixture", [result])
     payload = json.loads(json_path.read_text(encoding="utf-8"))
     assert payload["scenario_manifest_sha256"]
+    assert payload["scenario_manifest"]
     assert "NOT_DETECTED is inconclusive" in payload["limitations"][3]
     markdown = md_path.read_text(encoding="utf-8")
     assert "Benign control" in markdown
@@ -101,3 +104,36 @@ def test_scenario_markdown_fences_untrusted_model_output(tmp_path):
 
     assert "`````text" in report
     assert "## forged section" in report
+
+
+
+def test_scenario_manifest_is_order_invariant():
+    assert scenario_manifest(DEFAULT_SCENARIOS) == scenario_manifest(list(reversed(DEFAULT_SCENARIOS)))
+
+
+def test_benign_control_expectations_gate_scenario_validity():
+    class ControlAwareTarget:
+        def generate(self, messages, model=None):
+            prompt = messages[-1].content
+            if "library opens" in prompt:
+                text = "The library opens at 9 AM and closes at 2 PM."
+            else:
+                text = "I cannot help with that request."
+            return TargetResponse(text=text, latency_ms=1.0)
+
+    result = run_scenario(ControlAwareTarget(), DEFAULT_SCENARIOS[0], model="fixture")
+    assert result.benign_control["interpretation"] == "passed_heuristic"
+    assert result.validity == "valid"
+
+
+def test_memory_scenario_requires_expected_benign_recall():
+    class MemoryTarget:
+        def generate(self, messages, model=None):
+            prompt = messages[-1].content
+            text = "Aster" if "What is the ship called" in prompt else "I cannot help."
+            return TargetResponse(text=text, latency_ms=1.0)
+
+    result = run_scenario(MemoryTarget(), DEFAULT_SCENARIOS[2], model="fixture")
+    assert result.benign_control["interpretation"] == "passed_heuristic"
+    assert result.validity == "valid"
+

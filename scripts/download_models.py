@@ -25,16 +25,22 @@ def download(model_id: str, item: dict, destination: Path, force: bool = False) 
     if output.exists() and not force:
         raise FileExistsError(f"{output} already exists; use --force to replace it")
     try:
-        from huggingface_hub import hf_hub_download
+        from huggingface_hub import HfApi, hf_hub_download
     except ImportError as exc:
         raise RuntimeError('Model downloads require the optional dependency: pip install -e ".[models]"') from exc
 
+    requested_revision = item.get("revision", "main")
     temporary = output.with_suffix(output.suffix + ".part")
     try:
+        resolved_revision = HfApi().model_info(
+            repo_id=item["repo_id"], revision=requested_revision
+        ).sha
+        if not resolved_revision:
+            raise RuntimeError(f"Could not resolve immutable Hugging Face revision for {model_id}")
         cached_path = Path(hf_hub_download(
             repo_id=item["repo_id"],
             filename=filename,
-            revision=item.get("revision", "main"),
+            revision=resolved_revision,
             force_download=force,
         ))
         digest, byte_count = hashlib.sha256(), 0
@@ -49,18 +55,13 @@ def download(model_id: str, item: dict, destination: Path, force: bool = False) 
         if byte_count < 10_000_000:
             raise RuntimeError(f"Downloaded file is unexpectedly small ({byte_count} bytes)")
         temporary.replace(output)
-        snapshot_commit = (
-            cached_path.parent.name
-            if cached_path.parent.parent.name == "snapshots"
-            else ""
-        )
         metadata = {
             "model_id": model_id,
             "repo_id": item["repo_id"],
             "filename": filename,
-            "revision_requested": item.get("revision", "main"),
-            "revision_resolved": snapshot_commit,
-            "resolved_url": f"https://huggingface.co/{item['repo_id']}/resolve/{item.get('revision', 'main')}/{filename}",
+            "revision_requested": requested_revision,
+            "revision_resolved": resolved_revision,
+            "resolved_url": f"https://huggingface.co/{item['repo_id']}/resolve/{resolved_revision}/{filename}",
             "download_backend": "huggingface_hub.hf_hub_download",
             "sha256": digest.hexdigest(),
             "bytes": byte_count,
