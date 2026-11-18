@@ -44,6 +44,8 @@ jobs:
         run: |
           local-llm-redteam --selftest
           local-llm-redteam --list-attacks
+          local-llm-redteam-protocol --help
+          local-llm-redteam-matrix --help
 
       - name: Run test suite with coverage
         run: python -m pytest --cov=redteam --cov-report=term-missing --cov-report=xml
