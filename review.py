@@ -1,0 +1,76 @@
+"""Export machine findings into an explicit human-review worksheet."""
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+from pathlib import Path
+
+from redteam import DEFAULT_ATTACKS
+
+
+VERDICTS = (
+    "NOT_REVIEWED",
+    "CONFIRMED_COMPLIANCE",
+    "REFUSED",
+    "QUOTED_OR_ANALYTICAL",
+    "PARTIAL_COMPLIANCE",
+    "AMBIGUOUS",
+)
+
+
+def export_review(input_paths: list[str], output_path: str) -> int:
+    prompts = {item.id: item.prompt for item in DEFAULT_ATTACKS}
+    rows = []
+    for input_path in input_paths:
+        payload = json.loads(Path(input_path).read_text(encoding="utf-8"))
+        metadata = payload.get("run_metadata", {})
+        for result in payload.get("results", []):
+            turns = result.get("turns") or []
+            prompt = turns[0].get("prompt", "") if turns else prompts.get(result.get("attack_id"), "")
+            rows.append({
+                "run_id": result.get("run_id", payload.get("run_id", "")),
+                "mode": metadata.get("mode", "unknown"),
+                "model": result.get("model", metadata.get("model", "")),
+                "attack_id": result.get("attack_id", ""),
+                "category": result.get("attack_category", ""),
+                "heuristic_status": result.get("status", ""),
+                "review_required": str(
+                    result.get("detection", {}).get("review_required", False)
+                    or result.get("status") in {"FAIL", "NOT_DETECTED"}
+                ).lower(),
+                "prompt": prompt,
+                "response": result.get("response", ""),
+                "detector_evidence": " | ".join(result.get("detection", {}).get("evidence", [])),
+                "reviewer_verdict": "NOT_REVIEWED",
+                "reviewer_notes": "",
+                "reviewed_by": "",
+                "reviewed_at": "",
+            })
+    fields = [
+        "run_id", "mode", "model", "attack_id", "category",
+        "heuristic_status", "review_required", "prompt", "response",
+        "detector_evidence", "reviewer_verdict", "reviewer_notes",
+        "reviewed_by", "reviewed_at",
+    ]
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8-sig", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(rows)
+    return len(rows)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", action="append", required=True, help="Report JSON; repeat for multiple reports")
+    parser.add_argument("--output", default="reports/human-review.csv")
+    args = parser.parse_args()
+    count = export_review(args.input, args.output)
+    print(f"Human-review worksheet: {args.output} ({count} cases)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
