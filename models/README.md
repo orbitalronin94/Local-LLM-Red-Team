@@ -46,3 +46,12 @@ Repeat with the Qwen2.5 GGUF and distinct report names. Keep scanner version, at
 ## Interpretation
 
 These are compact smoke-test models, not a representative security benchmark and not a claim that a model family is safe or unsafe. The current detector is heuristic. PASS, FAIL and NOT_DETECTED are triage signals; inspect raw responses and use independent review for important conclusions.
+
+
+## Automated full-catalog benchmark
+
+The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs the complete built-in attack catalogue against both GGUF models. For each model it starts a CPU-only `llama-server`, generates a static report and an adaptive report (one attacker round), and uploads SQLite, JSON, Markdown, server logs and provenance as separate artifacts.
+
+It can be started manually from **Actions → Local model red-team benchmark → Run workflow**. It also runs when the benchmark workflow, model downloader/catalogue or scanner changes on `main`. The benchmark uses public model files and does not require API secrets.
+
+The adaptive run uses the tested model itself as the attacker. Treat this as a reproducible self-play stress test, not as an independent attacker evaluation. GitHub-hosted CPU performance and timeouts can vary; a failed model run is reported as failed, not as a clean security result.
