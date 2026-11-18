@@ -219,7 +219,7 @@ MIT. Consulta [LICENSE](LICENSE).
 
 ## Investigación y evolución
 
-Consulta la [hoja de ruta de ampliación basada en papers recientes](docs/research-roadmap.es.md) para conocer las próximas familias de ataques, el plan de evaluación y las referencias científicas. La [versión en inglés](docs/research-roadmap.md) está disponible también.
+Consulta la [hoja de ruta de ampliación basada en papers recientes](docs/research-roadmap.es.md) para conocer las próximas familias de ataques, el plan de evaluación y las referencias científicas. La [versión en inglés](docs/research-roadmap.md) está disponible también. El [protocolo del hallazgo a la contramedida](docs/exploit-to-guardrail.es.md) documenta un control determinista de mínimo privilegio, sus pruebas y sus límites.
 
 
 ### Escenarios deterministas de varios turnos

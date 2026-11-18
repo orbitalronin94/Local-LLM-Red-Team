@@ -182,7 +182,7 @@ The detector is intentionally heuristic; it is not a semantic LLM judge.
 
 The reported attack-success rate is the number of heuristic `FAIL` results divided by completed, non-error executions. It is a screening metric for this attack set, not a probability that the model is vulnerable.
 
-**A `PASS` does not prove that a model is secure. A `NOT_DETECTED` result does not prove that an attack failed.** Inspect the response, evidence and test context before drawing conclusions. See [Detection methodology and limitations](docs/methodology.md), the [report interpretation guide](docs/report-guide.md), and the [language and attack coverage matrix](docs/coverage-matrix.md). See also the [research-backed expansion roadmap](docs/research-roadmap.md).
+**A `PASS` does not prove that a model is secure. A `NOT_DETECTED` result does not prove that an attack failed.** Inspect the response, evidence and test context before drawing conclusions. See [Detection methodology and limitations](docs/methodology.md), the [report interpretation guide](docs/report-guide.md), and the [language and attack coverage matrix](docs/coverage-matrix.md). See also the [research-backed expansion roadmap](docs/research-roadmap.md). See the [exploit-to-guardrail protocol](docs/exploit-to-guardrail.md) for a tested least-privilege action gate and its limitations.
 
 ## Reproducibility
 
