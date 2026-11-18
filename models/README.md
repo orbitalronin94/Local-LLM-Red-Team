@@ -2,12 +2,15 @@
 
 Small GGUF models for repeatable local inference tests. Model weights are fetched on demand and are not committed to this repository.
 
-| ID | Upstream model | GGUF quantization | Approx. size | License |
-| --- | --- | --- | ---: | --- |
-| smollm2 | [SmolLM2 360M Instruct](https://huggingface.co/QuantFactory/SmolLM2-360M-Instruct-GGUF) | Q4_K_M | 271 MB | Apache-2.0 |
-| qwen2.5 | [Qwen2.5 0.5B Instruct](https://huggingface.co/tensorblock/Qwen2.5-0.5B-Instruct-GGUF) | Q4_K_M | 398 MB | Apache-2.0 |
+| ID | Model family / upstream | Parameters | GGUF quantization | Approx. size | License |
+| --- | --- | ---: | --- | ---: | --- |
+| smollm2 | [Hugging Face SmolLM2](https://huggingface.co/QuantFactory/SmolLM2-360M-Instruct-GGUF) | 360M | Q4_K_M | 271 MB | Apache-2.0 |
+| qwen2_5 | [Alibaba Qwen2.5](https://huggingface.co/tensorblock/Qwen2.5-0.5B-Instruct-GGUF) | 0.5B | Q4_K_M | 398 MB | Apache-2.0 |
+| llama3_2_1b | [Meta Llama 3.2](https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF) | 1B | Q4_K_M | 808 MB | Llama 3.2 Community License |
+| gemma3_1b | [Google Gemma 3](https://huggingface.co/bartowski/google_gemma-3-1b-it-GGUF) | 1B | Q4_K_M | 806 MB | Gemma Terms |
+| granite3_3_2b | [IBM Granite 3.3](https://huggingface.co/bartowski/ibm-granite_granite-3.3-2b-instruct-GGUF) | 2B | Q4_K_M | 1.55 GB | Apache-2.0 |
 
-The files are third-party GGUF quantizations. Their model cards identify the source model and license. SmolLM2's model card notes that the family primarily understands and generates English; use it as an additional stress target, not the only multilingual benchmark. Qwen2.5's model card describes multilingual support including Spanish.
+The GGUF files are community quantizations. Each catalogue entry records both the quantized repository and its upstream model. Licenses are not interchangeable: Llama and Gemma have their own terms; check the linked model card and upstream terms before redistribution or commercial use. SmolLM2 is primarily English-oriented, while Qwen2.5 is multilingual; do not interpret one language's result as a universal model score.
 
 ## Download and integrity record
 
@@ -15,8 +18,9 @@ Run from the repository root:
 
 ```bash
 python scripts/download_models.py --list
-python scripts/download_models.py --model smollm2
-python scripts/download_models.py --model qwen2.5
+python scripts/download_models.py --model llama3_2_1b
+python scripts/download_models.py --model gemma3_1b
+python scripts/download_models.py --model granite3_3_2b
 python scripts/download_models.py --model all
 ```
 
@@ -28,29 +32,28 @@ Weights are excluded from Git by the root .gitignore. Do not commit model weight
 
 ## Serve with llama.cpp
 
-Install a current llama-server build separately. Example for SmolLM2:
+Install a current llama-server build separately. Example:
 
 ```bash
-llama-server --model models/weights/SmolLM2-360M-Instruct-Q4_K_M.gguf --host 127.0.0.1 --port 8080
+llama-server --model models/weights/Llama-3.2-1B-Instruct-Q4_K_M.gguf --host 127.0.0.1 --port 8080
 ```
 
 Then run the existing OpenAI-compatible target:
 
 ```bash
 mkdir -p reports
-python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --db reports/smollm2.db --json reports/smollm2.json --report reports/smollm2.md
+python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --db reports/llama-static.db --json reports/llama-static.json --report reports/llama-static.md
 ```
 
-Repeat with the Qwen2.5 GGUF and distinct report names. Keep scanner version, attack manifest, llama.cpp version, context size, sampling parameters, hardware and runtime flags constant. Record unavoidable differences. Compare individual attack IDs and response evidence, not only aggregate rates.
+Keep scanner version, attack manifest, llama.cpp version, context size, sampling parameters, hardware and runtime flags constant. Compare individual attack IDs and response evidence, not only aggregate rates.
 
 ## Interpretation
 
 These are compact smoke-test models, not a representative security benchmark and not a claim that a model family is safe or unsafe. The current detector is heuristic. PASS, FAIL and NOT_DETECTED are triage signals; inspect raw responses and use independent review for important conclusions.
 
-
 ## Automated full-catalog benchmark
 
-The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs the complete built-in attack catalogue against both GGUF models. For each model it starts a CPU-only `llama-server`, generates a static report and an adaptive report (one attacker round), and uploads SQLite, JSON, Markdown, server logs and provenance as separate artifacts.
+The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs the complete built-in attack catalogue against all five GGUF models. For each model it starts a CPU-only `llama-server`, generates a static report and an adaptive report (one attacker round), and uploads SQLite, JSON, Markdown, server logs and provenance as separate artifacts.
 
 It can be started manually from **Actions → Local model red-team benchmark → Run workflow**. It also runs when the benchmark workflow, model downloader/catalogue or scanner changes on `main`. The benchmark uses public model files and does not require API secrets.
 
