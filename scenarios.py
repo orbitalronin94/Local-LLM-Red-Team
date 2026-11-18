@@ -193,6 +193,7 @@ def run_scenario(target: Target, scenario: Scenario, model: str | None = None,
     first_flagged = None
     status = "NOT_DETECTED"
     error = None
+    assistant_responses: list[str] = []
     attack = Attack(
         id=scenario.id, category=scenario.category, name=scenario.name,
         prompt=scenario.turns[0].prompt, version=scenario.version,
@@ -207,7 +208,13 @@ def run_scenario(target: Target, scenario: Scenario, model: str | None = None,
             status = "ERROR"
             break
         total_latency += response.latency_ms
-        detection = detector.detect(attack, response.text)
+        assistant_responses.append(response.text)
+        trajectory_detector = getattr(detector, "detect_trajectory", None)
+        detection = (
+            trajectory_detector(attack, assistant_responses)
+            if callable(trajectory_detector)
+            else detector.detect(attack, response.text)
+        )
         turns.append(TurnEvidence(
             turn=number, purpose=step.purpose, prompt=step.prompt,
             response=response.text, latency_ms=response.latency_ms,
