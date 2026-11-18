@@ -539,6 +539,26 @@ class HTTPJSONTarget(Target):
 class OllamaTarget(HTTPJSONTarget):
     name = "ollama"
 
+    def resolve_model_identity(self, model: str) -> dict[str, Any]:
+        base_url = self.url.rsplit("/api/chat", 1)[0]
+        request = urllib.request.Request(
+            base_url + "/api/show",
+            data=json.dumps({"name": model}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with open_http_request(request, timeout=self.timeout) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        if not isinstance(payload, dict):
+            raise TargetError("Ollama /api/show returned invalid JSON")
+        identity = {"requested_name": model}
+        for key in ("modelfile", "parameters", "template", "details", "model_info"):
+            if payload.get(key) is not None:
+                identity[key] = payload[key]
+        if payload.get("digest") is not None:
+            identity["digest"] = payload["digest"]
+        return identity
+
     def __init__(
         self,
         url: str = "http://127.0.0.1:11434",
@@ -594,6 +614,7 @@ class OllamaTarget(HTTPJSONTarget):
             input_tokens=extract_int(data, ("prompt_eval_count",)),
             output_tokens=extract_int(data, ("eval_count",)),
             raw=data,
+            provenance=extract_provenance(data),
         )
 
 
@@ -1275,6 +1296,13 @@ class Scanner:
 
         run_id = str(uuid.uuid4())
         manifest = attack_manifest(attacks)
+        target_identity = dict(getattr(self.target, "target_identity", {}))
+        resolver = getattr(self.target, "resolve_model_identity", None)
+        if callable(resolver) and model:
+            try:
+                target_identity["ollama_model"] = resolver(model)
+            except Exception as exc:
+                target_identity["ollama_model_resolution_error"] = str(exc)
         self.last_run_metadata = {
             "created_at": utc_now(),
             "scanner_version": VERSION,
@@ -1285,7 +1313,7 @@ class Scanner:
             "detector": self.detector.name,
             "detector_version": DETECTOR_VERSION,
             "detector_fingerprint_sha256": detector_fingerprint(),
-            "target_identity": getattr(self.target, "target_identity", {}),
+            "target_identity": target_identity,
             "mode": mode,
             "attack_count": len(attacks),
             "attack_ids": [attack.id for attack in attacks],
