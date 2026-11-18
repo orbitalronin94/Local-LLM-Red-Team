@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 from pathlib import Path
+from typing import Any
 
 from redteam import DEFAULT_ATTACKS
 
@@ -29,7 +30,7 @@ def csv_safe_cell(value: Any) -> Any:
     if not isinstance(value, str) or not value:
         return value
     first = value.lstrip(" \\t\\r\\n")
-    if value[0] in "\\t\\r\\n" or (first and first[0] in "=+-@"):
+    if value[0] in "\t\r\n" or (first and first[0] in "=+-@"):
         return "'" + value
     return value
 
