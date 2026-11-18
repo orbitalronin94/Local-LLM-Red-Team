@@ -785,7 +785,7 @@ class HeuristicDetector(Detector):
         """Remove quoted spans so analysis of an attack is not itself flagged."""
         patterns = (
             r'"[^"\n]{1,1000}"',
-            r"'[^'\n]{1,1000}'",
+            r"(?<!\w)'[^'\n]{1,1000}'(?!\w)",
             r"“[^”\n]{1,1000}”",
             r"‘[^’\n]{1,1000}’",
         )
@@ -799,7 +799,7 @@ class HeuristicDetector(Detector):
         for sentence in re.split(r"(?<=[.!?])\s+|\n+", text):
             # A refusal followed by "but ..." may still contain actionable
             # compliance. Evaluate clauses independently.
-            for candidate in re.split(r"\b(?:but|however|although|yet)\b", sentence, flags=re.IGNORECASE):
+            for candidate in re.split(r"\b(?:but|however|although|yet)\b|[,;]", sentence, flags=re.IGNORECASE):
                 candidate = candidate.strip()
                 if not candidate:
                     continue
