@@ -4,14 +4,14 @@
     "smollm2": {
       "name": "SmolLM2-360M-Instruct Q4_K_M",
       "parameters": "360M",
-      "repo_id": "tensorblock/SmolLM2-360M-Instruct-GGUF",
+      "repo_id": "bartowski/SmolLM2-360M-Instruct-GGUF",
       "revision": "main",
       "filename": "SmolLM2-360M-Instruct-Q4_K_M.gguf",
       "quantization": "Q4_K_M",
       "approx_size": "271 MB",
       "license": "Apache-2.0",
       "upstream_model": "HuggingFaceTB/SmolLM2-360M-Instruct",
-      "model_card": "https://huggingface.co/tensorblock/SmolLM2-360M-Instruct-GGUF"
+      "model_card": "https://huggingface.co/bartowski/SmolLM2-360M-Instruct-GGUF"
     },
     "qwen2_5": {
       "name": "Qwen2.5-0.5B-Instruct Q4_K_M",
