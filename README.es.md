@@ -231,5 +231,5 @@ La primera suite cubre construcción gradual de contexto, negativa seguida de re
 
 ### Comparación emparejada EN/ES y revisión humana
 
-El benchmark ejecuta cinco pares de prompts en inglés y español, con controles benignos independientes. Los resultados se guardan por idioma y par; no son traducciones certificadas ni una evaluación multilingüe representativa. También genera una hoja CSV de revisión humana con prompts, respuestas, señales heurísticas y campos de anotación. Las señales de texto no demuestran efectos reales ni ejecución de herramientas.
+El benchmark ejecuta diez pares de prompts en inglés y español, con controles benignos independientes. Los resultados se guardan por idioma y par; no son traducciones certificadas ni una evaluación multilingüe representativa. También genera una hoja CSV de revisión humana con prompts, respuestas, señales heurísticas y campos de anotación. Las señales de texto no demuestran efectos reales ni ejecución de herramientas.
 
