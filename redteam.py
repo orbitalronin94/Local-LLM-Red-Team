@@ -1228,7 +1228,10 @@ class Scanner:
                     attacker_latency += attacker_response.latency_ms
 
                     current_prompt = attacker_response.text.strip()
-                    refusal_from_attacker = self._matches(REFUSAL_PATTERNS, current_prompt)
+                    refusal_from_attacker = any(
+                        re.search(pattern, current_prompt, re.IGNORECASE)
+                        for pattern in REFUSAL_PATTERNS
+                    )
                     if (not current_prompt or len(current_prompt) > 2000
                             or current_prompt == attack.prompt
                             or refusal_from_attacker):
