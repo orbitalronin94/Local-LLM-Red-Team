@@ -66,7 +66,7 @@ def json_dumps(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2)
 
 
-DETECTOR_VERSION = "1"
+DETECTOR_VERSION = "2"
 
 
 def detector_fingerprint() -> str:
