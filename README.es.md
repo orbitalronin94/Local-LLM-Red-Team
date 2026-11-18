@@ -238,3 +238,22 @@ La primera suite cubre construcción gradual de contexto, negativa seguida de re
 
 El benchmark ejecuta diez pares de prompts en inglés y español, con controles benignos independientes. Los resultados se guardan por idioma y par; no son traducciones certificadas ni una evaluación multilingüe representativa. También genera una hoja CSV de revisión humana con prompts, respuestas, señales heurísticas y campos de anotación. Las señales de texto no demuestran efectos reales ni ejecución de herramientas.
 
+
+
+## Persistencia conductual y matriz de robustez
+
+El protocolo controlado está disponible como comando instalado:
+
+```bash
+local-llm-redteam-protocol --target ollama --model MODELO --seed 42 --variant direct
+```
+
+Para separar la varianza de sampling de la robustez ante paráfrasis, ejecuta la matriz:
+
+```bash
+local-llm-redteam-matrix --target ollama --model MODELO \
+  --seeds 42,43,44 \
+  --variants direct,authority_reframing,contextual_reframing
+```
+
+La matriz usa los controles limpios como gate de cohorte, excluye los fallos de baseline de los denominadores de ataque, calcula la varianza entre semillas para cada paráfrasis fija y mide la susceptibilidad a paráfrasis dentro de cada semilla fija. Consulta el [protocolo de persistencia](docs/persistence-protocol.es.md) y la [matriz de robustez](docs/robustness-matrix.es.md). Estos fixtures sintéticos son instrumentos de evaluación, no certificaciones de políticas de producción.
