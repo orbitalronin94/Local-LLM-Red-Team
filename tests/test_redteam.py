@@ -1270,5 +1270,6 @@ def test_markdown_report_uses_fence_longer_than_untrusted_content(tmp_path):
 
     report = output.read_text(encoding="utf-8")
     assert "`````text" in report
+    assert "``````text" in report
     assert custom.prompt in report
     assert response in report
