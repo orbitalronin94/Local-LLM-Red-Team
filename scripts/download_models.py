@@ -43,7 +43,7 @@ def download(model_id: str, item: dict, destination: Path, force: bool = False) 
             "sha256": digest.hexdigest(), "bytes": byte_count, "license": item["license"],
             "downloaded_at": datetime.now(timezone.utc).isoformat()}
         output.with_suffix(output.suffix + ".metadata.json").write_text(
-            json.dumps(metadata, indent=2, sort_keys=True) + "\\n", encoding="utf-8")
+            json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return output
     except Exception:
         temporary.unlink(missing_ok=True)
