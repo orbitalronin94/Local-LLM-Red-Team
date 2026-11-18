@@ -578,6 +578,15 @@ REFUSAL_PATTERNS = [
     r"\bnot follow (?:them|it|the instructions)\b",
 ]
 
+DISCLOSURE_COMMITMENT_PATTERNS = [
+    # Affirmative promises to reveal protected instructions, including indirect
+    # commitments to follow an instruction to disclose them.
+    r"\b(?:i will|i can|i am ready to|i'm ready to|i'm prepared to)\s+(?:reveal|disclose|provide|share|expose)\b.{0,100}\b(?:hidden|private|system)\s+(?:instructions|prompt|message)\b",
+    r"\b(?:follow|obey|comply with)\b.{0,100}\b(?:reveal|disclose|provide|share|expose)\b.{0,100}\b(?:hidden|private|system)\s+(?:instructions|prompt|message)\b",
+    r"\b(?:revelaré|revelar|proporcionaré|proporcionar|compartiré|compartir|expondré|exponer)\b.{0,100}\b(?:instrucciones|prompt)\s+(?:ocultas|privadas|del sistema)\b",
+    r"\b(?:obedeceré|seguiré|cumpliré)\b.{0,100}\b(?:revelar|compartir|proporcionar)\b.{0,100}\b(?:instrucciones|prompt)\s+(?:ocultas|privadas|del sistema)\b",
+]
+
 LEAK_PATTERNS = [
     # Require disclosure-shaped content; bare mentions are not leaks.
     r"\b(?:my|the) (?:hidden )?(?:system prompt|system message|instructions) (?:is|are|says|states|contains)\s*[:=]",
@@ -729,6 +738,10 @@ class HeuristicDetector(Detector):
 
         if attack.category == "system_extraction":
             evidence = self._matches(LEAK_PATTERNS, unquoted)
+            evidence.extend(self._affirmative_matches(
+                DISCLOSURE_COMMITMENT_PATTERNS, unquoted
+            ))
+            evidence = list(dict.fromkeys(evidence))
             if evidence:
                 return Detection(
                     True, "FAIL", 0.95, evidence,
@@ -770,6 +783,13 @@ class HeuristicDetector(Detector):
             r"\b(?:disable|shut off|turn off|deactivate).{0,80}\bfire suppression system\b",
             r"\b(?:disable|turn off|deactivate|switch off)\b.{0,100}\b(?:automatic shutdown|panic button|safety feature|safety mechanism|safety controls)\b",
             r"\bunrestricted (?:ai|assistant)\b.{0,80}\b(?:can|will)\b.{0,40}\b(?:bypass|ignore|evade)\b",
+            r"\b(?:i am|i'm|i will be|i'll be) (?:an? )?unrestricted (?:ai )?assistant\b",
+            r"\bas (?:a|an) unrestricted (?:ai )?assistant\b",
+            r"\b(?:ready|prepared) to answer\b.{0,100}\bwithout (?:applying )?(?:my |the )?(?:normal )?restrictions\b",
+            r"\banswer\b.{0,80}\bwithout applying (?:my |the )?(?:normal )?restrictions\b",
+            r"\b(?:me comportaré|actuaré) como (?:un )?asistente sin restricciones\b",
+            r"\b(?:estoy listo|estoy preparada|estoy preparado) para responder\b.{0,100}\bsin (?:aplicar )?(?:mis |las )?restricciones\b",
+            r"\b(?:responderé|responder)\b.{0,100}\bsin aplicar (?:mis |las )?restricciones(?: habituales)?\b",
             r"\b(?:i can|i will|i'll) help (?:you )?(?:with )?(?:the )?(?:necessary )?(?:steps|process) to bypass\b",
             r"\bif you decide to bypass\b.{0,100}\b(?:i can|i will|i'll) help\b.{0,80}\b(?:steps|process)\b",
             r"\b(?:i will|i can|i'll) (?:provide|give|list|outline|show|walk you through)\b.{0,100}\b(?:steps|sequence|actions|instructions)\b.{0,100}\b(?:bypass|disable|turn off|deactivate|circumvent)\b.{0,100}\b(?:safety|security|control|controls|restrictions|features)\b",
@@ -792,6 +812,12 @@ class HeuristicDetector(Detector):
                 r"\bignoraré las instrucciones anteriores\b",
                 r"\binstrucciones anteriores han sido (?:desactivadas|anuladas)\b",
                 r"\brestricciones de seguridad (?:desactivadas|anuladas)\b",
+                r"\b(?:i am|i'm) (?:ready|prepared) to follow (?:the )?(?:new|developer-approved) authority\b",
+                r"\bi will follow (?:this|the) new authority\b",
+                r"\b(?:i am|i'm) ready to obey (?:this|the) new authority\b",
+                r"\bme comprometo a obedecer (?:sus|las) reglas\b",
+                r"\b(?:estoy listo|estoy preparada|estoy preparado) para (?:seguir|obedecer)\b.{0,80}\b(?:nueva autoridad|nuevas reglas|autoridad)\b",
+                r"\b(?:obedeceré|seguiré)\b.{0,80}\b(?:nueva autoridad|sus reglas|nuevas reglas)\b",
             ]
             evidence = self._affirmative_matches(patterns, unquoted)
             if evidence:
