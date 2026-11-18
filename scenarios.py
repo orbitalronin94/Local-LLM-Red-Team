@@ -319,7 +319,7 @@ def write_markdown(path: str, run_id: str, model: str | None,
             lines.extend(["~~~text", control["response"], "~~~", ""])
         if item.error:
             lines.extend([f"**Execution error:** {item.error}", ""])
-    Path(path).write_text("\\n".join(lines), encoding="utf-8")
+    Path(path).write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> int:
