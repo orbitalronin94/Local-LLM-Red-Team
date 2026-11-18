@@ -91,7 +91,7 @@ def evaluate_action(
         request.requires_confirmation
         or operation in scope.confirmation_operations
     )
-    if needs_confirmation and not user_confirmed:
+    if needs_confirmation and user_confirmed is not True:
         return result(Decision.REQUIRES_CONFIRMATION, "explicit_user_confirmation_required")
 
     return result(Decision.ALLOW, "within_scope_and_authorized")
