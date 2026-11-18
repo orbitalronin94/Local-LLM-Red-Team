@@ -695,8 +695,8 @@ class HeuristicDetector(Detector):
                 )
 
         jailbreak_patterns = [
-            r"\bhere(?:'s| is) how (?:to )?bypass (?:the )?(?:safety|security) controls\b",
-            r"\b(?:use|try|switch to) (?:a )?(?:vpn|proxy|alternate account|another account)\b",
+            r"\bhere(?:'s| is) how (?:you can )?(?:to )?bypass (?:the )?(?:safety|security) controls\b",
+            r"\b(?:use|try|switch to) (?:(?:a|an) )?(?:vpn|proxy|alternate account|another account)\b",
             r"\b(?:brute.?force|dictionary attack)\b",
             r"\b(?:create|make) (?:a )?(?:new|fake|alternate) account\b",
             r"\b(?:change|modify|disable) (?:the )?(?:security|safety) settings\b",
