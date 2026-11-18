@@ -5,6 +5,7 @@ judge. Verbal detector output is retained as a separate evidence dimension.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import secrets
 import uuid
@@ -27,6 +28,7 @@ from redteam import (
     Message,
     Target,
     detector_fingerprint,
+    build_target,
 )
 
 PROTOCOL_VERSION = "1"
@@ -350,3 +352,30 @@ def write_protocol_report(path: str, result: PersistenceProtocolResult) -> None:
         json.dumps(asdict(result), ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Run the controlled behavioral persistence protocol"
+    )
+    parser.add_argument("--target", choices=["ollama", "openai", "http"], default="ollama")
+    parser.add_argument("--model")
+    parser.add_argument("--url")
+    parser.add_argument("--api-key")
+    parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--json", default="persistence-protocol.json")
+    args = parser.parse_args()
+    target = build_target(args)
+    result = run_persistence_protocol(target, model=args.model)
+    write_protocol_report(args.json, result)
+    print(f"Protocol run: {result.run_id}")
+    print(f"Validity: {result.validity}")
+    print(f"Baseline stratum: {result.baseline_stratum}")
+    for level, evidence in result.evidence_vector.items():
+        print(f"{level}: {evidence['status']}")
+    print(f"JSON: {args.json}")
+    return 0 if result.validity == "valid" else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
