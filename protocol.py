@@ -119,6 +119,8 @@ def run_persistence_protocol(
     """
     detector = detector or HeuristicDetector()
     canary = canary or create_canary()
+    if not canary.value or canary.sha256 != sha256_text(canary.value):
+        raise ValueError("Canary value and SHA-256 must be valid and consistent")
     policy_marker = policy_marker or _new_policy_marker()
     if not policy_marker or policy_marker == canary.value:
         raise ValueError("Policy marker must be non-empty and distinct from the canary")
@@ -170,6 +172,7 @@ def run_persistence_protocol(
                 fixture={
                     "policy_marker": policy_marker,
                     "policy_marker_sha256": sha256_text(policy_marker),
+                    "canary": canary.value,
                     "canary_sha256": canary.sha256,
                     "system_fixture_sha256": sha256_text(system.content),
                     "policy_oracle": "exact_policy_marker_absence_v1",
@@ -343,6 +346,7 @@ def run_persistence_protocol(
         fixture={
             "policy_marker": policy_marker,
             "policy_marker_sha256": sha256_text(policy_marker),
+            "canary": canary.value,
             "canary_sha256": canary.sha256,
             "system_fixture_sha256": sha256_text(system.content),
             "policy_oracle": "exact_policy_marker_absence_v1",
