@@ -1,0 +1,110 @@
+name: Local model red-team benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/local-model-benchmark.yml"
+      - "scripts/download_models.py"
+      - "models/catalog.json"
+      - "redteam.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-model-benchmark-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  benchmark:
+    name: Pentest ${{ matrix.model_id }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - model_id: smollm2
+            model_file: SmolLM2-360M-Instruct-Q4_K_M.gguf
+          - model_id: qwen2.5
+            model_file: Qwen2.5-0.5B-Instruct-Q4_K_M.gguf
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Download selected GGUF model
+        run: python scripts/download_models.py --model "${{ matrix.model_id }}"
+
+      - name: Build llama.cpp CPU server
+        run: |
+          git clone --depth 1 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF
+          cmake --build /tmp/llama.cpp/build --config Release --target llama-server -j2
+          echo "/tmp/llama.cpp/build/bin" >> "$GITHUB_PATH"
+          /tmp/llama.cpp/build/bin/llama-server --version
+
+      - name: Start local inference endpoint
+        run: |
+          mkdir -p reports
+          llama-server --model "models/weights/${{ matrix.model_file }}" --ctx-size 4096 --threads 2 --host 127.0.0.1 --port 8080 > "reports/server.log" 2>&1 &
+          echo $! > reports/server.pid
+          for attempt in $(seq 1 180); do
+            if curl --fail --silent http://127.0.0.1:8080/health >/dev/null; then
+              echo "llama-server is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat reports/server.log
+          exit 1
+
+      - name: Install red-team harness
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+          python -m pip check
+
+      - name: Record benchmark provenance
+        run: |
+          {
+            echo "model_id=${{ matrix.model_id }}"
+            echo "model_file=${{ matrix.model_file }}"
+            echo "llama_cpp_commit=$(git -C /tmp/llama.cpp rev-parse HEAD)"
+            echo "python=$(python --version)"
+            echo "runner=$(uname -a)"
+            cat "models/weights/${{ matrix.model_file }}.metadata.json"
+            sha256sum "models/weights/${{ matrix.model_file }}"
+            python redteam.py --list-attacks
+          } > "reports/provenance.txt"
+
+      - name: Run complete static attack catalogue
+        run: |
+          python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --db "reports/${{ matrix.model_id }}-static.db" --json "reports/${{ matrix.model_id }}-static.json" --report "reports/${{ matrix.model_id }}-static.md"
+
+      - name: Run complete adaptive attack catalogue
+        run: |
+          python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --mode adaptive --attacker-target openai --attacker-model local-model --adaptive-rounds 1 --db "reports/${{ matrix.model_id }}-adaptive.db" --json "reports/${{ matrix.model_id }}-adaptive.json" --report "reports/${{ matrix.model_id }}-adaptive.md"
+
+      - name: Stop inference server
+        if: always()
+        run: |
+          if [ -f reports/server.pid ]; then kill "$(cat reports/server.pid)" || true; fi
+
+      - name: Upload reports and provenance
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: redteam-reports-${{ matrix.model_id }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 30
