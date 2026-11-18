@@ -2,11 +2,11 @@ cff-version: 1.2.0
 message: "If you use this software in research or evaluation, please cite it as below."
 title: "Local LLM Red Team"
 type: software
+abstract: "A lightweight, local-first Python harness for reproducible prompt-level security testing of locally hosted large language models, including jailbreak and prompt-injection probes against Ollama and OpenAI-compatible endpoints."
 authors:
-  - family-names: Canalis
-    given-names: David Ferrández
+  - family-names: Ferrández Canalis
+    given-names: David
 version: "0.1.0"
-date-released: 2026-10-04
 license: MIT
 repository-code: "https://github.com/orbitalronin94/Local-LLM-Red-Team"
 keywords:
