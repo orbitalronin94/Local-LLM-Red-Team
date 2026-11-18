@@ -134,7 +134,10 @@ jobs:
           catalog = json.loads(Path("models/catalog.json").read_text(encoding="utf-8"))
           model_id = os.environ["MODEL_ID"] if "MODEL_ID" in os.environ else None
           expected = catalog["models"].get(model_id, {}) if model_id else {}
-          if metadata.get("filename") != model.name or metadata.get("repo_id") != expected.get("repo_id"):
+          if (metadata.get("model_id") != model_id
+                  or metadata.get("filename") != model.name
+                  or metadata.get("repo_id") != expected.get("repo_id")
+                  or metadata.get("revision_requested") != expected.get("revision", "main")):
               raise SystemExit(f"Model provenance mismatch for {model}")
           if metadata.get("sha256") != digest:
               raise SystemExit(f"SHA-256 mismatch for {model}")
@@ -184,6 +187,10 @@ jobs:
       - name: Run complete adaptive attack catalogue
         run: |
           python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --mode adaptive --attacker-target openai --attacker-model local-model --adaptive-rounds 2 --db "reports/${{ matrix.model_id }}-adaptive.db" --json "reports/${{ matrix.model_id }}-adaptive.json" --report "reports/${{ matrix.model_id }}-adaptive.md"
+
+      - name: Run deterministic multi-turn scenarios
+        run: |
+          python scenarios.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --json "reports/${{ matrix.model_id }}-scenarios.json" --report "reports/${{ matrix.model_id }}-scenarios.md"
 
       - name: Stop inference server
         if: always()
