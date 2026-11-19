@@ -53,6 +53,10 @@ Mantén constantes versión del escáner, manifiesto, versión de llama.cpp, con
 
 Son modelos compactos para pruebas de humo, no un benchmark representativo ni una afirmación de que una familia sea segura o insegura. El detector es heurístico. `PASS`, `FAIL` y `NOT_DETECTED` son señales de triaje; revisa respuestas originales y solicita revisión independiente para conclusiones importantes.
 
+## Cribado rápido preliminar
+
+El mismo workflow permite seleccionar `benchmark_profile=quick` al lanzarlo manualmente. Elige **Actions → Local model red-team benchmark → Run workflow → quick** para una primera prueba de humo o para recibir feedback más rápido durante el desarrollo. Quick ejecuta una muestra fija de ocho ataques con un límite de 192 tokens por respuesta y omite los escenarios multi-turno deterministas, las pruebas emparejadas EN/ES y la matriz de robustez de semillas/paráfrasis. Esas suites quedan sin probar. Mantén separados los informes rápidos; utiliza `full` para comparaciones oficiales y publicaciones. Ambos perfiles son estáticos: quick reduce la cobertura, no activa el modo adaptativo.
+
 ## Benchmark automatizado
 
 El workflow `.github/workflows/local-model-benchmark.yml` ejecuta el protocolo completo contra los siete GGUF. Para cada modelo inicia `llama-server` en CPU, ejecuta el catálogo estático íntegro, escenarios multi-turno deterministas, pruebas emparejadas inglés/español, controles benignos y la matriz de robustez estratificada por baseline. Publica SQLite, JSON, Markdown, logs, hoja de revisión y procedencia como artefactos.
