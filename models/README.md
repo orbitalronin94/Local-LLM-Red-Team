@@ -57,6 +57,10 @@ Keep scanner version, attack manifest, llama.cpp version, context size, sampling
 
 These are compact smoke-test models, not a representative security benchmark and not a claim that a model family is safe or unsafe. The current detector is heuristic. PASS, FAIL and NOT_DETECTED are triage signals; inspect raw responses and use independent review for important conclusions.
 
+## Quick preliminary screen
+
+The same workflow also exposes `benchmark_profile=quick` at manual dispatch. Choose **Actions → Local model red-team benchmark → Run workflow → quick** for an early smoke test or faster development feedback. Quick runs a fixed eight-attack subset with a 192-token output cap and skips deterministic multi-turn scenarios, paired EN/ES probes and the seed/paraphrase robustness matrix. These omitted suites are not tested. Keep quick reports separate; use `full` for official cross-model comparisons and publication. Both profiles are static; quick is a reduced-coverage screen, not an adaptive run.
+
 ## Automated full-catalog benchmark
 
 The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs the complete built-in attack catalogue against seven GGUF models: SmolLM2 360M, Qwen2.5 0.5B and 3B, Llama 3.2 1B and 3B, and Gemma 3 1B and 4B. For each model it starts a CPU-only `llama-server`, runs the complete static attack catalogue, deterministic multi-turn scenarios, paired English-Spanish probes and benign controls, plus the baseline-stratified robustness matrix. It uploads SQLite, JSON, Markdown, server logs and provenance as separate artifacts. Adaptive self-play is deliberately excluded from the official seven-model benchmark.
@@ -65,7 +69,7 @@ It can be started manually from **Actions → Local model red-team benchmark →
 
 To populate the three larger-model caches before a benchmark, merge the model-catalogue change and manually run **Actions → Prepare local model cache** on `main`. That workflow downloads only Qwen2.5 3B, Llama 3.2 3B and Gemma 3 4B, records resolved revisions and SHA-256, and writes cache entries using the exact keys consumed by the benchmark. It does not start inference or run attacks. Model-catalogue/workflow-maintenance changes no longer auto-launch the expensive benchmark; dispatch it explicitly when ready.
 
-The official benchmark is static-only: it does not launch adaptive self-play or use the target model as its own attacker. The full profile still includes the complete static catalogue, deterministic multi-turn scenarios, paired-language probes and the robustness matrix. This is distinct from `benchmark_profile=quick`, which remains a reduced development screen. The standalone CLI's adaptive mode remains available for separate exploratory experiments, but its results are not part of the official seven-model comparison. GitHub-hosted CPU performance and timeouts can vary; a failed model run is reported as failed, not as a clean security result.
+The official seven-model comparison uses the full static protocol. Static means that all targets receive the same versioned, pre-authored attack catalogue; it does not remove multi-turn coverage. The full profile also runs fixed deterministic multi-turn scenarios, paired EN/ES probes, benign controls and the baseline-stratified robustness matrix. Adaptive self-play is excluded because the target acting as its own attacker creates response-dependent attack paths, weakens cross-model input matching and adds CPU inference cost. The standalone CLI adaptive mode remains available for exploratory research and is not pooled into official results. See [official benchmark methodology](../docs/official-benchmark-methodology.md). GitHub-hosted CPU performance and timeouts can vary; a failed model run is reported as failed, not as a clean security result.
 
 
 ## Persistent model cache
@@ -79,4 +83,4 @@ The active CI matrix now contains seven models spanning 360M–4B: SmolLM2 360M,
 
 The workflow restores each model from its own GitHub Actions cache, validates sidecar provenance and recomputes SHA-256 before inference. The first run after a cache miss downloads the GGUF; later runs reuse it when GitHub retains the cache. This is persistent CI caching, not a guarantee that weights are permanently preinstalled on every ephemeral runner.
 
-The next run records runner capacity, starts llama-server with one parallel slot, and sends a deterministic warm-up request before the attack suites. Future improvements: pin immutable GGUF revisions, add repeated seeded runs, separate target and attacker models, and expand matched Spanish-native probes with benign controls.
+The current workflow records runner capacity and model/runtime provenance, starts llama-server with one parallel slot, and sends a warm-up request before the attack suites. The full official profile includes the configured seed/paraphrase matrix and matched English/Spanish probes; preserve their separate denominators and limitations when interpreting the aggregate.

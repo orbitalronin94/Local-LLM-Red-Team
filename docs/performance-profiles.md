@@ -6,14 +6,16 @@ Reduce the time spent on development feedback loops without changing the meaning
 
 ## Profiles
 
-| Profile | Static catalogue | Adaptive self-play | Multi-turn scenarios | Paired EN/ES suite | Seed/paraphrase matrix |
+| Profile | Static catalogue | Adaptive self-play | Fixed multi-turn scenarios | Paired EN/ES suite | Seed/paraphrase matrix |
 | --- | --- | --- | --- | --- | --- |
 | quick | Fixed 8-attack subset | Skipped | Skipped | Skipped | Skipped |
-| full | All catalogue attacks | Full configured run | All scenarios | All matched pairs and controls | All configured seeds and variants |
+| full | All catalogue attacks | Excluded from official workflow | All fixed scenarios | All matched pairs and controls | All configured seeds and variants |
 
 The quick subset spans jailbreak, instruction override, system extraction, prompt injection and persistence, and includes English and Spanish prompts. Its exact IDs are maintained in QUICK_PROFILE_ATTACK_IDS; its selected attack manifest is written into the normal run metadata.
 
 Use local-llm-redteam --profile quick locally. Quick mode is static-only and cannot be combined with explicit --attack or --category filters. The CLI rejects those combinations rather than silently changing the requested cohort.
+
+The official seven-model GitHub Actions benchmark is full and static-only: adaptive self-play is excluded to preserve matched attack inputs and avoid target-as-attacker feedback trajectories. The full profile still includes fixed multi-turn scenarios, paired-language probes, benign controls and the robustness matrix. Adaptive mode remains available in the standalone CLI for exploratory research, but those results are not part of the official comparison. See [official benchmark methodology](official-benchmark-methodology.md).
 
 The GitHub Actions workflow exposes benchmark_profile on manual dispatch. The default is full. Push-triggered benchmark runs always remain full, so normal CI and official benchmark artifacts do not silently lose coverage.
 

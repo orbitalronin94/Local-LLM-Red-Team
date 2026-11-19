@@ -6,14 +6,16 @@ Reducir el tiempo de las iteraciones de desarrollo sin alterar el significado ni
 
 ## Perfiles
 
-| Perfil | Catálogo estático | Autoataque adaptativo | Escenarios multi-turno | Suite pareada EN/ES | Matriz de semillas/paráfrasis |
+| Perfil | Catálogo estático | Autoataque adaptativo | Escenarios multi-turno fijos | Suite pareada EN/ES | Matriz de semillas/paráfrasis |
 | --- | --- | --- | --- | --- | --- |
 | quick | Muestra fija de 8 ataques | Omitido | Omitidos | Omitida | Omitida |
-| full | Todo el catálogo | Ejecución configurada completa | Todos los escenarios | Todos los pares y controles | Todas las semillas y variantes configuradas |
+| full | Todo el catálogo | Excluido del workflow oficial | Todos los escenarios fijos | Todos los pares y controles | Todas las semillas y variantes configuradas |
 
 La muestra rápida cubre jailbreak, anulación de instrucciones, extracción del sistema, inyección de prompts y persistencia; incluye prompts en inglés y español. Sus IDs exactos viven en QUICK_PROFILE_ATTACK_IDS y el manifiesto seleccionado queda registrado en los metadatos de la ejecución.
 
 En local: local-llm-redteam --profile quick. El perfil rápido es solo estático y no se puede combinar con filtros explícitos --attack o --category. La CLI rechaza esas combinaciones para no cambiar silenciosamente la cohorte solicitada.
+
+El benchmark oficial de siete modelos en GitHub Actions utiliza full y es exclusivamente estático: excluye el autoataque adaptativo para conservar entradas emparejadas y evitar trayectorias de ataque dependientes de las respuestas del objetivo. El perfil completo mantiene escenarios multi-turno fijos, pruebas lingüísticas pareadas, controles benignos y la matriz de robustez. El modo adaptativo sigue disponible en la CLI independiente para investigación exploratoria, pero sus resultados no forman parte de la comparación oficial. Consulta la [metodología del benchmark oficial](official-benchmark-methodology.es.md).
 
 El workflow de GitHub Actions ofrece benchmark_profile al lanzarlo manualmente. El valor predeterminado es full. Los benchmarks activados por push siguen siendo siempre completos, de modo que CI y los artefactos oficiales no pierden cobertura de forma inadvertida.
 

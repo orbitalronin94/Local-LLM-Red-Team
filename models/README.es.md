@@ -53,13 +53,17 @@ Mantén constantes versión del escáner, manifiesto, versión de llama.cpp, con
 
 Son modelos compactos para pruebas de humo, no un benchmark representativo ni una afirmación de que una familia sea segura o insegura. El detector es heurístico. `PASS`, `FAIL` y `NOT_DETECTED` son señales de triaje; revisa respuestas originales y solicita revisión independiente para conclusiones importantes.
 
+## Cribado rápido preliminar
+
+El mismo workflow permite seleccionar `benchmark_profile=quick` al lanzarlo manualmente. Elige **Actions → Local model red-team benchmark → Run workflow → quick** para una primera prueba de humo o para recibir feedback más rápido durante el desarrollo. Quick ejecuta una muestra fija de ocho ataques con un límite de 192 tokens por respuesta y omite los escenarios multi-turno deterministas, las pruebas emparejadas EN/ES y la matriz de robustez de semillas/paráfrasis. Esas suites quedan sin probar. Mantén separados los informes rápidos; utiliza `full` para comparaciones oficiales y publicaciones. Ambos perfiles son estáticos: quick reduce la cobertura, no activa el modo adaptativo.
+
 ## Benchmark automatizado
 
-El workflow `.github/workflows/local-model-benchmark.yml` ejecuta el catálogo integrado contra los siete GGUF. Para cada modelo inicia `llama-server` en CPU, genera un informe estático y otro adaptativo (autojuego de dos rondas) y publica SQLite, JSON, Markdown, logs y procedencia como artefactos.
+El workflow `.github/workflows/local-model-benchmark.yml` ejecuta el protocolo completo contra los siete GGUF. Para cada modelo inicia `llama-server` en CPU, ejecuta el catálogo estático íntegro, escenarios multi-turno deterministas, pruebas emparejadas inglés/español, controles benignos y la matriz de robustez estratificada por baseline. Publica SQLite, JSON, Markdown, logs, hoja de revisión y procedencia como artefactos.
 
-Puede iniciarse desde **Actions → Local model red-team benchmark → Run workflow**. También se dispara cuando cambian en `main` el workflow, el descargador/catálogo o el escáner. Utiliza modelos públicos y no necesita secretos API.
+Puede iniciarse desde **Actions → Local model red-team benchmark → Run workflow**. El benchmark oficial utiliza `benchmark_profile=full` y registra `benchmark_mode=static`. Los cambios de catálogo/workflow no lanzan por sí solos el benchmark costoso; se despacha expresamente cuando está listo. Utiliza modelos públicos y no necesita secretos API.
 
-En el modo adaptativo, el modelo evaluado también actúa como atacante. Es una prueba de estrés por autojuego reproducible, no una evaluación con un atacante independiente. El rendimiento de los runners CPU y los timeouts pueden variar; una ejecución fallida se registra como fallida, nunca como resultado limpio de seguridad.
+El autoataque adaptativo queda fuera de la comparación oficial. El objetivo actuando también como atacante genera seguimientos dependientes de respuestas previas, por lo que los modelos pueden recibir trayectorias distintas; esto dificulta atribuir diferencias al modelo y añade coste de inferencia CPU. El modo adaptativo sigue disponible en la CLI para investigación exploratoria, pero sus resultados no se mezclan con los oficiales. Consulta la [metodología del benchmark oficial](../docs/official-benchmark-methodology.es.md). El rendimiento de los runners CPU y los timeouts pueden variar; una ejecución fallida se registra como fallida, nunca como resultado limpio de seguridad.
 
 
 ## Caché persistente de modelos
