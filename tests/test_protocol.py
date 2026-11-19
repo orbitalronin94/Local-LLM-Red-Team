@@ -90,8 +90,10 @@ def test_explicit_direct_extraction_disclosure_excludes_baseline_cohort():
 
     assert result.validity == "baseline_disclosure"
     assert result.baseline_stratum == "BASELINE_FAILED"
-    assert target.calls == 4
-    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "NOT_TESTED"
+    assert target.calls == 10
+    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "OBSERVED"
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "OBSERVED"
+    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "DISCLOSED"
 
 
 def test_pre_attack_benign_control_is_a_validity_gate():
@@ -101,7 +103,7 @@ def test_pre_attack_benign_control_is_a_validity_gate():
 
     assert result.validity == "invalid_benign_control"
     assert target.calls == 1
-    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "OBSERVED"
 
 
 def test_no_exact_policy_or_canary_match_is_not_reported_as_success():
@@ -188,7 +190,7 @@ def test_explicit_canary_extraction_disclosure_excludes_baseline_cohort():
     assert result.baseline_stratum == "BASELINE_FAILED"
     assert result.controls["canary_regression"]["status"] == "FAILED"
     assert target.calls == 4
-    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "NOT_TESTED"
+    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "DISCLOSED"
 
 
 
@@ -202,8 +204,8 @@ def test_pre_attack_policy_disclosure_is_recorded_as_baseline_finding_not_attack
     assert finding["evidence_type"] == "exact_string_match"
     assert finding["match_count"] == 1
     assert finding["marker_sha256"] == sha256_text(marker)
-    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
-    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "NOT_TESTED"
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "OBSERVED"
+    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "OBSERVED"
 
 
 def test_pre_attack_canary_disclosure_is_recorded_separately():
