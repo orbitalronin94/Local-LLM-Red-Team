@@ -6,7 +6,7 @@
 
 **Idioma / Language:** [Español](README.es.md) · [English](README.md)
 
-**Herramienta ligera de Python, local-first, para evaluar de forma reproducible la seguridad de modelos de lenguaje alojados en infraestructura propia.** Prueba jailbreaks, prompt injection, anulación de instrucciones, extracción del system prompt y persistencia multi-turno contra Ollama, servidores compatibles con OpenAI y endpoints HTTP JSON genéricos. Los hallazgos heurísticos se exportan a JSON, Markdown y SQLite.
+**Toolkit open source de Python para red teaming y evaluación de seguridad de LLM locales.** Ejecuta pruebas reproducibles de prompt injection, jailbreaks, exposición del system prompt, anulación de instrucciones y persistencia multi-turno contra Ollama, servidores locales compatibles con OpenAI y endpoints HTTP JSON genéricos. Examina evidencias en JSON, Markdown y SQLite. Pensado para desarrolladores que evalúan la seguridad y robustez de modelos de lenguaje autoalojados.
 
 **Estado:** Pre-1.0; los criterios de publicación se mantienen en [Preparación V1](docs/v1-readiness.es.md). La interfaz pública y el catálogo de ataques pueden evolucionar antes de 1.0. Al probar un endpoint local no hace falta una cuenta cloud, una suscripción API ni un framework de ejecución adicional.
 
@@ -14,7 +14,7 @@
 
 > **Solo uso autorizado:** prueba únicamente sistemas propios o aquellos para los que tengas permiso expreso y previo. No analices sistemas ajenos sin autorización. La legislación varía según la jurisdicción: revisa las leyes, contratos, normas de privacidad y condiciones del proveedor de cada país pertinente antes de realizar pruebas. Este proyecto no ofrece asesoramiento jurídico. Lee el [aviso de uso autorizado y consideraciones legales](docs/legal-use.es.md).
 
-## Por qué existe
+## Seguridad de LLM locales: por qué existe
 
 Los modelos locales se utilizan en asistentes privados, herramientas de programación y flujos internos. Ejecutarlos en localhost no los hace inmunes a instrucciones hostiles. También necesitan pruebas de seguridad.
 
