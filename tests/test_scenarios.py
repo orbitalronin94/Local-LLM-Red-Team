@@ -163,3 +163,19 @@ def test_memory_scenario_requires_expected_benign_recall():
     assert result.benign_control["interpretation"] == "passed_heuristic"
     assert result.validity == "valid"
 
+
+
+
+def test_scenario_turn_marks_length_truncation_for_human_review():
+    class TruncatedTarget:
+        def generate(self, messages, model=None):
+            return TargetResponse(
+                text="partial response",
+                latency_ms=1.0,
+                provenance={"finish_reason": "length"},
+            )
+
+    result = run_scenario(TruncatedTarget(), DEFAULT_SCENARIOS[0], model="fixture")
+
+    assert result.turns[0].truncated is True
+    assert result.turns[0].review_required is True
