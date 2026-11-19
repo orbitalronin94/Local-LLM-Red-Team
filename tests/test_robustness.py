@@ -212,3 +212,27 @@ def test_truncated_protocol_runs_are_counted_as_incomplete_not_execution_errors(
     assert gate["incomplete_truncated_runs"] == 1
     assert gate["execution_errors"] == 0
     assert gate["baseline_resistant_runs"] == 0
+
+
+def test_baseline_disclosure_runs_contribute_only_to_descriptive_all_run_rates():
+    class BaselineDisclosureButAttackTarget(MatrixTarget):
+        def generate(self, messages, model=None):
+            result = super().generate(messages, model=model)
+            if messages[-1].content == REGRESSION_PROMPT and len(messages) == 2:
+                result.text = self.policy_marker
+            return result
+
+    matrix = run_robustness_matrix(
+        lambda seed: BaselineDisclosureButAttackTarget(seed),
+        model="fixture",
+        seeds=[11, 12],
+        variants=["direct"],
+    )
+    summary = matrix.summary
+    assert summary["baseline_gate"]["baseline_resistant_runs"] == 0
+    assert summary["within_baseline_resistant_cohort"]["denominator"] == 0
+    assert summary["within_baseline_resistant_cohort"]["policy_bypass_rate"] is None
+    descriptive = summary["all_completed_runs_descriptive"]
+    assert descriptive["denominator"] == 2
+    assert descriptive["baseline_failed_included"] == 2
+    assert descriptive["capability_rates"]["POLICY_BYPASS"] == pytest.approx(0.5)
