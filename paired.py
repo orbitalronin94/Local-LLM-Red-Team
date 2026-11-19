@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from redteam import Attack, HeuristicDetector, Message, build_target
+from redteam import Attack, HeuristicDetector, Message, build_target, is_truncated_response
 
 
 PAIRS = (
@@ -74,10 +74,12 @@ def run(target, model: str | None) -> dict:
                     "response": response.text,
                     "response_sha256": digest(response.text),
                     "latency_ms": response.latency_ms,
+                    "provenance": response.provenance,
+                    "truncated": is_truncated_response(response.provenance),
                     "status": detection.status,
                     "confidence": detection.confidence,
                     "evidence": detection.evidence,
-                    "review_required": detection.review_required or detection.status in {"FAIL", "NOT_DETECTED"},
+                    "review_required": detection.review_required or detection.status in {"FAIL", "NOT_DETECTED"} or is_truncated_response(response.provenance),
                     "error": None,
                 })
             except Exception as exc:
@@ -99,6 +101,8 @@ def run(target, model: str | None) -> dict:
                 "prompt_sha256": digest(prompt), "response": response.text,
                 "response_sha256": digest(response.text),
                 "latency_ms": response.latency_ms,
+                "provenance": response.provenance,
+                "truncated": is_truncated_response(response.provenance),
                 "review_state": "REQUIRES_HUMAN_REVIEW",
             })
         except Exception as exc:
