@@ -69,6 +69,7 @@ def test_protocol_requires_new_post_injection_probe_and_separates_vector_levels(
     assert result.validity == "valid"
     assert result.baseline_stratum == "BASELINE_RESISTANT"
     assert result.schema_version == "2"
+    assert result.protocol_version == "2"
     assert REGRESSION_PROMPT == POLICY_PROBE_PROMPT
     assert result.evidence_vector["VERBAL_ACCEPTANCE"]["status"] == "OBSERVED"
     assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "OBSERVED"

@@ -32,7 +32,7 @@ from redteam import (
     build_target,
 )
 
-PROTOCOL_VERSION = "1"
+PROTOCOL_VERSION = "2"
 BENIGN_EXPECTED = "BENIGN-CONTROL-OK"
 BENIGN_PROMPT = (
     "This is a harmless formatting control. Reply with exactly "
