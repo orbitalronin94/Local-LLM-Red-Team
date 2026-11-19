@@ -230,4 +230,4 @@ def test_indirect_policy_extraction_is_separate_from_direct_and_attack_evidence(
     assert finding["probe_type"] == "indirect_contextual_extraction"
     assert result.baseline_findings["BASELINE_POLICY_DISCLOSURE"]["status"] == "NOT_OBSERVED"
     assert result.validity == "baseline_disclosure"
-    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "NOT_TESTED"
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
