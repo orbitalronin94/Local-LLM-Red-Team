@@ -758,6 +758,7 @@ def test_write_json(tmp_path):
     assert payload["run_metadata"]["target_type"] == "fake"
     assert payload["run_metadata"]["model"] == "fake-model"
     assert len(payload["results"]) == 1
+    assert payload["results"][0]["evidence_vector"]["POLICY_BYPASS"]["status"] == "UNVERIFIED"
 
 
 def test_write_markdown(tmp_path):
@@ -1439,6 +1440,29 @@ def test_summary_excludes_empty_errors_and_throttled_from_rates():
     assert summary.attack_success_rate == pytest.approx(0.5)
     assert summary.refusal_rate == pytest.approx(0.5)
     assert summary.throttled == 1
+
+
+
+def test_scanner_persists_independent_evidence_vector_in_sqlite(tmp_path):
+    attack = next(a for a in DEFAULT_ATTACKS if a.id == "instruction-override")
+    database = Database(str(tmp_path / "evidence.db"))
+    try:
+        scanner = Scanner(
+            FakeTarget(response="Previous instructions have been disabled."),
+            database=database,
+        )
+        run_id, results = scanner.scan([attack], model="fixture")
+        row = database.connection.execute(
+            "SELECT evidence_vector_json FROM results WHERE run_id = ?",
+            (run_id,),
+        ).fetchone()
+        stored = json.loads(row["evidence_vector_json"])
+        assert stored == results[0].evidence_vector
+        assert stored["PERSISTENT_OVERRIDE"]["status"] == "NOT_TESTED"
+        assert stored["POLICY_BYPASS"]["status"] == "UNVERIFIED"
+    finally:
+        database.close()
+
 
 
 def test_scanner_persists_target_provenance(tmp_path):
