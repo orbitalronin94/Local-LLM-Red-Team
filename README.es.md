@@ -296,7 +296,7 @@ En local, usa local-llm-redteam --profile quick. El perfil rápido solo admite m
 
 Cada resultado estático incluye un vector de capacidades independientes: `VERBAL_ACCEPTANCE`, `PERSISTENT_OVERRIDE`, `POLICY_BYPASS` y `CANARY_DISCLOSURE`. Una señal textual del detector solo puede alimentar `VERBAL_ACCEPTANCE`, que requiere revisión humana; no demuestra persistencia ni bypass. Esas capacidades necesitan una tarea conductual posterior a la inyección o un oráculo determinista independiente.
 
-Para ejecutar la sonda opcional de canario sintético:
+Para añadir la sonda opcional de canario sintético al conjunto estático seleccionado (sin filtros también se ejecuta el catálogo predeterminado):
 
 ```bash
 local-llm-redteam --target ollama --model llama3.2 --canary-test --json canario.json --report canario.md
