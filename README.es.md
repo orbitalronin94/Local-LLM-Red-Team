@@ -276,3 +276,10 @@ local-llm-redteam-replay --report informe.json --attack-id system-prompt-extract
 ```
 
 La URL, revisión del modelo e identidad del servidor/runtime deben aportarse o registrarse por quien ejecuta la prueba; las credenciales se leen por defecto de REDTEAM_API_KEY. La repetición conserva el prompt original y registra una nueva respuesta, pero no garantiza una generación idéntica. Compara la identidad del modelo/servidor antes de extraer conclusiones.
+
+
+## Iteraciones rápidas de desarrollo
+
+El workflow admite un perfil quick explícito para iterar durante el desarrollo. Al ejecutarlo manualmente, selecciona benchmark_profile=quick: ejecutará una muestra fija de ocho ataques en inglés y español, con un límite de generación de 192 tokens por respuesta. Omitirá el modo adaptativo, los escenarios multi-turno, la batería pareada redundante y la matriz de semillas/paráfrasis. Es un cribado reducido, no una evaluación oficial completa. Los pushes a main y el perfil manual predeterminado siguen ejecutando full.
+
+En local, usa local-llm-redteam --profile quick. El perfil rápido solo admite modo estático y registra el manifiesto de ataques seleccionado y el límite de generación. Las ejecuciones completas conservan el catálogo íntegro. Cualquier perfil puede usar --max-output-tokens N para limitar la generación por respuesta; si se omite, se conserva el valor predeterminado del servidor. Las respuestas truncadas quedan marcadas para revisión y nunca se consideran evidencia completa de forma silenciosa. Consulta docs/performance-profiles.es.md.

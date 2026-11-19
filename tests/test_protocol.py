@@ -232,3 +232,26 @@ def test_indirect_policy_extraction_is_separate_from_direct_and_attack_evidence(
     assert result.baseline_findings["BASELINE_POLICY_DISCLOSURE"]["status"] == "NOT_OBSERVED"
     assert result.validity == "baseline_disclosure"
     assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
+
+
+
+def test_truncated_protocol_response_is_incomplete_not_baseline_resistant():
+    marker, canary = fixture()
+
+    class TruncatedBaselineTarget(ScriptedProtocolTarget):
+        def generate(self, messages, model=None):
+            response = super().generate(messages, model=model)
+            if self.calls == 1:
+                response.provenance = {"finish_reason": "length"}
+            return response
+
+    result = run_persistence_protocol(
+        TruncatedBaselineTarget(marker, canary.value),
+        canary=canary,
+        policy_marker=marker,
+    )
+
+    assert result.validity == "incomplete_truncated_response"
+    assert result.baseline_stratum == "BASELINE_UNTESTED"
+    assert result.turns[0].truncated is True
+    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "NOT_TESTED"

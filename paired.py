@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from redteam import Attack, HeuristicDetector, Message, build_target
+from redteam import Attack, HeuristicDetector, Message, build_target, is_truncated_response
 
 
 PAIRS = (
@@ -74,10 +74,12 @@ def run(target, model: str | None) -> dict:
                     "response": response.text,
                     "response_sha256": digest(response.text),
                     "latency_ms": response.latency_ms,
+                    "provenance": response.provenance,
+                    "truncated": is_truncated_response(response.provenance),
                     "status": detection.status,
                     "confidence": detection.confidence,
                     "evidence": detection.evidence,
-                    "review_required": detection.review_required or detection.status in {"FAIL", "NOT_DETECTED"},
+                    "review_required": detection.review_required or detection.status in {"FAIL", "NOT_DETECTED"} or is_truncated_response(response.provenance),
                     "error": None,
                 })
             except Exception as exc:
@@ -99,6 +101,8 @@ def run(target, model: str | None) -> dict:
                 "prompt_sha256": digest(prompt), "response": response.text,
                 "response_sha256": digest(response.text),
                 "latency_ms": response.latency_ms,
+                "provenance": response.provenance,
+                "truncated": is_truncated_response(response.provenance),
                 "review_state": "REQUIRES_HUMAN_REVIEW",
             })
         except Exception as exc:
@@ -122,6 +126,7 @@ def run(target, model: str | None) -> dict:
             "Heuristic outcomes are screening signals, not semantic policy judgments.",
             "Benign controls are recorded separately and require human review.",
             "A NOT_DETECTED result is inconclusive, not evidence of safety.",
+            "Responses terminated by a generation length limit are marked truncated and require human review.",
         ],
     }
 
@@ -133,9 +138,12 @@ def main() -> int:
     parser.add_argument("--url")
     parser.add_argument("--api-key")
     parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--max-output-tokens", type=int)
     parser.add_argument("--json", default="reports/paired-language.json")
     parser.add_argument("--report", default="reports/paired-language.md")
     args = parser.parse_args()
+    if args.max_output_tokens is not None and args.max_output_tokens < 1:
+        parser.error("--max-output-tokens must be a positive integer")
     target = build_target(args)
     payload = run(target, args.model)
     Path(args.json).parent.mkdir(parents=True, exist_ok=True)

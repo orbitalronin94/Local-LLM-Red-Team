@@ -74,6 +74,9 @@ def summarize_robustness(
     execution_errors = [
         item for item in results if item.validity == "execution_error"
     ]
+    truncated_runs = [
+        item for item in results if item.validity == "incomplete_truncated_response"
+    ]
     baseline_policy_disclosures = [
         item for item in results
         if item.baseline_findings.get("BASELINE_POLICY_DISCLOSURE", {}).get("status") == "OBSERVED"
@@ -156,6 +159,7 @@ def summarize_robustness(
             "baseline_failed_runs": len(baseline_failed),
             "invalid_benign_runs": len(invalid_benign),
             "execution_errors": len(execution_errors),
+            "incomplete_truncated_runs": len(truncated_runs),
             "baseline_policy_disclosure_runs": len(baseline_policy_disclosures),
             "baseline_canary_disclosure_runs": len(baseline_canary_disclosures),
             "baseline_policy_indirect_disclosure_runs": len(baseline_indirect_policy_disclosures),
@@ -261,6 +265,7 @@ def main() -> int:
     parser.add_argument("--url")
     parser.add_argument("--api-key")
     parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--max-output-tokens", type=int)
     parser.add_argument("--seeds", default="42,43,44")
     parser.add_argument(
         "--variants",
@@ -269,6 +274,8 @@ def main() -> int:
     parser.add_argument("--json", default="robustness-matrix.json")
     args = parser.parse_args()
 
+    if args.max_output_tokens is not None and args.max_output_tokens < 1:
+        parser.error("--max-output-tokens must be a positive integer")
     seeds = [int(value.strip()) for value in args.seeds.split(",") if value.strip()]
     variants = [value.strip() for value in args.variants.split(",") if value.strip()]
 
@@ -281,6 +288,7 @@ def main() -> int:
             timeout=args.timeout,
             seed=seed,
             temperature=0.0,
+            max_output_tokens=args.max_output_tokens,
         )
         return build_target(target_args)
 
@@ -290,10 +298,15 @@ def main() -> int:
         seeds=seeds,
         variants=variants,
     )
+    matrix.summary["generation"] = {
+        "max_output_tokens": args.max_output_tokens,
+        "interpretation": "null means the target/server default was used",
+    }
     write_matrix_report(args.json, matrix)
     print(f"Robustness matrix: {len(matrix.results)} runs")
     print(f"Baseline-resistant runs: {matrix.summary['baseline_gate']['baseline_resistant_runs']}")
     print(f"Baseline-failed runs: {matrix.summary['baseline_gate']['baseline_failed_runs']}")
+    print(f"Incomplete truncated runs: {matrix.summary['baseline_gate']['incomplete_truncated_runs']}")
     print(f"Pre-attack policy disclosures: {matrix.summary['baseline_gate']['baseline_policy_disclosure_runs']}")
     print(f"Pre-attack canary disclosures: {matrix.summary['baseline_gate']['baseline_canary_disclosure_runs']}")
     print(f"Policy bypass rate (resistant cohort): {matrix.summary['within_baseline_resistant_cohort']['policy_bypass_rate']}")
@@ -301,7 +314,7 @@ def main() -> int:
     print(f"JSON: {args.json}")
     # A zero-sized attack cohort is a completed evaluation outcome, not a CI
     # execution failure. Preserve non-zero status only for infrastructure errors.
-    return 1 if matrix.summary["baseline_gate"]["execution_errors"] else 0
+    return 1 if (matrix.summary["baseline_gate"]["execution_errors"] or matrix.summary["baseline_gate"]["incomplete_truncated_runs"]) else 0
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 from paired import CONTROLS, PAIRS, run
-from redteam import FakeTarget
+from redteam import FakeTarget, TargetResponse
 
 
 def test_paired_suite_has_equal_english_and_spanish_coverage():
@@ -16,3 +16,23 @@ def test_paired_suite_records_pairs_controls_and_hashes():
         assert languages == {"en", "es"}
     assert all(item["prompt_sha256"] and item["response_sha256"] for item in payload["records"])
     assert all(item["review_state"] == "REQUIRES_HUMAN_REVIEW" for item in payload["benign_controls"])
+
+
+
+def test_paired_suite_marks_truncated_outputs_for_review():
+    class TruncatedTarget:
+        name = "truncated-fixture"
+
+        def generate(self, messages, model=None):
+            return TargetResponse(
+                text="partial response",
+                latency_ms=1.0,
+                provenance={"finish_reason": "length"},
+            )
+
+    payload = run(TruncatedTarget(), "fixture")
+
+    assert payload["records"][0]["truncated"] is True
+    assert payload["records"][0]["review_required"] is True
+    assert payload["records"][0]["provenance"]["finish_reason"] == "length"
+    assert all(item["truncated"] for item in payload["benign_controls"])

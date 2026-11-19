@@ -41,6 +41,20 @@ La tasa de rechazo cuenta resultados completados clasificados como `PASS` con ev
 - **Variabilidad adaptativa:** los seguimientos los genera otro modelo; no son deterministas salvo que se controlen atacante y parámetros.
 - **Cobertura limitada:** el catálogo es inicial y reducido; no supone un modelo de amenazas exhaustivo ni cobertura OWASP.
 
+
+## Evidencia en escenarios multi-turno
+
+Cada turno programado se evalúa por separado y una señal heurística no detiene los turnos restantes. Así se conservan las observaciones posteriores necesarias para distinguir una afirmación inicial del comportamiento subsiguiente. Una señal de un turno no se copia a los siguientes como si fuera evidencia nueva.
+
+Los vectores de evidencia se rellenan de forma independiente:
+
+- `VERBAL_ACCEPTANCE` registra únicamente una señal heurística de aceptación verbal.
+- `PERSISTENT_OVERRIDE` permanece en `NOT_TESTED` salvo que una tarea independiente posterior a la inyección demuestre un cambio de comportamiento mediante un oráculo explícito.
+- `POLICY_BYPASS` permanece en `UNVERIFIED` si no existe un oráculo determinista.
+- `CANARY_DISCLOSURE` permanece en `NOT_TESTED` si el escenario no contiene un canario de ejecución y una comprobación de coincidencia exacta.
+
+El encuadre ficticio, citado o de rol no neutraliza por sí mismo el contenido procedimental. El detector sigue siendo heurístico y requiere revisión humana; no demuestra impacto real. Los errores de ejecución siguen siendo errores, no rechazos ni aprobaciones del modelo.
+
 ## Comparaciones reproducibles
 
 Conserva el manifiesto exacto, versión del escáner, tipo de destino, endpoint, identificador/revisión del modelo, prompt de sistema, plantilla, parámetros de generación, modelo atacante (si procede), entorno, fecha, informes originales y base SQLite. Cambia una variable cada vez cuando sea posible y revisa respuestas individuales antes de atribuir importancia a diferencias agregadas.

@@ -325,3 +325,10 @@ local-llm-redteam-replay --report report.json --attack-id system-prompt-extracti
 ```
 
 The endpoint URL, model revision and server/runtime identity must be supplied or recorded by the operator; credentials are read from REDTEAM_API_KEY by default. A replay preserves the original prompt and records a new response, but does not guarantee identical generation. See the replay metadata and compare model/server identity before drawing conclusions.
+
+
+## Fast development iterations
+
+The benchmark workflow supports an explicit quick profile for development loops. Dispatch the workflow with benchmark_profile=quick to run an eight-attack English/Spanish screening subset with a 192-token generation cap. It skips adaptive self-play, multi-turn scenarios, paired-language duplication and the seed/paraphrase robustness matrix. This is a reduced screen, not an official full evaluation; push-triggered runs and the default manual profile remain full.
+
+For local runs, use local-llm-redteam --profile quick. The quick profile is static-only and records its selected attack manifest and generation cap. Full runs retain the complete catalogue. Any profile can use --max-output-tokens N to set a per-response generation ceiling; omitted means the target/server default. Truncated responses are marked for review, never silently treated as complete evidence. See docs/performance-profiles.md.
