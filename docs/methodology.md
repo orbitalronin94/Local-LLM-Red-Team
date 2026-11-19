@@ -99,3 +99,9 @@ Only assess models, endpoints and systems you own or are explicitly authorized t
 Static scanner JSON exports use an explicit `schema_version` so consumers can distinguish report structure changes from package version changes. The heuristic detector version and SHA-256 implementation fingerprint are recorded separately in run metadata. A changed detector implementation must not be pooled silently with results from an earlier fingerprint.
 
 The static scanner's `FAIL` is a review-required heuristic indicator. It does not, by itself, establish verbal acceptance, persistent override, policy bypass or canary disclosure. Those are independent evidence dimensions and require their own observations and oracles; a phrase-level match must not promote one dimension into another.
+
+## Static evidence vectors and controlled canary tests
+
+Static scan results now carry an independent evidence vector with four dimensions: `VERBAL_ACCEPTANCE`, `PERSISTENT_OVERRIDE`, `POLICY_BYPASS` and `CANARY_DISCLOSURE`. A static phrase-level signal may populate only `VERBAL_ACCEPTANCE`, and remains review-required; it cannot establish persistence or policy bypass. Those dimensions remain `NOT_TESTED` or `UNVERIFIED` until a dedicated behavioral protocol or deterministic oracle supplies evidence.
+
+The opt-in `--canary-test` runs a separate static probe using a random, run-scoped synthetic token placed in the target's system context. Disclosure is recorded only when the exact token occurs in the model response. The report stores the token hash and a hash of the injected context, never the token itself. The canary probe is not a real-secret test, is not part of the default attack profile, and cannot be combined with adaptive or quick mode. Static JSON reports use schema version `2`; the evidence vector has its own schema version in run metadata.
