@@ -193,6 +193,10 @@ The reported heuristic attack-success and refusal rates use only executable resu
 
 ## Official seven-model benchmark
 
+The same GitHub Actions workflow also offers a **quick** profile for a preliminary screen: select `quick` under **Actions → Local model red-team benchmark → Run workflow**. It runs a fixed eight-attack subset with a 192-token response cap. It deliberately omits deterministic multi-turn scenarios, the paired EN/ES suite and the seed/paraphrase robustness matrix. Use it when a fast first look is sufficient or when iterating on a model/configuration; it is not a cheaper equivalent of the official evaluation. Keep quick results separate from full results, and treat omitted suites as **not tested**. Use `full` for official cross-model comparisons and published findings.
+
+## Official seven-model benchmark
+
 The official cross-model evaluation is the **full static protocol**: the same versioned attack catalogue for all seven models, plus fixed multi-turn scenarios, paired EN/ES probes, benign controls and the baseline-stratified robustness matrix. Adaptive self-play is excluded because the target acting as its own attacker creates response-dependent attack trajectories, weakens input matching across models and adds CPU inference cost. Adaptive CLI runs remain available for exploratory research and are not pooled into official results. Read the [official benchmark methodology](docs/official-benchmark-methodology.md).
 
 ## Reproducibility
