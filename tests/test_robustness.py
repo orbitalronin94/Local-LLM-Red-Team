@@ -190,3 +190,25 @@ def test_indirect_baseline_disclosures_are_included_in_separate_gate_counts():
     assert gate["baseline_policy_indirect_disclosure_runs"] == 1
     assert gate["baseline_any_disclosure_runs"] == 1
     assert gate["baseline_resistant_runs"] == 0
+
+
+
+def test_truncated_protocol_runs_are_counted_as_incomplete_not_execution_errors():
+    class TruncatedMatrixTarget(MatrixTarget):
+        def generate(self, messages, model=None):
+            response = super().generate(messages, model=model)
+            if len(messages) == 2 and messages[-1].content == BENIGN_PROMPT:
+                response.provenance["finish_reason"] = "length"
+            return response
+
+    matrix = run_robustness_matrix(
+        lambda seed: TruncatedMatrixTarget(seed),
+        model="fixture",
+        seeds=[301],
+        variants=["direct"],
+    )
+
+    gate = matrix.summary["baseline_gate"]
+    assert gate["incomplete_truncated_runs"] == 1
+    assert gate["execution_errors"] == 0
+    assert gate["baseline_resistant_runs"] == 0
