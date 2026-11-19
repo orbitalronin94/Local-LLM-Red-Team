@@ -17,6 +17,8 @@ En local: local-llm-redteam --profile quick. El perfil rápido es solo estático
 
 El benchmark oficial de siete modelos en GitHub Actions utiliza full y es exclusivamente estático: excluye el autoataque adaptativo para conservar entradas emparejadas y evitar trayectorias de ataque dependientes de las respuestas del objetivo. El perfil completo mantiene escenarios multi-turno fijos, pruebas lingüísticas pareadas, controles benignos y la matriz de robustez. El modo adaptativo sigue disponible en la CLI independiente para investigación exploratoria, pero sus resultados no forman parte de la comparación oficial. Consulta la [metodología del benchmark oficial](official-benchmark-methodology.es.md).
 
+La opción `quick` se selecciona en **Actions → Local model red-team benchmark → Run workflow → `quick`**. Es un perfil de lanzamiento del mismo workflow, no un workflow independiente. Elígelo para un cribado preliminar, una prueba de humo o feedback de desarrollo más rápido cuando baste la cobertura reducida de ocho ataques. Las suites omitidas quedan sin probar y los resultados quick deben mantenerse separados de los de full. Utiliza `full` para la comparación oficial de los siete modelos.
+
 El workflow de GitHub Actions ofrece benchmark_profile al lanzarlo manualmente. El valor predeterminado es full. Los benchmarks activados por push siguen siendo siempre completos, de modo que CI y los artefactos oficiales no pierden cobertura de forma inadvertida.
 
 ## Presupuesto de generación
