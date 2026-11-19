@@ -212,7 +212,6 @@ def run_scenario(target: Target, scenario: Scenario, model: str | None = None,
     first_flagged = None
     status = "NOT_DETECTED"
     error = None
-    assistant_responses: list[str] = []
     attack = Attack(
         id=scenario.id, category=scenario.category, name=scenario.name,
         prompt=scenario.turns[0].prompt, version=scenario.version,
@@ -227,7 +226,6 @@ def run_scenario(target: Target, scenario: Scenario, model: str | None = None,
             status = "ERROR"
             break
         total_latency += response.latency_ms
-        assistant_responses.append(response.text)
         # Score the current turn, not the cumulative transcript. Reusing an
         # earlier verbal-acceptance phrase on every later turn would make it
         # look like fresh behavioral evidence and obscure whether the model
