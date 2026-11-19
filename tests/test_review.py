@@ -96,7 +96,7 @@ def test_review_export_preserves_multiturn_hashes_and_turn_count(tmp_path):
             "category": "prompt_injection",
             "status": "NOT_DETECTED",
             "turns": [
-                {"prompt": "Turn one", "response": "Response one",
+                {"prompt": "Turn one", "response": "Response one", "truncated": True,
                  "prompt_sha256": "1" * 64, "response_sha256": "2" * 64},
                 {"prompt": "Turn two", "response": "Response two",
                  "prompt_sha256": "3" * 64, "response_sha256": "4" * 64},
@@ -113,6 +113,7 @@ def test_review_export_preserves_multiturn_hashes_and_turn_count(tmp_path):
     scenario = rows[0]
     assert scenario["mode"] == "multi-turn-scenario"
     assert scenario["turn_count"] == "2"
+    assert scenario["truncated"] == "true"
     assert scenario["prompt_sha256"] == "1" * 64
     assert scenario["response_sha256"] == "4" * 64
     assert scenario["attack_version"] == "1"
@@ -255,3 +256,26 @@ def test_csv_safe_cell_handles_leading_whitespace_and_control_characters():
     assert csv_safe_cell("\t=1+1") == "'\t=1+1"
     assert csv_safe_cell("ordinary response") == "ordinary response"
     assert csv_safe_cell(42) == 42
+
+
+
+def test_review_export_surfaces_truncation_from_target_provenance(tmp_path):
+    source = tmp_path / "truncated.json"
+    output = tmp_path / "truncated-review.csv"
+    source.write_text(json.dumps({
+        "run_id": "truncated-run",
+        "results": [{
+            "attack_id": "jailbreak-roleplay",
+            "status": "NOT_DETECTED",
+            "response": "partial refusal",
+            "provenance": {"finish_reason": "length"},
+            "detection": {"review_required": False, "evidence": []},
+            "turns": [],
+        }],
+    }), encoding="utf-8")
+
+    assert export_review([str(source)], str(output)) == 1
+    with output.open(encoding="utf-8-sig", newline="") as stream:
+        row = next(csv.DictReader(stream))
+
+    assert row["truncated"] == "true"
