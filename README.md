@@ -208,43 +208,6 @@ For meaningful model comparisons, keep the attack manifest, endpoint configurati
 See the [automated findings catalogue](docs/findings-catalog.md) for the per-run cross-model index of heuristic positives and inconclusive cases, including prompts, responses and model provenance.
 
 
-## Local model benchmark kit
-
-A small-model download manifest and reproducible local benchmark recipe are included. Model weights are not stored in Git: download them into models/weights/ on demand. A sidecar JSON records the resolved URL, ETag, byte count and SHA-256 digest for each downloaded file.
-
-| Model | Parameters | Quantization | Approx. download | License |
-| --- | ---: | --- | ---: | --- |
-| SmolLM2 360M Instruct | 360M | Q4_K_M | 271 MB | Apache-2.0 |
-| Qwen2.5 0.5B Instruct | 0.5B | Q4_K_M | 491 MB | Apache-2.0 |
-| Llama 3.2 1B Instruct | 1B | Q4_K_M | 808 MB | Llama 3.2 Community License |
-| Gemma 3 1B IT | 1B | Q4_K_M | 806 MB | Gemma Terms |
-
-SmolLM2 is primarily English; Qwen2.5 has broader multilingual support. These compact models are smoke-test targets, not a representative benchmark of all model sizes or languages. GGUF files are community quantizations: check each upstream model card and license before redistribution or commercial use. See [Local model benchmark kit](models/README.md) for the complete manifest.
-
-```bash
-python scripts/download_models.py --list
-python scripts/download_models.py --model smollm2
-python scripts/download_models.py --model qwen2_5
-python scripts/download_models.py --model llama3_2_1b
-python scripts/download_models.py --model gemma3_1b
-python scripts/download_models.py --model all
-```
-
-Serve a downloaded GGUF with a local llama.cpp installation:
-
-```bash
-llama-server --model models/weights/SmolLM2-360M-Instruct-Q4_K_M.gguf --host 127.0.0.1 --port 8080
-```
-
-Then generate a report bundle:
-
-```bash
-mkdir -p reports
-python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --db reports/smollm2.db --json reports/smollm2.json --report reports/smollm2.md
-```
-
-Repeat with Qwen2.5 and distinct report names. Keep the attack manifest, inference server version, context size, generation settings and hardware consistent. Record unavoidable differences. See [Local model benchmark kit](models/README.md) for details and limitations.
-
 ## Development and tests
 
 ```bash
