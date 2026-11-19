@@ -76,4 +76,4 @@ skip_covered = true
 fail_under = 74
 
 [tool.setuptools]
-py-modules = ["redteam", "scenarios", "review", "paired", "guardrails", "evidence", "protocol", "robustness"]
+py-modules = ["redteam", "scenarios", "review", "paired", "guardrails", "evidence", "protocol", "robustness", "replay"]
