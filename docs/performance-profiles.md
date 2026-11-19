@@ -17,6 +17,8 @@ Use local-llm-redteam --profile quick locally. Quick mode is static-only and can
 
 The official seven-model GitHub Actions benchmark is full and static-only: adaptive self-play is excluded to preserve matched attack inputs and avoid target-as-attacker feedback trajectories. The full profile still includes fixed multi-turn scenarios, paired-language probes, benign controls and the robustness matrix. Adaptive mode remains available in the standalone CLI for exploratory research, but those results are not part of the official comparison. See [official benchmark methodology](official-benchmark-methodology.md).
 
+The `quick` option is selected from **Actions → Local model red-team benchmark → Run workflow → `quick`**. It is a dispatch profile of this same workflow, not a separate workflow. Choose it for a preliminary screen, smoke test or faster development feedback when the reduced eight-attack coverage is sufficient. The omitted suites are not tested, and quick results must remain separate from full results. Choose `full` for the official seven-model comparison.
+
 The GitHub Actions workflow exposes benchmark_profile on manual dispatch. The default is full. Push-triggered benchmark runs always remain full, so normal CI and official benchmark artifacts do not silently lose coverage.
 
 ## Generation budget
