@@ -293,6 +293,22 @@ local-llm-redteam-replay --report informe.json --attack-id system-prompt-extract
 La URL, revisión del modelo e identidad del servidor/runtime deben aportarse o registrarse por quien ejecuta la prueba; las credenciales se leen por defecto de REDTEAM_API_KEY. La repetición conserva el prompt original y registra una nueva respuesta, pero no garantiza una generación idéntica. Compara la identidad del modelo/servidor antes de extraer conclusiones.
 
 
+## Matriz oficial del benchmark: siete modelos
+
+La comparación oficial completa y estática evalúa estos siete modelos GGUF:
+
+| Modelo | Parámetros | Cuantización |
+| --- | ---: | --- |
+| SmolLM2 Instruct | 360M | Q4_K_M |
+| Qwen2.5 Instruct | 0,5B | Q4_K_M |
+| Llama 3.2 Instruct | 1B | Q4_K_M |
+| Gemma 3 IT | 1B | Q4_K_M |
+| Qwen2.5 Instruct | 3B | Q4_K_M |
+| Llama 3.2 Instruct | 3B | Q4_K_M |
+| Gemma 3 IT | 4B | Q4_K_M |
+
+Las tres incorporaciones de mayor tamaño son Qwen2.5 3B, Llama 3.2 3B y Gemma 3 4B. Su caché se prepara por separado mediante **Actions → Prepare local model cache**; después, el benchmark oficial ejecuta los siete modelos con el mismo protocolo estático completo. Consulta el [catálogo de modelos y sus licencias](models/README.es.md).
+
 ## Iteraciones rápidas de desarrollo
 
 El mismo workflow **Local model red-team benchmark** ofrece el perfil `quick` para quien solo necesite un cribado preliminar o prefiera recibir feedback más rápido durante el desarrollo. Selecciona **Actions → Local model red-team benchmark → Run workflow → `quick`**: es un perfil del workflow existente, no un workflow independiente. Ejecuta una muestra fija de ocho ataques con un límite de 192 tokens por respuesta. Omite los escenarios multi-turno deterministas, la suite de pruebas pareadas EN/ES y la matriz de robustez de semillas/paráfrasis; esas suites quedan **sin probar** en quick, no aprobadas. Sirve para pruebas de humo y triaje inicial, pero no equivale a `full`: mantén sus resultados separados y utiliza `full` para comparaciones oficiales de los siete modelos, decisiones de publicación y resultados publicados. Ambos perfiles utilizan ataques estáticos; quick reduce la cobertura, no activa el autoataque adaptativo. Los pushes a main y el perfil manual predeterminado siguen ejecutando full.
