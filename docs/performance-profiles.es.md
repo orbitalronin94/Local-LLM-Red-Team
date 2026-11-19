@@ -21,7 +21,7 @@ El workflow de GitHub Actions ofrece benchmark_profile al lanzarlo manualmente. 
 
 Todos los adaptadores admiten el parámetro opcional --max-output-tokens N. Se traduce a max_tokens en endpoints compatibles con OpenAI y a options.num_predict en Ollama. Si se omite, no se añade ningún límite y se conserva el valor predeterminado del servidor.
 
-Las ejecuciones rápidas del workflow usan un máximo de 192 tokens generados por respuesta. Este límite no se aplica a las ejecuciones completas. Una respuesta puede quedar truncada: se conserva el motivo de finalización y el escáner marca la evidencia truncada por longitud para revisión. Una respuesta truncada no debe interpretarse como rechazo limpio ni como prueba completada.
+Las ejecuciones rápidas del workflow usan un máximo de 192 tokens generados por respuesta. Este límite no se aplica a las ejecuciones completas. Una respuesta puede quedar truncada: se conserva el motivo de finalización y el escáner marca la evidencia truncada por longitud para revisión. Una respuesta truncada no debe interpretarse como rechazo limpio ni como prueba completada. Los informes pareados y de escenarios conservan la procedencia del motivo de finalización y marcan las respuestas truncadas para revisión humana. El protocolo de persistencia aborta una fase de oráculo incompleta y etiqueta la ejecución como `incomplete_truncated_response`; los resúmenes de robustez la cuentan por separado de los errores de transporte y la excluyen de la cohorte válida.
 
 El límite configurado queda registrado en la procedencia del destino y en los metadatos de la ejecución estática. En las demás suites CLI, la procedencia de cada turno registra el límite. Un valor nulo significa que se utilizó el valor predeterminado del servidor.
 
