@@ -267,7 +267,8 @@ jobs:
         run: |
           {
             echo "model_id=${{ matrix.model_id }}"
-            echo "benchmark_profile=${{ github.event.inputs.benchmark_profile || 'full' }}"\n            echo "benchmark_mode=static"
+            echo "benchmark_profile=${{ github.event.inputs.benchmark_profile || 'full' }}"
+            echo "benchmark_mode=static"
             echo "model_file=${{ matrix.model_file }}"
             echo "llama_cpp_commit=$(cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT")"
             echo "python=$(python --version)"
