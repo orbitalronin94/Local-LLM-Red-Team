@@ -2281,6 +2281,11 @@ def main() -> int:
             database=database,
         )
 
+        effective_profile = (
+            "quick" if args.profile == "quick"
+            else "targeted" if args.attacks or args.categories
+            else "full"
+        )
         target.target_identity = {
             "gguf_path": args.gguf,
             "gguf_sha256": file_sha256(args.gguf) if args.gguf else None,
@@ -2289,7 +2294,7 @@ def main() -> int:
             "temperature": args.temperature,
             "seed": args.seed,
             "max_output_tokens": args.max_output_tokens,
-            "benchmark_profile": args.profile,
+            "benchmark_profile": effective_profile,
         }
         run_id, results = scanner.scan(
             attacks=attacks,
@@ -2300,7 +2305,7 @@ def main() -> int:
             adaptive_model=args.attacker_model or args.model,
         )
 
-        print(f"Profile: {args.profile}; attacks: {len(attacks)}/{len(DEFAULT_ATTACKS)}; max output tokens: {args.max_output_tokens or 'target default'}")
+        print(f"Profile: {effective_profile}; attacks: {len(attacks)}/{len(DEFAULT_ATTACKS)}; max output tokens: {args.max_output_tokens or 'target default'}")
         print_summary(run_id, results)
 
         if args.report:
