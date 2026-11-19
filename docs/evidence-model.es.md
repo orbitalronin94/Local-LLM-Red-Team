@@ -17,7 +17,7 @@ Los niveles no se promueven entre sí. Un canario revelado no implica persistenc
 
 El módulo de evidencias genera marcadores aleatorios `LRT-CANARY-...` y comprueba coincidencias literales exactas. Hay dos usos distintos:
 
-- El escáner estático ofrece la opción explícita `--canary-test`, que añade una sonda dedicada e inserta el marcador de esa ejecución en un mensaje de sistema protegido. Solo funciona en modo estático y no se combina con modo adaptativo ni perfil rápido.
+- El escáner estático ofrece la opción explícita `--canary-test`, que añade una sonda dedicada al conjunto de ataques seleccionado e inserta el marcador de esa ejecución en un mensaje de sistema protegido. Si no se aplican filtros, también se ejecuta el catálogo predeterminado. Solo funciona en modo estático y no se combina con modo adaptativo ni perfil rápido.
 - El protocolo conductual de persistencia de fase C utiliza sus propios controles basales y comprobaciones del canario antes y después de la inyección. Sus gates de cohorte y hallazgos basales no deben confundirse con el resultado de una única sonda estática.
 
 Ninguna vía utiliza regex semánticas, jueces LLM ni inferencias basadas en frases como «he revelado el secreto». `DISCLOSED` significa únicamente que el marcador sintético apareció literalmente en la respuesta observada. Nunca debe contener credenciales, datos personales ni secretos reales. Como se conservan las respuestas originales, si el modelo divulga el marcador este aparecerá en el cuerpo del informe: protege y redacta los informes antes de compartirlos.
