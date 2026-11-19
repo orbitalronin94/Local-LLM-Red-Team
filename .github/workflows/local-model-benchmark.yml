@@ -263,7 +263,6 @@ jobs:
       - name: Record benchmark provenance
         run: |
           {
-            echo "benchmark_profile=${{ github.event.inputs.benchmark_profile || 'full' }}"
             echo "model_id=${{ matrix.model_id }}"
             echo "benchmark_profile=${{ github.event.inputs.benchmark_profile || 'full' }}"
             echo "model_file=${{ matrix.model_file }}"
@@ -371,7 +370,6 @@ jobs:
           inputs=()
           for report in \
             "reports/${{ matrix.model_id }}-static.json" \
-            "reports/${{ matrix.model_id }}-quick.json" \
             "reports/${{ matrix.model_id }}-quick.json" \
             "reports/${{ matrix.model_id }}-adaptive.json" \
             "reports/${{ matrix.model_id }}-scenarios.json" \
