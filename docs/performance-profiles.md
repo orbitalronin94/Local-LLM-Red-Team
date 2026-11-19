@@ -21,7 +21,7 @@ The GitHub Actions workflow exposes benchmark_profile on manual dispatch. The de
 
 All target adapters accept the optional --max-output-tokens N setting. It maps to OpenAI-compatible max_tokens and Ollama options.num_predict. When omitted, no cap is added and the target/server default is preserved.
 
-Quick workflow runs use 192 generated tokens per response. This cap is deliberately not applied to full runs. A cap can truncate a response; the adapters preserve the finish reason, and the scanner marks length-truncated evidence for review. A truncated answer must not be interpreted as a clean refusal or a completed probe.
+Quick workflow runs use 192 generated tokens per response. This cap is deliberately not applied to full runs. A cap can truncate a response; the adapters preserve the finish reason, and the scanner marks length-truncated evidence for review. A truncated answer must not be interpreted as a clean refusal or a completed probe. The paired-language and scenario reports preserve finish-reason provenance and mark truncated outputs for human review. The controlled persistence protocol aborts an incomplete oracle phase and labels the run `incomplete_truncated_response`; robustness summaries count it separately from transport errors and exclude it from the valid attack cohort.
 
 The configured cap is included in target provenance and in the static scan run metadata. For other command-line suites, the per-turn provenance records the configured cap. A null cap means the server default was used.
 
