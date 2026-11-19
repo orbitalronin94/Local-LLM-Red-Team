@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from redteam import DEFAULT_ATTACKS
+from redteam import DEFAULT_ATTACKS, is_truncated_response
 
 
 VERDICTS = (
@@ -67,6 +67,10 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                     result.get("detection", {}).get("review_required", False)
                     or result.get("status") in {"FAIL", "NOT_DETECTED"}
                 ).lower(),
+                "truncated": str(
+                    is_truncated_response(result.get("provenance", {}))
+                    or any(is_truncated_response(turn.get("provenance", {})) for turn in turns)
+                ).lower(),
                 "prompt": prompt,
                 "response": result.get("response", ""),
                 "detector_evidence": " | ".join(result.get("detection", {}).get("evidence", [])),
@@ -102,6 +106,7 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "category": result.get("category", ""),
                 "heuristic_status": result.get("status", ""),
                 "review_required": str(result.get("review_required", True)).lower(),
+                "truncated": str(result.get("truncated", False)).lower(),
                 "prompt": result.get("prompt", ""),
                 "response": result.get("response", ""),
                 "detector_evidence": " | ".join(result.get("evidence", [])),
@@ -137,6 +142,7 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "category": "benign_control",
                 "heuristic_status": control.get("review_state", "UNKNOWN"),
                 "review_required": "true",
+                "truncated": str(control.get("truncated", False)).lower(),
                 "prompt": control.get("prompt", ""),
                 "response": control.get("response", ""),
                 "detector_evidence": "",
@@ -175,6 +181,11 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "category": result.get("category", ""),
                 "heuristic_status": result.get("status", ""),
                 "review_required": "true",
+                "truncated": str(any(
+                    turn.get("truncated", False)
+                    or is_truncated_response(turn.get("provenance", {}))
+                    for turn in turns
+                )).lower(),
                 "prompt": "\n".join(turn.get("prompt", "") for turn in turns),
                 "response": "\n".join(turn.get("response", "") for turn in turns),
                 "detector_evidence": " | ".join(
@@ -212,6 +223,9 @@ def export_review(input_paths: list[str], output_path: str) -> int:
                 "category": "benign_control",
                 "heuristic_status": control.get("status", "UNKNOWN"),
                 "review_required": "true",
+                "truncated": str(
+                    is_truncated_response(control.get("provenance", {}))
+                ).lower(),
                 "prompt": control.get("prompt", ""),
                 "response": control.get("response", ""),
                 "detector_evidence": "",
@@ -233,7 +247,7 @@ def export_review(input_paths: list[str], output_path: str) -> int:
         "model_revision_requested", "model_revision_resolved", "model_resolved_url",
         "quantization", "upstream_model", "model_sha256", "inference_engine",
         "inference_engine_commit", "attack_id", "category",
-        "heuristic_status", "review_required", "prompt", "response",
+        "heuristic_status", "review_required", "truncated", "prompt", "response",
         "detector_evidence", "detector_reason", "detector_confidence",
         "scanner_version", "detector_name", "attack_version",
         "prompt_sha256", "response_sha256", "turn_count",
