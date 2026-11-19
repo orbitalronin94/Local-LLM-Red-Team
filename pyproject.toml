@@ -73,7 +73,7 @@ branch = true
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-fail_under = 60
+fail_under = 74
 
 [tool.setuptools]
 py-modules = ["redteam", "scenarios", "review", "paired", "guardrails", "evidence", "protocol", "robustness"]

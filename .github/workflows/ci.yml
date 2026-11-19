@@ -46,9 +46,10 @@ jobs:
           local-llm-redteam --list-attacks
           local-llm-redteam-protocol --help
           local-llm-redteam-matrix --help
+          local-llm-redteam-replay --help
 
       - name: Run test suite with coverage
         run: python -m pytest --cov --cov-report=term-missing --cov-report=xml
 
       - name: Enforce coverage threshold
-        run: python -m coverage report --fail-under=60
+        run: python -m coverage report --fail-under=74

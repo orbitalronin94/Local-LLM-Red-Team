@@ -114,18 +114,24 @@ def main() -> int:
     parser.add_argument("--report", required=True, help="Original JSON report")
     parser.add_argument("--attack-id", required=True)
     parser.add_argument("--source-run-id")
-    parser.add_argument("--target", choices=["ollama", "openai", "http"], default="ollama")
+    parser.add_argument("--target", choices=["ollama", "openai", "http"])
     parser.add_argument("--model")
     parser.add_argument("--url")
     parser.add_argument("--api-key", default=os.environ.get("REDTEAM_API_KEY"))
     parser.add_argument("--timeout", type=float, default=60.0)
-    parser.add_argument("--temperature", type=float, default=0.0)
-    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--temperature", type=float)
+    parser.add_argument("--seed", type=int)
     parser.add_argument("--output", default="replay.json")
     args = parser.parse_args()
 
     try:
         source, attack_data = load_source_attack(args.report, args.attack_id, args.source_run_id)
+        metadata = source.get("run_metadata") or {}
+        identity = metadata.get("target_identity") or {}
+        args.target = args.target or metadata.get("target_type") or "ollama"
+        args.model = args.model or metadata.get("model")
+        args.temperature = args.temperature if args.temperature is not None else identity.get("temperature", 0.0)
+        args.seed = args.seed if args.seed is not None else identity.get("seed", 42)
         target = build_target(args)
         result = replay_attack(
             source, attack_data, target, model=args.model,
