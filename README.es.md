@@ -8,7 +8,7 @@
 
 **Herramienta ligera de Python, local-first, para evaluar de forma reproducible la seguridad de modelos de lenguaje alojados en infraestructura propia.** Prueba jailbreaks, prompt injection, anulación de instrucciones, extracción del system prompt y persistencia multi-turno contra Ollama, servidores compatibles con OpenAI y endpoints HTTP JSON genéricos. Los hallazgos heurísticos se exportan a JSON, Markdown y SQLite.
 
-**Estado:** Alpha, versión 0.1.0. La interfaz pública y el catálogo de ataques pueden evolucionar antes de 1.0. Al probar un endpoint local no hace falta una cuenta cloud, una suscripción API ni un framework de ejecución adicional.
+**Estado:** Pre-1.0; los criterios de publicación se mantienen en [Preparación V1](docs/v1-readiness.es.md). La interfaz pública y el catálogo de ataques pueden evolucionar antes de 1.0. Al probar un endpoint local no hace falta una cuenta cloud, una suscripción API ni un framework de ejecución adicional.
 
 > **Uso responsable — autorización obligatoria.** Prueba únicamente sistemas, modelos y endpoints propios o cuyo análisis tengas expresamente autorizado. No escanees sistemas ajenos sin permiso previo. Antes de probar, define el alcance por escrito y revisa la legislación de **todos los países y jurisdicciones pertinentes**. Que un sistema sea accesible públicamente no significa que tengas autorización. Consulta el [aviso de uso responsable y legal](docs/uso-responsable.md).
 
@@ -190,7 +190,7 @@ make coverage
 make selftest
 ```
 
-CI ejecuta self-tests y pytest en Python 3.10, 3.11 y 3.12.
+CI ejecuta self-tests, pytest y cobertura de todos los módulos propios en Python 3.10–3.13. Consulta [Preparación V1](docs/v1-readiness.es.md) para los criterios de publicación.
 
 ## Alcance y uso responsable
 
@@ -257,3 +257,8 @@ local-llm-redteam-matrix --target ollama --model MODELO \
 ```
 
 La matriz usa los controles limpios como gate de cohorte, excluye los fallos de baseline de los denominadores de ataque, calcula la varianza entre semillas para cada paráfrasis fija y mide la susceptibilidad a paráfrasis dentro de cada semilla fija. Consulta el [protocolo de persistencia](docs/persistence-protocol.es.md) y la [matriz de robustez](docs/robustness-matrix.es.md). Estos fixtures sintéticos son instrumentos de evaluación, no certificaciones de políticas de producción.
+
+
+## Preparación de la versión 1.0
+
+El proyecto sigue deliberadamente antes de 1.0. La [lista de aceptación V1](docs/v1-readiness.es.md) reúne validez de evidencia, cobertura, reproducibilidad, calidad del software, informes y publicación.

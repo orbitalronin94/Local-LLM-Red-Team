@@ -239,7 +239,7 @@ make coverage
 make selftest
 ```
 
-Continuous integration runs the self-tests and pytest suite on Python 3.10, 3.11 and 3.12.
+Continuous integration runs self-tests, the full pytest suite and coverage across all first-party modules on Python 3.10–3.13. See [V1 readiness](docs/v1-readiness.md) for release gates.
 
 ## Scope and responsible use
 
@@ -307,3 +307,8 @@ local-llm-redteam-matrix --target ollama --model MODEL \
 ```
 
 The matrix treats clean regression controls as a cohort gate, excludes baseline failures from attack denominators, computes seed variance for each fixed paraphrase, and measures paraphrase susceptibility within each fixed seed. See [the persistence protocol](docs/persistence-protocol.md) and [the robustness matrix](docs/robustness-matrix.md). These controlled synthetic fixtures are evaluation instruments, not production-policy certifications.
+
+
+## Version 1.0 readiness
+
+The project is intentionally pre-1.0. Track evidence validity, attack coverage, reproducibility, software quality, report quality and release acceptance in the [V1 readiness checklist](docs/v1-readiness.md).

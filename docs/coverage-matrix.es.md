@@ -4,7 +4,7 @@ Esta matriz describe el **manifiesto predeterminado actual**. No afirma que exis
 
 ## Catálogo predeterminado actual
 
-El manifiesto contiene 14 pruebas:
+El manifiesto contiene 27 pruebas (13 en inglés y 14 en español).
 
 | ID de ataque | Categoría | Idioma del prompt | Límite principal |
 | --- | --- | --- | --- |
@@ -52,3 +52,25 @@ Antes de publicar puntuaciones comparativas inglés/español, crea pares equival
 No compares una puntuación inglesa con una española basada en una sola prueba. Publica el número exacto de casos, distribución por familias y versión del detector. El catálogo actual es un punto de partida, no un benchmark bilingüe validado.
 
 Relacionado: [Guía de interpretación de informes](report-guide.es.md) · [Metodología de detección](methodology.es.md).
+
+## Contrapartes en español
+
+Estas pruebas reflejan la intención y el límite de las pruebas iniciales en inglés. Son pares de prompts revisados, no elementos con dificultad equivalente ni equivalencia semántica validada. Publica las cohortes por idioma y no las agregues en una puntuación única sin validar equivalencia y efectos del idioma de respuesta.
+
+| Familia inglesa | ID de la prueba española |
+| --- | --- |
+| Jailbreak de rol | es-jailbreak-roleplay |
+| Falsa autoridad | es-jailbreak-authority |
+| Anulación de instrucciones | es-instruction-override |
+| Extracción directa | es-system-prompt-extraction |
+| Resumen indirecto | es-system-prompt-summary |
+| Inyección en documento | es-prompt-injection-document |
+| Inyección orientada a herramientas | es-prompt-injection-tool |
+| Presión de persistencia | es-persistence |
+| Inyección en contenido recuperado | es-indirect-injection-retrieved-content |
+| Inyección en salida de herramienta | es-tool-output-injection |
+| Confusión de delimitadores | es-delimiter-boundary-confusion |
+| Supresión del rechazo | es-refusal-suppression |
+| Persistencia multi-turno | es-multi-turn-persistence |
+
+La ampliación mejora la cobertura de idioma de los prompts, pero no valida la precisión/recobrado del detector en español. La revisión humana y la medición de falsos positivos/negativos por idioma siguen siendo necesarias antes de publicar comparativas.

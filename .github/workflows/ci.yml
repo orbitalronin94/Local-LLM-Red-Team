@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Check out repository
@@ -48,7 +48,7 @@ jobs:
           local-llm-redteam-matrix --help
 
       - name: Run test suite with coverage
-        run: python -m pytest --cov=redteam --cov-report=term-missing --cov-report=xml
+        run: python -m pytest --cov --cov-report=term-missing --cov-report=xml
 
       - name: Enforce coverage threshold
         run: python -m coverage report --fail-under=60
