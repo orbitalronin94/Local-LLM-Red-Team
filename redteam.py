@@ -1993,6 +1993,11 @@ def write_markdown(
                 f"- Attacker latency (adaptive overhead): `{result.attacker_latency_ms:.1f} ms`",
                 f"- Prompt SHA-256: `{result.prompt_sha256 or 'unavailable'}`",
                 f"- Response SHA-256: `{result.response_sha256}`",
+                "- Evidence vector:",
+                *[
+                    f"  - {level}: `{record.get('status', 'UNKNOWN')}`"
+                    for level, record in result.evidence_vector.items()
+                ],
                 "",
                 f"**Reason:** {result.detection.reason}",
                 "",
@@ -2424,6 +2429,11 @@ def main() -> int:
 
         print(f"Profile: {effective_profile}; attacks: {len(attacks)}/{len(DEFAULT_ATTACKS)}; max output tokens: {args.max_output_tokens or 'target default'}")
         print_summary(run_id, results)
+        if canary is not None:
+            for result in results:
+                if result.attack_id == CANARY_ATTACK_ID:
+                    disclosure = result.evidence_vector["CANARY_DISCLOSURE"]
+                    print(f"Synthetic canary disclosure: {disclosure['status']} (exact-string oracle)")
 
         if args.report:
             write_markdown(
