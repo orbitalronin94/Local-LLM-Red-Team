@@ -1228,9 +1228,9 @@ class ScanSummary:
     attack_success_rate: float
     coverage: float = 0.0
     throttled: int = 0
-    generation_throughput_samples: int = 0
-    generation_tokens_per_second_p50: float | None = None
-    generation_tokens_per_second_p95: float | None = None
+    effective_throughput_samples: int = 0
+    effective_output_tokens_per_second_p50: float | None = None
+    effective_output_tokens_per_second_p95: float | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -1888,11 +1888,11 @@ def summarize(results: list[AttackResult]) -> ScanSummary:
         ),
         coverage=(executable / total if total else 0.0),
         throttled=throttled,
-        generation_throughput_samples=len(throughput_samples),
-        generation_tokens_per_second_p50=(
+        effective_throughput_samples=len(throughput_samples),
+        effective_output_tokens_per_second_p50=(
             percentile(throughput_samples, 0.50) if throughput_samples else None
         ),
-        generation_tokens_per_second_p95=(
+        effective_output_tokens_per_second_p95=(
             percentile(throughput_samples, 0.95) if throughput_samples else None
         ),
     )
@@ -1934,15 +1934,15 @@ def print_summary(
         f"Latency p95: "
         f"{summary.p95_latency_ms:.1f} ms"
     )
-    if summary.generation_tokens_per_second_p50 is not None:
+    if summary.effective_output_tokens_per_second_p50 is not None:
         print(
-            f"Generation throughput p50/p95: "
-            f"{summary.generation_tokens_per_second_p50:.2f}/"
-            f"{summary.generation_tokens_per_second_p95:.2f} tokens/s "
-            f"(n={summary.generation_throughput_samples})"
+            f"Effective output throughput p50/p95: "
+            f"{summary.effective_output_tokens_per_second_p50:.2f}/"
+            f"{summary.effective_output_tokens_per_second_p95:.2f} tokens/s "
+            f"(n={summary.effective_throughput_samples})"
         )
     else:
-        print("Generation throughput: unavailable (no token-count samples)")
+        print("Effective output throughput: unavailable (no token-count samples)")
 
     print()
     print("Results:")
@@ -2018,7 +2018,7 @@ def write_markdown(
         f"- Refusal rate: `{summary.refusal_rate:.1%}`",
         f"- Mean latency: `{summary.mean_latency_ms:.1f} ms`",
         f"- P95 latency: `{summary.p95_latency_ms:.1f} ms`",
-        f"- Generation throughput p50/p95: `{summary.generation_tokens_per_second_p50 if summary.generation_tokens_per_second_p50 is not None else 'unavailable'}` / `{summary.generation_tokens_per_second_p95 if summary.generation_tokens_per_second_p95 is not None else 'unavailable'}` tokens/s (n=`{summary.generation_throughput_samples}`)",
+        f"- Effective output throughput p50/p95: `{summary.effective_output_tokens_per_second_p50 if summary.effective_output_tokens_per_second_p50 is not None else 'unavailable'}` / `{summary.effective_output_tokens_per_second_p95 if summary.effective_output_tokens_per_second_p95 is not None else 'unavailable'}` tokens/s (n=`{summary.effective_throughput_samples}`)",
         "",
         "- Adaptive self-play is identified in run metadata; attacker latency is reported separately.",
         "- Observed effect: not measured (prompt-level response only).",
@@ -2131,15 +2131,15 @@ def compare_results(
     lines = [
         "# Model comparison",
         "",
-        "| Model | Attacks | Failures | Success rate | Refusal rate | Mean latency | Generation p50 |",
+        "| Model | Attacks | Failures | Success rate | Refusal rate | Mean latency | Effective output p50 |",
         "|---|---:|---:|---:|---:|---:|---:|",
     ]
 
     for model, results in model_results.items():
         summary = summarize(results)
         throughput = (
-            f"{summary.generation_tokens_per_second_p50:.2f} tokens/s"
-            if summary.generation_tokens_per_second_p50 is not None
+            f"{summary.effective_output_tokens_per_second_p50:.2f} tokens/s"
+            if summary.effective_output_tokens_per_second_p50 is not None
             else "unavailable"
         )
         lines.append(
