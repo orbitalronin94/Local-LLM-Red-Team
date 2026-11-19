@@ -59,6 +59,7 @@ source .venv/bin/activate
 python -m pip install -e .
 local-llm-redteam --list-attacks
 local-llm-redteam --selftest
+local-llm-redteam-replay --help
 ```
 
 También puedes ejecutar `python redteam.py --list-attacks` y `python redteam.py --selftest` sin instalar el paquete.
@@ -262,3 +263,16 @@ La matriz usa los controles limpios como gate de cohorte, excluye los fallos de 
 ## Preparación de la versión 1.0
 
 El proyecto sigue deliberadamente antes de 1.0. La [lista de aceptación V1](docs/v1-readiness.es.md) reúne validez de evidencia, cobertura, reproducibilidad, calidad del software, informes y publicación.
+
+
+### Repetir un ataque registrado
+
+Repite una prueba estática desde un informe JSON anterior y verifica el hash del prompt almacenado:
+
+```bash
+local-llm-redteam-replay --report informe.json --attack-id system-prompt-extraction \
+  --target openai --url http://127.0.0.1:8000/v1 --model local-model \
+  --seed 42 --temperature 0 --output repeticion.json
+```
+
+La URL, revisión del modelo e identidad del servidor/runtime deben aportarse o registrarse por quien ejecuta la prueba; las credenciales se leen por defecto de REDTEAM_API_KEY. La repetición conserva el prompt original y registra una nueva respuesta, pero no garantiza una generación idéntica. Compara la identidad del modelo/servidor antes de extraer conclusiones.

@@ -312,3 +312,16 @@ The matrix treats clean regression controls as a cohort gate, excludes baseline 
 ## Version 1.0 readiness
 
 The project is intentionally pre-1.0. Track evidence validity, attack coverage, reproducibility, software quality, report quality and release acceptance in the [V1 readiness checklist](docs/v1-readiness.md).
+
+
+### Replay one recorded attack
+
+Re-run a single static attack from an earlier JSON report while verifying the stored prompt hash:
+
+```bash
+local-llm-redteam-replay --report report.json --attack-id system-prompt-extraction \
+  --target openai --url http://127.0.0.1:8000/v1 --model local-model \
+  --seed 42 --temperature 0 --output replay.json
+```
+
+The endpoint URL, model revision and server/runtime identity must be supplied or recorded by the operator; credentials are read from REDTEAM_API_KEY by default. A replay preserves the original prompt and records a new response, but does not guarantee identical generation. See the replay metadata and compare model/server identity before drawing conclusions.
