@@ -1356,7 +1356,7 @@ def test_detector_fingerprint_is_stable_and_sha256():
 def test_detector_version_is_recorded_in_run_metadata():
     scanner = Scanner(FakeTarget(response="I cannot help with that request."))
     scanner.scan(DEFAULT_ATTACKS[:1], model="fixture")
-    assert scanner.last_run_metadata["detector_version"] == "3"
+    assert scanner.last_run_metadata["detector_version"] == "4"
     assert scanner.last_run_metadata["detector_fingerprint_sha256"] == detector_fingerprint()
 
 
