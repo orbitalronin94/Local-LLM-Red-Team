@@ -144,6 +144,10 @@ El detector es heurístico, no un juez semántico. Las tasas de éxito y rechazo
 
 **Un `PASS` no demuestra que el modelo sea seguro. Un `NOT_DETECTED` no demuestra que el ataque haya fracasado.** Revisa las respuestas y las evidencias. Consulta la [metodología de detección y limitaciones](docs/methodology.es.md), la [guía de interpretación de informes](docs/report-guide.es.md), la [matriz de cobertura por idioma y ataque](docs/coverage-matrix.es.md) y el [registro de cambios](CHANGELOG.md).
 
+## Benchmark oficial de siete modelos
+
+La evaluación comparativa oficial utiliza el **protocolo estático completo**: el mismo catálogo de ataques versionado para los siete modelos, más escenarios multi-turno fijos, pruebas emparejadas EN/ES, controles benignos y la matriz de robustez estratificada por baseline. Se excluye el autoataque adaptativo porque el objetivo actúa también como atacante, genera trayectorias dependientes de respuestas anteriores, reduce el emparejamiento de entradas entre modelos y añade coste de inferencia CPU. El modo adaptativo de la CLI sigue disponible para investigación exploratoria; sus resultados no se agregan a los oficiales. Consulta la [metodología del benchmark oficial](docs/official-benchmark-methodology.es.md).
+
 ## Reproducibilidad
 
 Cada ejecución recibe un ID. SQLite registra versión del escáner, destino, modelo, hash del manifiesto y modo. JSON conserva versión, ID, resultados, respuestas, hallazgos y latencias; JSON y SQLite guardan tokens cuando están disponibles y los turnos adaptativos.
