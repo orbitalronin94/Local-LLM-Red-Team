@@ -22,7 +22,6 @@ El modo estático envía cada ataque de forma independiente. El adaptativo manti
 | `EMPTY` | El destino no devolvió texto. | No equivale a un rechazo seguro. |
 | `ERROR` | Falló la petición o el procesamiento. | No es un resultado del modelo ni debe contarse como tal. |
 | `THROTTLED` | El endpoint limitó la petición (por ejemplo, HTTP 429/503). | No es un rechazo ni un resultado conductual del modelo. |
-| `THROTTLED` | El endpoint limitó la petición (por ejemplo, HTTP 429/503). | No es un resultado conductual del modelo ni debe contarse como rechazo. |
 
 ## Interpretación de métricas
 
