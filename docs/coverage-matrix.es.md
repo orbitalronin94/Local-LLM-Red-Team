@@ -4,7 +4,7 @@ Esta matriz describe el **manifiesto predeterminado actual**. No afirma que exis
 
 ## Catálogo predeterminado actual
 
-El manifiesto contiene 27 pruebas (13 en inglés y 14 en español).
+El manifiesto contiene **14 pruebas: 13 prompts en inglés y 1 explícitamente en español**. La suite pareada, separada del catálogo estático, añade diez pares de intención equivalente EN/ES y controles benignos; no los sumes al recuento del catálogo predeterminado.
 
 | ID de ataque | Categoría | Idioma del prompt | Límite principal |
 | --- | --- | --- | --- |

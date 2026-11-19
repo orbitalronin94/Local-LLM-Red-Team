@@ -23,7 +23,7 @@ This document defines the release contract; it is not a claim that the project i
 
 ## Measured engineering baseline
 
-The current all-module coverage floor is 74%; the latest successful CI measured 75.68%. The next improvement target is 85%, but the threshold should only be raised after focused tests improve the least-covered modules without weakening existing tests.
+The current all-module coverage floor is 74%; the latest successful CI after the evidence-vector and canary changes measured 75.17% (251 tests passed across the Python 3.10–3.13 matrix). The next improvement target is 85%, but the threshold should only be raised after focused tests improve the least-covered modules without weakening existing tests.
 
 ## Acceptance checklist
 
@@ -38,7 +38,9 @@ The current all-module coverage floor is 74%; the latest successful CI measured 
 - [ ] Replay instructions preserve model revision, fixture, seed and generation parameters.
 - [ ] Coverage includes all first-party modules and threshold follows a measured baseline.
 - [ ] Clean install and CLI entry points work on supported Python versions.
-- [ ] JSON/SQLite compatibility and migrations have regression tests.
+- [ ] JSON/SQLite compatibility and migrations have regression tests, including the evidence-vector field and report schema version.
+- [ ] Detector version/fingerprint, evidence schema version and report schema version are visible and documented in both languages.
+- [ ] Static canary testing is opt-in, exact-match only, and clearly distinguished from the multi-turn persistence protocol.
 - [ ] Both READMEs and paired documentation are current.
 - [ ] Reference benchmark includes raw artifacts, hashes, limitations and denominators.
 - [ ] No security certification or universal safety claim is made.

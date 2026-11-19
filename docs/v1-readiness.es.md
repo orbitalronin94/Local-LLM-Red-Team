@@ -23,7 +23,7 @@ Este documento define el contrato de publicación; no afirma que el proyecto ya 
 
 ## Base de ingeniería medida
 
-El umbral actual de cobertura de todos los módulos es del 74%; el último CI satisfactorio midió un 75,68%. El siguiente objetivo de mejora es el 85%, pero el umbral solo debe elevarse después de añadir pruebas específicas a los módulos con menor cobertura, sin debilitar las existentes.
+El umbral actual de cobertura de todos los módulos es del 74%; el último CI satisfactorio tras los cambios del vector de evidencias y el canario midió un 75,17 % (251 pruebas superadas en la matriz Python 3.10–3.13). El siguiente objetivo de mejora es el 85%, pero el umbral solo debe elevarse después de añadir pruebas específicas a los módulos con menor cobertura, sin debilitar las existentes.
 
 ## Lista de aceptación
 
@@ -38,7 +38,9 @@ El umbral actual de cobertura de todos los módulos es del 74%; el último CI sa
 - [ ] La repetición conserva revisión del modelo, fixture, semilla y parámetros.
 - [ ] La cobertura incluye todos los módulos propios y el umbral parte de una medición real.
 - [ ] Instalación limpia y comandos CLI funcionan en las versiones soportadas.
-- [ ] Compatibilidad JSON/SQLite y migraciones tienen pruebas de regresión.
+- [ ] Compatibilidad JSON/SQLite y migraciones tienen pruebas de regresión, incluido el campo del vector de evidencia y la versión del esquema.
+- [ ] La versión/huella del detector y las versiones de los esquemas de evidencia e informe están visibles y documentadas en ambos idiomas.
+- [ ] La prueba estática de canario es opcional, usa coincidencia exacta y se distingue del protocolo multi-turno de persistencia.
 - [ ] Ambos README y documentación emparejada están actualizados.
 - [ ] Benchmark de referencia incluye artefactos, hashes, limitaciones y denominadores.
 - [ ] No se afirma certificación ni seguridad universal.

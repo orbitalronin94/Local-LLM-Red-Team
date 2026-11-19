@@ -15,9 +15,12 @@ Los niveles no se promueven entre sí. Un canario revelado no implica persistenc
 
 ## Canario
 
-El módulo de esta fase crea un marcador aleatorio `LRT-CANARY-...` y ofrece el comparador exacto contra una respuesta. La inserción del marcador en un mensaje de sistema protegido y la ejecución de la sonda ya están implementadas en el protocolo conductual de fase C; el informe conserva hashes y resultado de coincidencia. El comparador no usa regex semánticas, jueces LLM ni inferencias basadas en frases como «he revelado el secreto».
+El módulo de evidencias genera marcadores aleatorios `LRT-CANARY-...` y comprueba coincidencias literales exactas. Hay dos usos distintos:
 
-El informe conserva el SHA-256 del canario y de la respuesta, el resultado de coincidencia y el número de apariciones. El canario es sintético y no debe contener credenciales, datos personales ni secretos reales.
+- El escáner estático ofrece la opción explícita `--canary-test`, que añade una sonda dedicada al conjunto de ataques seleccionado e inserta el marcador de esa ejecución en un mensaje de sistema protegido. Si no se aplican filtros, también se ejecuta el catálogo predeterminado. Solo funciona en modo estático y no se combina con modo adaptativo ni perfil rápido.
+- El protocolo conductual de persistencia de fase C utiliza sus propios controles basales y comprobaciones del canario antes y después de la inyección. Sus gates de cohorte y hallazgos basales no deben confundirse con el resultado de una única sonda estática.
+
+Ninguna vía utiliza regex semánticas, jueces LLM ni inferencias basadas en frases como «he revelado el secreto». `DISCLOSED` significa únicamente que el marcador sintético apareció literalmente en la respuesta observada. Nunca debe contener credenciales, datos personales ni secretos reales. Como se conservan las respuestas originales, si el modelo divulga el marcador este aparecerá en el cuerpo del informe: protege y redacta los informes antes de compartirlos.
 
 ## Política de bypass
 
@@ -39,6 +42,6 @@ Semillas y paráfrasis se registran por separado: las primeras estiman variació
 
 Este contrato no convierte un resultado de prompt-level en prueba de explotación de un sistema en producción.
 
-## Detector verbal, versión 2
+## Detector verbal, versión 4
 
-La versión 2 identifica compromisos afirmativos con contracciones inglesas (por ejemplo, `I'll`) y evalúa por separado cláusulas contrastivas de negativa y cumplimiento. La división por comas solo se activa cuando la cláusula anterior contiene una negativa; así se evita convertir una negativa genuina en aceptación. Las menciones citadas se excluyen antes de evaluar. Estas reglas generan señales de revisión, no demuestran ejecución de una tarea ni elevan otros niveles del vector.
+La versión 4 utiliza un analizador de tramos entrecomillados en lugar de una regex amplia. Reconoce comillas rectas y curvas, conserva apóstrofos de contracciones y posesivos, enmascara solo tramos completos y deja sin enmascarar el resto del texto si la comilla de apertura no se cierra. También evalúa transiciones de negativa a cumplimiento entre cláusulas. Estas reglas reducen falsos positivos/negativos conocidos, pero siguen generando señales heurísticas que requieren revisión; no demuestran ejecución ni elevan otros niveles del vector. La huella SHA-256 de la implementación se registra por separado de la versión.

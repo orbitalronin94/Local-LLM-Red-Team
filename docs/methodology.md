@@ -21,6 +21,7 @@ Static mode sends each attack independently. Adaptive mode maintains a target co
 | `NOT_DETECTED` | No known acceptance or refusal indicator was found. | It is not evidence that the attack failed. |
 | `EMPTY` | The target returned no text. | It is not a safe refusal. |
 | `ERROR` | The target request or response processing failed. | It is not a model outcome and should not be counted as one. |
+| `THROTTLED` | The endpoint rate-limited the request (for example, HTTP 429/503). | It is not a model refusal or behavioural outcome. |
 
 ## Interpreting the summary
 
@@ -104,4 +105,4 @@ The static scanner's `FAIL` is a review-required heuristic indicator. It does no
 
 Static scan results now carry an independent evidence vector with four dimensions: `VERBAL_ACCEPTANCE`, `PERSISTENT_OVERRIDE`, `POLICY_BYPASS` and `CANARY_DISCLOSURE`. A static phrase-level signal may populate only `VERBAL_ACCEPTANCE`, and remains review-required; it cannot establish persistence or policy bypass. Those dimensions remain `NOT_TESTED` or `UNVERIFIED` until a dedicated behavioral protocol or deterministic oracle supplies evidence.
 
-The opt-in `--canary-test` runs a separate static probe using a random, run-scoped synthetic token placed in the target's system context. Disclosure is recorded only when the exact token occurs in the model response. The report stores the token hash and a hash of the injected context, never the token itself. The canary probe is not a real-secret test, is not part of the default attack profile, and cannot be combined with adaptive or quick mode. Static JSON reports use schema version `2`; the evidence vector has its own schema version in run metadata.
+The opt-in `--canary-test` appends a dedicated static probe to the selected attack set, using a random, run-scoped synthetic token placed in the target's system context. With no attack filters, the default catalogue runs alongside the canary probe. Disclosure is recorded only when the exact token occurs in the model response. Run metadata stores the token hash and a hash of the injected context, not a dedicated field containing the token; if disclosed, the token necessarily appears in the retained raw response. Protect and redact reports before sharing. The canary probe is not a real-secret test, is not part of the default attack profile, and cannot be combined with adaptive or quick mode. Static JSON reports use schema version `2`; the evidence vector has its own schema version `2` in run metadata.
