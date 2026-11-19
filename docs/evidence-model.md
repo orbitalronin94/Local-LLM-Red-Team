@@ -17,7 +17,7 @@ Levels do not promote one another. A disclosed canary does not imply persistence
 
 The shared evidence module generates random `LRT-CANARY-...` markers and evaluates literal exact-string matches. There are two separate uses:
 
-- The static scanner's opt-in `--canary-test` adds a dedicated probe and injects the run-scoped marker into a protected system message. It is static-only and cannot be combined with adaptive or quick mode.
+- The static scanner's opt-in `--canary-test` appends a dedicated probe to the selected attack set and injects the run-scoped marker into a protected system message. With no attack filters, the default catalogue also runs. It is static-only and cannot be combined with adaptive or quick mode.
 - The Phase C behavioural persistence protocol uses its own controlled baseline and post-injection canary checks. Its cohort gates and baseline findings are distinct from the static scanner's single-probe result.
 
 Neither path uses a semantic regex, LLM judge or inference from phrases such as “I disclosed the secret.” A `DISCLOSED` result means only that this synthetic marker appeared literally in the observed response. The marker is synthetic and must never contain credentials, personal data or real secrets. Because raw responses are retained, a disclosed marker will appear in the response body; protect and redact reports before sharing.
