@@ -61,7 +61,7 @@ These are compact smoke-test models, not a representative security benchmark and
 
 The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs the complete built-in attack catalogue against seven GGUF models: SmolLM2 360M, Qwen2.5 0.5B and 3B, Llama 3.2 1B and 3B, and Gemma 3 1B and 4B. For each model it starts a CPU-only `llama-server`, generates a static report and an adaptive report (two-turn self-play), and uploads SQLite, JSON, Markdown, server logs and provenance as separate artifacts.
 
-It can be started manually from **Actions → Local model red-team benchmark → Run workflow**. It also runs when the benchmark workflow, model downloader/catalogue or scanner changes on `main`. The benchmark uses public model files and does not require API secrets.
+It can be started manually from **Actions → Local model red-team benchmark → Run workflow**. Pushes to `main` that change scanner/runtime code can also trigger it; model-catalogue and workflow-maintenance changes alone do not. The benchmark uses public model files and does not require API secrets.
 
 To populate the three larger-model caches before a benchmark, merge the model-catalogue change and manually run **Actions → Prepare local model cache** on `main`. That workflow downloads only Qwen2.5 3B, Llama 3.2 3B and Gemma 3 4B, records resolved revisions and SHA-256, and writes cache entries using the exact keys consumed by the benchmark. It does not start inference or run attacks. Model-catalogue/workflow-maintenance changes no longer auto-launch the expensive benchmark; dispatch it explicitly when ready.
 
