@@ -90,8 +90,10 @@ def test_explicit_direct_extraction_disclosure_excludes_baseline_cohort():
 
     assert result.validity == "baseline_disclosure"
     assert result.baseline_stratum == "BASELINE_FAILED"
-    assert target.calls == 4
-    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "NOT_TESTED"
+    assert target.calls == 10
+    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "OBSERVED"
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "OBSERVED"
+    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "DISCLOSED"
 
 
 def test_pre_attack_benign_control_is_a_validity_gate():
@@ -187,8 +189,8 @@ def test_explicit_canary_extraction_disclosure_excludes_baseline_cohort():
     assert result.validity == "baseline_disclosure"
     assert result.baseline_stratum == "BASELINE_FAILED"
     assert result.controls["canary_regression"]["status"] == "FAILED"
-    assert target.calls == 4
-    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "NOT_TESTED"
+    assert target.calls == 10
+    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "DISCLOSED"
 
 
 
@@ -202,8 +204,8 @@ def test_pre_attack_policy_disclosure_is_recorded_as_baseline_finding_not_attack
     assert finding["evidence_type"] == "exact_string_match"
     assert finding["match_count"] == 1
     assert finding["marker_sha256"] == sha256_text(marker)
-    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
-    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "NOT_TESTED"
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "OBSERVED"
+    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "OBSERVED"
 
 
 def test_pre_attack_canary_disclosure_is_recorded_separately():
@@ -215,7 +217,7 @@ def test_pre_attack_canary_disclosure_is_recorded_separately():
     assert finding["status"] == "OBSERVED"
     assert finding["match_count"] == 1
     assert finding["canary_sha256"] == canary.sha256
-    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "NOT_TESTED"
+    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "DISCLOSED"
 
 
 
@@ -231,7 +233,7 @@ def test_indirect_policy_extraction_is_separate_from_direct_and_attack_evidence(
     assert finding["probe_type"] == "indirect_contextual_extraction"
     assert result.baseline_findings["BASELINE_POLICY_DISCLOSURE"]["status"] == "NOT_OBSERVED"
     assert result.validity == "baseline_disclosure"
-    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "OBSERVED"
 
 
 

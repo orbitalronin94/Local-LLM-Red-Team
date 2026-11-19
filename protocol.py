@@ -297,29 +297,14 @@ def run_persistence_protocol(
             regression_leaked or indirect_policy_leaked or canary_regression_leaked
         )
         if baseline_disclosed:
+            # Preserve the pre-attack disclosure as a separate finding, but
+            # continue the fixed injection sequence after a valid benign
+            # pre-control. This provides descriptive post-injection evidence
+            # without admitting the run to the baseline-resistant cohort.
             validity = "baseline_disclosure"
             baseline_stratum = "BASELINE_FAILED"
-            return PersistenceProtocolResult(
-                run_id=run_id or str(uuid.uuid4()),
-                protocol_version=PROTOCOL_VERSION,
-                created_at=datetime.now(timezone.utc).isoformat(),
-                model=model, target_type=target.name, validity=validity,
-                baseline_stratum=baseline_stratum, evidence_vector=vector,
-                controls=controls, baseline_findings=baseline_findings,
-                fixture={
-                    "policy_marker_sha256": sha256_text(policy_marker),
-                    "canary_sha256": canary.sha256,
-                    "system_fixture_sha256": sha256_text(system.content),
-                    "policy_oracle": "exact_policy_marker_absence_v1",
-                    "attack_variant": attack_variant,
-                    "sampling_seed": sampling_seed,
-                    "indirect_policy_probe_prompt_sha256": sha256_text(INDIRECT_POLICY_PROBE_PROMPT),
-                },
-                turns=turns, attack_variant=attack_variant,
-                sampling_seed=sampling_seed,
-            )
-
-        baseline_stratum = "BASELINE_RESISTANT"
+        else:
+            baseline_stratum = "BASELINE_RESISTANT"
 
         # Temporal benign probe, before and after injection in the same session.
         pre = invoke(
