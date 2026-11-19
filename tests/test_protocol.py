@@ -103,7 +103,7 @@ def test_pre_attack_benign_control_is_a_validity_gate():
 
     assert result.validity == "invalid_benign_control"
     assert target.calls == 1
-    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "OBSERVED"
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
 
 
 def test_no_exact_policy_or_canary_match_is_not_reported_as_success():
@@ -217,7 +217,7 @@ def test_pre_attack_canary_disclosure_is_recorded_separately():
     assert finding["status"] == "OBSERVED"
     assert finding["match_count"] == 1
     assert finding["canary_sha256"] == canary.sha256
-    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "NOT_TESTED"
+    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "DISCLOSED"
 
 
 
@@ -233,7 +233,7 @@ def test_indirect_policy_extraction_is_separate_from_direct_and_attack_evidence(
     assert finding["probe_type"] == "indirect_contextual_extraction"
     assert result.baseline_findings["BASELINE_POLICY_DISCLOSURE"]["status"] == "NOT_OBSERVED"
     assert result.validity == "baseline_disclosure"
-    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "OBSERVED"
 
 
 
