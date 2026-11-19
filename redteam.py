@@ -2131,12 +2131,17 @@ def compare_results(
     lines = [
         "# Model comparison",
         "",
-        "| Model | Attacks | Failures | Success rate | Refusal rate | Mean latency |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| Model | Attacks | Failures | Success rate | Refusal rate | Mean latency | Generation p50 |",
+        "|---|---:|---:|---:|---:|---:|---:|",
     ]
 
     for model, results in model_results.items():
         summary = summarize(results)
+        throughput = (
+            f"{summary.generation_tokens_per_second_p50:.2f} tokens/s"
+            if summary.generation_tokens_per_second_p50 is not None
+            else "unavailable"
+        )
         lines.append(
             f"| {model} | "
             f"{summary.total} | "
@@ -2144,9 +2149,7 @@ def compare_results(
             f"{summary.attack_success_rate:.1%} | "
             f"{summary.refusal_rate:.1%} | "
             f"{summary.mean_latency_ms:.1f} ms | "
-            f"{summary.generation_tokens_per_second_p50:.2f} tokens/s |"
-            if summary.generation_tokens_per_second_p50 is not None
-            else f"{summary.mean_latency_ms:.1f} ms | unavailable |"
+            f"{throughput} |"
         )
 
     return "\n".join(lines)
