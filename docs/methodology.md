@@ -21,6 +21,7 @@ Static mode sends each attack independently. Adaptive mode maintains a target co
 | `NOT_DETECTED` | No known acceptance or refusal indicator was found. | It is not evidence that the attack failed. |
 | `EMPTY` | The target returned no text. | It is not a safe refusal. |
 | `ERROR` | The target request or response processing failed. | It is not a model outcome and should not be counted as one. |
+| `THROTTLED` | The endpoint rate-limited the request (for example, HTTP 429/503). | It is not a model refusal or behavioural outcome. |
 
 ## Interpreting the summary
 
