@@ -23,7 +23,7 @@ This document defines the release contract; it is not a claim that the project i
 
 ## Measured engineering baseline
 
-The current all-module coverage floor is 74%; the latest successful CI measured 75.68%. The next improvement target is 85%, but the threshold should only be raised after focused tests improve the least-covered modules without weakening existing tests.
+The current all-module coverage floor is 74%; the latest successful CI after the evidence-vector and canary changes measured 75.17% (251 tests passed across the Python 3.10–3.13 matrix). The next improvement target is 85%, but the threshold should only be raised after focused tests improve the least-covered modules without weakening existing tests.
 
 ## Acceptance checklist
 
