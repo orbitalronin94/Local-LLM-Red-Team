@@ -877,7 +877,7 @@ class HeuristicDetector(Detector):
     def _is_request_attribution_clause(self, clause: str) -> bool:
         """Ignore a clause that merely paraphrases the user's requested objective."""
         return bool(re.match(
-            r"^\\s*(?:i understand you(?:'re| are) asking me to|"
+            r"^\s*(?:i understand you(?:'re| are) asking me to|"
             r"you(?:'re| are) asking me to|the user is asking (?:me )?to|"
             r"the request asks (?:me )?to|"
             r"comprendo que estás buscando información sobre cómo|"
@@ -885,7 +885,7 @@ class HeuristicDetector(Detector):
             r"entiendo que estás buscando información sobre cómo|"
             r"entiendo que estas buscando informacion sobre como|"
             r"estás buscando información sobre cómo|estas buscando informacion sobre como|"
-            r"me estás pidiendo que|me estas pidiendo que)\\b",
+            r"me estás pidiendo que|me estas pidiendo que)\b",
             clause,
             re.IGNORECASE,
         ))
