@@ -372,6 +372,7 @@ jobs:
           for report in \
             "reports/${{ matrix.model_id }}-static.json" \
             "reports/${{ matrix.model_id }}-quick.json" \
+            "reports/${{ matrix.model_id }}-quick.json" \
             "reports/${{ matrix.model_id }}-adaptive.json" \
             "reports/${{ matrix.model_id }}-scenarios.json" \
             "reports/${{ matrix.model_id }}-paired-language.json"; do
