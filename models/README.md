@@ -8,6 +8,9 @@ Small GGUF models for repeatable local inference tests. Model weights are fetche
 | qwen2_5 | [Alibaba Qwen2.5](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF) | 0.5B | Q4_K_M | 491 MB | Apache-2.0 |
 | llama3_2_1b | [Meta Llama 3.2](https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF) | 1B | Q4_K_M | 808 MB | Llama 3.2 Community License |
 | gemma3_1b | [Google Gemma 3](https://huggingface.co/bartowski/google_gemma-3-1b-it-GGUF) | 1B | Q4_K_M | 806 MB | Gemma Terms |
+| qwen2_5_3b | [Qwen2.5 3B](https://huggingface.co/bartowski/Qwen2.5-3B-Instruct-GGUF) | 3B | Q4_K_M | 1.93 GB | Apache-2.0 |
+| llama3_2_3b | [Meta Llama 3.2 3B](https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF) | 3B | Q4_K_M | 2.02 GB | Llama 3.2 Community License |
+| gemma3_4b | [Google Gemma 3](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF) | 4B | Q4_K_M | 2.49 GB | Gemma Terms |
 
 The GGUF files are community quantizations. Each catalogue entry records both the quantized repository and its upstream model. Licenses are not interchangeable: Llama and Gemma have their own terms; check the linked model card and upstream terms before redistribution or commercial use. SmolLM2 is primarily English-oriented, while Qwen2.5 is multilingual; do not interpret one language's result as a universal model score.
 
@@ -21,6 +24,9 @@ python scripts/download_models.py --model smollm2
 python scripts/download_models.py --model qwen2_5
 python scripts/download_models.py --model llama3_2_1b
 python scripts/download_models.py --model gemma3_1b
+python scripts/download_models.py --model qwen2_5_3b
+python scripts/download_models.py --model llama3_2_3b
+python scripts/download_models.py --model gemma3_4b
 python scripts/download_models.py --model all
 ```
 
@@ -53,11 +59,13 @@ These are compact smoke-test models, not a representative security benchmark and
 
 ## Automated full-catalog benchmark
 
-The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs the complete built-in attack catalogue against the four retained GGUF models: SmolLM2 360M, Qwen2.5 0.5B, Llama 3.2 1B and Gemma 3 1B. For each model it starts a CPU-only `llama-server`, generates a static report and an adaptive report (two-turn self-play), and uploads SQLite, JSON, Markdown, server logs and provenance as separate artifacts.
+The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs the complete built-in attack catalogue against seven GGUF models: SmolLM2 360M, Qwen2.5 0.5B and 3B, Llama 3.2 1B and 3B, and Gemma 3 1B and 4B. For each model it starts a CPU-only `llama-server`, generates a static report and an adaptive report (two-turn self-play), and uploads SQLite, JSON, Markdown, server logs and provenance as separate artifacts.
 
-It can be started manually from **Actions → Local model red-team benchmark → Run workflow**. It also runs when the benchmark workflow, model downloader/catalogue or scanner changes on `main`. The benchmark uses public model files and does not require API secrets.
+It can be started manually from **Actions → Local model red-team benchmark → Run workflow**. Pushes to `main` that change scanner/runtime code can also trigger it; model-catalogue and workflow-maintenance changes alone do not. The benchmark uses public model files and does not require API secrets.
 
-The adaptive run uses the tested model itself as the attacker. Treat this as a reproducible self-play stress test, not as an independent attacker evaluation. GitHub-hosted CPU performance and timeouts can vary; a failed model run is reported as failed, not as a clean security result.
+To populate the three larger-model caches before a benchmark, merge the model-catalogue change and manually run **Actions → Prepare local model cache** on `main`. That workflow downloads only Qwen2.5 3B, Llama 3.2 3B and Gemma 3 4B, records resolved revisions and SHA-256, and writes cache entries using the exact keys consumed by the benchmark. It does not start inference or run attacks. Model-catalogue/workflow-maintenance changes no longer auto-launch the expensive benchmark; dispatch it explicitly when ready.
+
+The adaptive run uses the tested model itself as the attacker. Treat this as a reproducible self-play stress test, not as an independent attacker evaluation. Manual dispatch exposes `include_adaptive`: keep it enabled while completing the current cross-model comparison; turn it off to run the full static catalogue, scenarios, paired-language probes and robustness matrix without adaptive self-play. This is distinct from `benchmark_profile=quick`, which remains a reduced development screen. GitHub-hosted CPU performance and timeouts can vary; a failed model run is reported as failed, not as a clean security result.
 
 
 ## Persistent model cache
@@ -67,7 +75,7 @@ The benchmark workflow caches each GGUF independently with GitHub Actions cache,
 
 ## Focused benchmark set and next-run improvements
 
-The active CI matrix is intentionally limited to four models: SmolLM2 360M, Qwen2.5 0.5B, Llama 3.2 1B and Gemma 3 1B. Granite, Phi and Ministral remain outside the routine matrix while their download/runtime failures are investigated; they are not classified as insecure or as failed security tests.
+The active CI matrix now contains seven models spanning 360M–4B: SmolLM2 360M, Qwen2.5 0.5B/3B, Llama 3.2 1B/3B and Gemma 3 1B/4B. Granite, Phi and Ministral remain outside the routine matrix while their download/runtime failures are investigated; they are not classified as insecure or as failed security tests.
 
 The workflow restores each model from its own GitHub Actions cache, validates sidecar provenance and recomputes SHA-256 before inference. The first run after a cache miss downloads the GGUF; later runs reuse it when GitHub retains the cache. This is persistent CI caching, not a guarantee that weights are permanently preinstalled on every ephemeral runner.
 

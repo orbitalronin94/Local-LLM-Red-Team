@@ -48,6 +48,42 @@
       "license": "Gemma",
       "upstream_model": "google/gemma-3-1b-it",
       "model_card": "https://huggingface.co/bartowski/google_gemma-3-1b-it-GGUF"
+    },
+    "qwen2_5_3b": {
+      "name": "Qwen2.5-3B-Instruct Q4_K_M",
+      "parameters": "3B",
+      "repo_id": "bartowski/Qwen2.5-3B-Instruct-GGUF",
+      "revision": "main",
+      "filename": "Qwen2.5-3B-Instruct-Q4_K_M.gguf",
+      "quantization": "Q4_K_M",
+      "approx_size": "1.93 GB",
+      "license": "Apache-2.0",
+      "upstream_model": "Qwen/Qwen2.5-3B-Instruct",
+      "model_card": "https://huggingface.co/bartowski/Qwen2.5-3B-Instruct-GGUF"
+    },
+    "llama3_2_3b": {
+      "name": "Llama 3.2 3B Instruct Q4_K_M",
+      "parameters": "3B",
+      "repo_id": "bartowski/Llama-3.2-3B-Instruct-GGUF",
+      "revision": "main",
+      "filename": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+      "quantization": "Q4_K_M",
+      "approx_size": "2.02 GB",
+      "license": "Llama-3.2",
+      "upstream_model": "meta-llama/Llama-3.2-3B-Instruct",
+      "model_card": "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF"
+    },
+    "gemma3_4b": {
+      "name": "Gemma 3 4B IT Q4_K_M",
+      "parameters": "4B",
+      "repo_id": "ggml-org/gemma-3-4b-it-GGUF",
+      "revision": "main",
+      "filename": "gemma-3-4b-it-Q4_K_M.gguf",
+      "quantization": "Q4_K_M",
+      "approx_size": "2.49 GB",
+      "license": "Gemma",
+      "upstream_model": "google/gemma-3-4b-it",
+      "model_card": "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF"
     }
   }
 }

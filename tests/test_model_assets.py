@@ -9,7 +9,8 @@ DOWNLOADER = ROOT / 'scripts' / 'download_models.py'
 def test_model_downloader_lists_focused_catalog_without_network():
     result = subprocess.run([sys.executable, str(DOWNLOADER), '--list'], cwd=ROOT, capture_output=True, text=True, check=True)
     for model_name in ('SmolLM2-360M-Instruct', 'Qwen2.5-0.5B-Instruct',
-                       'Llama 3.2 1B', 'Gemma 3 1B'):
+                       'Llama 3.2 1B', 'Gemma 3 1B', 'Qwen2.5-3B-Instruct',
+                       'Llama 3.2 3B', 'Gemma 3 4B'):
         assert model_name in result.stdout
     for excluded_name in ('Granite 3.3 2B', 'Phi-3.5 Mini', 'Ministral 3B'):
         assert excluded_name not in result.stdout
@@ -29,6 +30,9 @@ def test_retained_models_have_dry_run_urls(tmp_path):
         ('qwen2_5', 'Qwen/Qwen2.5-0.5B-Instruct-GGUF'),
         ('llama3_2_1b', 'bartowski/Llama-3.2-1B-Instruct-GGUF'),
         ('gemma3_1b', 'bartowski/google_gemma-3-1b-it-GGUF'),
+        ('qwen2_5_3b', 'bartowski/Qwen2.5-3B-Instruct-GGUF'),
+        ('llama3_2_3b', 'bartowski/Llama-3.2-3B-Instruct-GGUF'),
+        ('gemma3_4b', 'ggml-org/gemma-3-4b-it-GGUF'),
     ):
         result = subprocess.run([sys.executable, str(DOWNLOADER), '--model', model_id,
                                  '--destination', str(tmp_path), '--dry-run'],
