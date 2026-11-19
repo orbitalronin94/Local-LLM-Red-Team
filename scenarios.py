@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from evidence import EVIDENCE_SCHEMA_VERSION, empty_evidence_vector
-from redteam import Attack, HeuristicDetector, Message, Target, build_target
+from redteam import Attack, HeuristicDetector, Message, Target, build_target, is_truncated_response
 
 
 @dataclass(frozen=True)
@@ -182,6 +182,8 @@ class TurnEvidence:
     prompt_sha256: str
     response_sha256: str
     provenance: dict[str, Any] = field(default_factory=dict)
+    truncated: bool = False
+    review_required: bool = False
 
 
 @dataclass
@@ -244,6 +246,8 @@ def run_scenario(target: Target, scenario: Scenario, model: str | None = None,
             prompt_sha256=sha256_text(step.prompt),
             response_sha256=sha256_text(response.text),
             provenance=response.provenance,
+            truncated=is_truncated_response(response.provenance),
+            review_required=detection.review_required or is_truncated_response(response.provenance),
         ))
         conversation.append(Message(role="assistant", content=response.text))
         if detection.status == "FAIL":
@@ -390,6 +394,8 @@ def write_markdown(path: str, run_id: str, model: str | None,
             lines.extend([
                 f"### Turn {turn.turn}: {turn.purpose}", "",
                 f"- Detector: {turn.status} (confidence {turn.confidence:.2f})",
+                f"- Truncated by generation limit: {'yes' if turn.truncated else 'no'}",
+                f"- Human review required: {'yes' if turn.review_required else 'no'}",
                 f"- Prompt SHA-256: {turn.prompt_sha256}",
                 f"- Response SHA-256: {turn.response_sha256}", "",
                 "**Prompt**", "",
