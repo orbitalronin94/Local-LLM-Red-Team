@@ -63,6 +63,8 @@ The GitHub Actions workflow `.github/workflows/local-model-benchmark.yml` runs t
 
 It can be started manually from **Actions → Local model red-team benchmark → Run workflow**. It also runs when the benchmark workflow, model downloader/catalogue or scanner changes on `main`. The benchmark uses public model files and does not require API secrets.
 
+To populate the three larger-model caches before a benchmark, merge the model-catalogue change and manually run **Actions → Prepare local model cache** on `main`. That workflow downloads only Qwen2.5 3B, Llama 3.2 3B and Gemma 3 4B, records resolved revisions and SHA-256, and writes cache entries using the exact keys consumed by the benchmark. It does not start inference or run attacks. Model-catalogue/workflow-maintenance changes no longer auto-launch the expensive benchmark; dispatch it explicitly when ready.
+
 The adaptive run uses the tested model itself as the attacker. Treat this as a reproducible self-play stress test, not as an independent attacker evaluation. Manual dispatch exposes `include_adaptive`: keep it enabled while completing the current cross-model comparison; turn it off to run the full static catalogue, scenarios, paired-language probes and robustness matrix without adaptive self-play. This is distinct from `benchmark_profile=quick`, which remains a reduced development screen. GitHub-hosted CPU performance and timeouts can vary; a failed model run is reported as failed, not as a clean security result.
 
 
