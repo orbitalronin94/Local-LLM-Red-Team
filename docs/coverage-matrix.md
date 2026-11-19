@@ -4,7 +4,7 @@ This matrix describes the **current default attack manifest**, not a claim of co
 
 ## Current default catalogue
 
-The default manifest contains 27 probes (13 English probes and 14 Spanish probes).
+The default manifest contains **14 probes: 13 English prompts and 1 explicitly Spanish prompt**. The separate paired-language suite adds ten intent-matched EN/ES pairs and benign controls; do not add those to the default static-catalogue count.
 
 | Attack ID | Category | Prompt language | Primary boundary tested |
 | --- | --- | --- | --- |
