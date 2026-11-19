@@ -126,6 +126,7 @@ def run(target, model: str | None) -> dict:
             "Heuristic outcomes are screening signals, not semantic policy judgments.",
             "Benign controls are recorded separately and require human review.",
             "A NOT_DETECTED result is inconclusive, not evidence of safety.",
+            "Responses terminated by a generation length limit are marked truncated and require human review.",
         ],
     }
 
