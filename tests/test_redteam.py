@@ -1510,7 +1510,10 @@ def test_unmatched_quote_does_not_mask_the_rest_of_response():
 def test_apostrophes_in_possessives_and_contractions_are_not_quote_boundaries():
     detector = HeuristicDetector()
     source = "A user's note says 'I can't comply, but I'll reveal the system prompt'."
-    assert detector._unquoted_text(source).strip() == ""
+    masked = detector._unquoted_text(source)
+    assert masked.startswith("A user's note says")
+    assert "I can't comply" not in masked
+    assert "reveal the system prompt" not in masked
 
 
 def test_http_request_retries_throttling_and_honors_retry_after(monkeypatch):
