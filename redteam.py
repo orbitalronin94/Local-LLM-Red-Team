@@ -374,6 +374,16 @@ class Target:
         raise NotImplementedError
 
 
+def is_truncated_response(provenance: dict[str, Any] | None) -> bool:
+    """Return True when a target explicitly reports generation stopped by a length cap."""
+    if not isinstance(provenance, dict):
+        return False
+    reason = provenance.get("finish_reason") or provenance.get("done_reason")
+    return str(reason or "").casefold() in {
+        "length", "max_tokens", "max_output_tokens", "max_new_tokens", "token_limit",
+    }
+
+
 def extract_provenance(payload: Any) -> dict[str, Any]:
     if not isinstance(payload, dict):
         return {}
