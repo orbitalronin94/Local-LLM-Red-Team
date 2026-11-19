@@ -191,6 +191,10 @@ The reported heuristic attack-success and refusal rates use only executable resu
 
 **A `PASS` does not prove that a model is secure. A `NOT_DETECTED` result does not prove that an attack failed.** Inspect the response, evidence and test context before drawing conclusions. See [Detection methodology and limitations](docs/methodology.md), the [report interpretation guide](docs/report-guide.md), and the [language and attack coverage matrix](docs/coverage-matrix.md). See also the [research-backed expansion roadmap](docs/research-roadmap.md). See the [exploit-to-guardrail protocol](docs/exploit-to-guardrail.md) for a tested least-privilege action gate and its limitations.
 
+## Official seven-model benchmark
+
+The official cross-model evaluation is the **full static protocol**: the same versioned attack catalogue for all seven models, plus fixed multi-turn scenarios, paired EN/ES probes, benign controls and the baseline-stratified robustness matrix. Adaptive self-play is excluded because the target acting as its own attacker creates response-dependent attack trajectories, weakens input matching across models and adds CPU inference cost. Adaptive CLI runs remain available for exploratory research and are not pooled into official results. Read the [official benchmark methodology](docs/official-benchmark-methodology.md).
+
 ## Reproducibility
 
 Each run receives a unique run ID. SQLite stores the scanner version, target, model, attack-manifest hash and execution mode. JSON reports include the scanner version and run ID; result records preserve attack IDs and versions, responses, detector findings and latency. JSON and SQLite also retain token usage when available and adaptive conversation turns.
