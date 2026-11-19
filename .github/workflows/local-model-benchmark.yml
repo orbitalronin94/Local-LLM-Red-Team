@@ -30,6 +30,7 @@ on:
       - "tests/test_robustness.py"
       - "tests/test_review.py"
       - "tests/test_paired.py"
+      - "tests/test_performance_profile.py"
       - "tests/test_findings_catalog.py"
 
 permissions:
@@ -252,6 +253,7 @@ jobs:
         run: |
           {
             echo "model_id=${{ matrix.model_id }}"
+            echo "benchmark_profile=${{ github.event.inputs.benchmark_profile || 'full' }}"
             echo "model_file=${{ matrix.model_file }}"
             echo "llama_cpp_commit=$(cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT")"
             echo "python=$(python --version)"
@@ -347,6 +349,7 @@ jobs:
           inputs=()
           for report in \
             "reports/${{ matrix.model_id }}-static.json" \
+            "reports/${{ matrix.model_id }}-quick.json" \
             "reports/${{ matrix.model_id }}-adaptive.json" \
             "reports/${{ matrix.model_id }}-scenarios.json" \
             "reports/${{ matrix.model_id }}-paired-language.json"; do
