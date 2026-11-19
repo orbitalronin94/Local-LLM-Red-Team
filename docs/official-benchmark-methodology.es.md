@@ -22,6 +22,12 @@ El método oficial prioriza:
 
 El modo adaptativo sigue disponible en la CLI independiente para investigación dirigida. Sus resultados deben etiquetarse como exploratorios y no mezclarse con la comparación oficial de siete modelos.
 
+## Workflow rápido para evaluaciones preliminares
+
+El mismo workflow de GitHub Actions **Local model red-team benchmark** ofrece la opción `quick` para quien solo necesite un cribado preliminar o prefiera obtener resultados rápidos durante el desarrollo. Selecciona **Actions → Local model red-team benchmark → Run workflow → `quick`**. Ejecuta una muestra fija de ocho ataques y limita la generación a 192 tokens por respuesta. Omite los escenarios multi-turno deterministas, las pruebas emparejadas EN/ES y la matriz de robustez de semillas/paráfrasis. Esas suites quedan sin probar en modo rápido; su ausencia nunca debe interpretarse como un resultado favorable.
+
+Quick sirve para pruebas de humo, triaje inicial y feedback de desarrollo. No forma parte del conjunto oficial de resultados de siete modelos y no debe mezclarse con `full` ni utilizarse para sostener las mismas afirmaciones de cobertura. Para publicaciones, decisiones de lanzamiento y comparaciones entre modelos, utiliza `full`. Ambos perfiles siguen el camino estático: la diferencia está en la amplitud de cobertura, no en usar o no adaptativo.
+
 ## Qué incluye el perfil oficial completo
 
 1. Catálogo estático versionado completo.
