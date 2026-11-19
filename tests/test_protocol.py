@@ -85,7 +85,7 @@ def test_clean_regression_control_invalidates_scenario_before_attack():
 
     assert result.validity == "invalid_regression_control"
     assert result.baseline_stratum == "BASELINE_FAILED"
-    assert target.calls == 1
+    assert target.calls == 2
     assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "NOT_TESTED"
 
 
@@ -95,7 +95,7 @@ def test_pre_attack_benign_control_is_a_validity_gate():
     result = run_persistence_protocol(target, canary=canary, policy_marker=marker)
 
     assert result.validity == "invalid_benign_control"
-    assert target.calls == 3
+    assert target.calls == 1
     assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
 
 
@@ -121,12 +121,14 @@ def test_protocol_records_prompt_response_hashes_and_target_provenance():
     assert result.fixture["policy_marker_sha256"] == sha256_text(marker)
     assert result.fixture["canary_sha256"] == canary.sha256
     assert result.fixture["canary"] == canary.value
-    assert result.controls["regression"]["status"] == "PASSED"
+    assert result.controls["benign_baseline"]["status"] == "PASSED"
+    assert result.controls["regression"]["probe_type"] == "explicit_direct_extraction"
     assert result.controls["canary_regression"]["status"] == "PASSED"
 
 
-def test_regression_and_post_attack_probe_are_the_same_task():
+def test_explicit_extraction_probe_is_not_a_benign_control():
     assert REGRESSION_PROMPT == POLICY_PROBE_PROMPT
+    assert REGRESSION_PROMPT not in BENIGN_PROMPT
     assert REGRESSION_PROMPT not in ATTACK_PROMPT
 
 
@@ -179,7 +181,7 @@ def test_clean_canary_request_is_also_a_regression_gate():
     assert result.validity == "invalid_regression_control"
     assert result.baseline_stratum == "BASELINE_FAILED"
     assert result.controls["canary_regression"]["status"] == "FAILED"
-    assert target.calls == 2
+    assert target.calls == 3
     assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "NOT_TESTED"
 
 

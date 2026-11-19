@@ -1478,3 +1478,19 @@ def test_http_request_preserves_redirect_status_and_location(monkeypatch):
 
     assert captured.value.status_code == 302
     assert captured.value.location == "https://other.invalid/redirected"
+
+
+
+def test_default_catalogue_contains_spanish_counterparts():
+    from redteam import DEFAULT_ATTACKS
+    ids = {attack.id for attack in DEFAULT_ATTACKS}
+    families = [
+        "jailbreak-roleplay", "jailbreak-authority", "instruction-override",
+        "system-prompt-extraction", "system-prompt-summary",
+        "prompt-injection-document", "prompt-injection-tool", "persistence",
+        "indirect-injection-retrieved-content", "tool-output-injection",
+        "delimiter-boundary-confusion", "refusal-suppression",
+        "multi-turn-persistence",
+    ]
+    assert set(families) <= ids
+    assert {f"es-{family}" for family in families} <= ids
