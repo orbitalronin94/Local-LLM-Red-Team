@@ -23,7 +23,7 @@ Este documento define el contrato de publicación; no afirma que el proyecto ya 
 
 ## Base de ingeniería medida
 
-El umbral actual de cobertura de todos los módulos es del 74%; el último CI satisfactorio midió un 75,68%. El siguiente objetivo de mejora es el 85%, pero el umbral solo debe elevarse después de añadir pruebas específicas a los módulos con menor cobertura, sin debilitar las existentes.
+El umbral actual de cobertura de todos los módulos es del 74%; el último CI satisfactorio tras los cambios del vector de evidencias y el canario midió un 75,17 % (251 pruebas superadas en la matriz Python 3.10–3.13). El siguiente objetivo de mejora es el 85%, pero el umbral solo debe elevarse después de añadir pruebas específicas a los módulos con menor cobertura, sin debilitar las existentes.
 
 ## Lista de aceptación
 
