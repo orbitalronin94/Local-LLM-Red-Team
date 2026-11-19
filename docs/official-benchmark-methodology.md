@@ -22,6 +22,12 @@ The official method therefore prioritizes:
 
 Adaptive mode remains available in the standalone CLI for targeted research. Its results must be labelled exploratory and must not be pooled into the official seven-model comparison.
 
+## Quick preliminary workflow
+
+The same **Local model red-team benchmark** GitHub Actions workflow provides a `quick` dispatch option for users who only need a preliminary screen or prefer faster feedback while iterating. Select **Actions → Local model red-team benchmark → Run workflow → `quick`**. It runs a fixed eight-attack subset and caps generated output at 192 tokens per response. It omits deterministic multi-turn scenarios, paired EN/ES probes and the seed/paraphrase robustness matrix. Those suites are not tested in quick mode; their absence must never be interpreted as a pass.
+
+Quick is useful for smoke tests, early triage and development feedback. It is not the official seven-model result set and must not be pooled with `full` or used to support the same coverage claims. For publication, release decisions and cross-model comparisons, use `full`. Both profiles use the static attack path; the distinction is breadth of coverage, not adaptive versus static execution.
+
 ## What the full official profile contains
 
 1. Complete versioned static attack catalogue.
