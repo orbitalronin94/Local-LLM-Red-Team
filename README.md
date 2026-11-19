@@ -6,7 +6,7 @@
 
 **Language / Idioma:** [English](README.md) · [Español](README.es.md)
 
-**A lightweight, local-first Python harness for reproducible security testing of locally hosted large language models (LLMs).** Probe jailbreaks, prompt injection, instruction overrides, system-prompt extraction and multi-turn persistence against Ollama, OpenAI-compatible servers and generic HTTP JSON endpoints. Review heuristic findings as JSON, Markdown or SQLite records.
+**An open-source Python toolkit for local LLM security testing and red teaming.** Run reproducible prompt-injection tests, jailbreak evaluations, system-prompt exposure probes, instruction-override checks and multi-turn persistence assessments against Ollama, OpenAI-compatible local servers and generic HTTP JSON endpoints. Review evidence in JSON, Markdown and SQLite. Designed for developers evaluating the security and robustness of self-hosted large language models.
 
 **Project status:** Pre-1.0 (package version 0.1.0). The project remains in active validation; the public interface, attack catalogue and report schemas may evolve before 1.0.
 
