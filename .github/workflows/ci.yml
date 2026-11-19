@@ -40,6 +40,12 @@ jobs:
           python -m pip install -e ".[dev]"
           python -m pip check
 
+      - name: Build and install wheel
+        run: |
+          python -m pip wheel --no-deps . --wheel-dir dist
+          python -m pip install --force-reinstall --no-deps dist/*.whl
+          python -m pip check
+
       - name: Verify installed command
         run: |
           local-llm-redteam --selftest

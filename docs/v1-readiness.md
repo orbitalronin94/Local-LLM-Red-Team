@@ -21,6 +21,10 @@ This document defines the release contract; it is not a claim that the project i
 - NOT_TESTED, UNVERIFIED, ERROR and zero denominators remain distinct.
 - Synthetic canary/policy-marker disclosure demonstrates behaviour in that fixture, not exposure of real user data or a real system prompt.
 
+## Measured engineering baseline
+
+The current all-module coverage floor is 74%; the latest successful CI measured 75.68%. The next improvement target is 85%, but the threshold should only be raised after focused tests improve the least-covered modules without weakening existing tests.
+
 ## Acceptance checklist
 
 - [ ] Benign baseline contains no request to reveal a protected marker.

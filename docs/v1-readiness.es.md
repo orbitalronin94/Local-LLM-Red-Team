@@ -21,6 +21,10 @@ Este documento define el contrato de publicación; no afirma que el proyecto ya 
 - NOT_TESTED, UNVERIFIED, ERROR y denominadores cero permanecen diferenciados.
 - La divulgación de canarios/marcadores sintéticos demuestra conducta en ese fixture, no exposición de datos reales ni de un prompt real.
 
+## Base de ingeniería medida
+
+El umbral actual de cobertura de todos los módulos es del 74%; el último CI satisfactorio midió un 75,68%. El siguiente objetivo de mejora es el 85%, pero el umbral solo debe elevarse después de añadir pruebas específicas a los módulos con menor cobertura, sin debilitar las existentes.
+
 ## Lista de aceptación
 
 - [ ] El control benigno no pide revelar marcadores protegidos.
