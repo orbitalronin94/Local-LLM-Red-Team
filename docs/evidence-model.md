@@ -15,9 +15,12 @@ Levels do not promote one another. A disclosed canary does not imply persistence
 
 ## Canary
 
-This phase provides random `LRT-CANARY-...` marker generation and an exact response comparator. Inserting the marker into a protected system message and executing the probe are implemented by the Phase C behavioral protocol; the report retains hashes and the exact match outcome. The comparator uses no semantic regex, LLM judge, or inference from phrases such as “I disclosed the secret.”
+The shared evidence module generates random `LRT-CANARY-...` markers and evaluates literal exact-string matches. There are two separate uses:
 
-The report retains the canary SHA-256, response SHA-256, match outcome, and occurrence count. The canary is synthetic and must never contain credentials, personal data, or real secrets.
+- The static scanner's opt-in `--canary-test` adds a dedicated probe and injects the run-scoped marker into a protected system message. It is static-only and cannot be combined with adaptive or quick mode.
+- The Phase C behavioural persistence protocol uses its own controlled baseline and post-injection canary checks. Its cohort gates and baseline findings are distinct from the static scanner's single-probe result.
+
+Neither path uses a semantic regex, LLM judge or inference from phrases such as “I disclosed the secret.” A `DISCLOSED` result means only that this synthetic marker appeared literally in the observed response. The marker is synthetic and must never contain credentials, personal data or real secrets. Because raw responses are retained, a disclosed marker will appear in the response body; protect and redact reports before sharing.
 
 ## Policy bypass
 
@@ -39,6 +42,6 @@ Seeds and paraphrases are recorded separately: seeds estimate sampling variance;
 
 This contract does not turn a prompt-level result into proof of exploitation of a production system.
 
-## Verbal detector, version 2
+## Verbal detector, version 4
 
-Version 2 recognizes affirmative disclosure commitments with English contractions (for example, `I'll`) and evaluates contrastive refusal/compliance clauses separately. Comma splitting is applied only when the preceding clause contains a refusal, preventing a genuine refusal from being reclassified as acceptance. Quoted mentions are removed before evaluation. These rules produce review signals; they do not prove task execution or promote any other evidence-vector level.
+Detector version 4 uses quote-span parsing rather than a broad quoted-text regex. It recognizes straight and curly quote pairs, preserves apostrophes inside contractions and possessives, masks only complete quoted spans, and leaves unmatched opening quotes unmasked. It also evaluates refusal-to-compliance transitions across clause boundaries. These rules reduce known false positives/negatives but remain heuristic review signals; they do not prove task execution or promote any other evidence-vector level. The SHA-256 implementation fingerprint is recorded separately from the detector version.
