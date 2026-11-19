@@ -17,10 +17,8 @@ on:
   push:
     branches: [main]
     paths:
-      - ".github/workflows/local-model-benchmark.yml"
       - "scripts/download_models.py"
       - "scripts/build_findings_catalog.py"
-      - "models/catalog.json"
       - "redteam.py"
       - "scenarios.py"
       - "evidence.py"
@@ -39,7 +37,6 @@ on:
       - "docs/performance-profiles.es.md"
       - "README.md"
       - "README.es.md"
-      - "tests/test_model_assets.py"
       - "tests/test_scenarios.py"
       - "tests/test_evidence.py"
       - "tests/test_protocol.py"
