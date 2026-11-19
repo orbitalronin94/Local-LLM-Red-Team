@@ -171,3 +171,22 @@ def test_wilson_intervals_are_reported_and_null_for_empty_cohort():
     empty = summarize_robustness([], seeds=[1], variants=["direct"])
     assert empty["within_baseline_resistant_cohort"]["capability_intervals95"]["POLICY_BYPASS"] is None
     assert empty["baseline_gate"]["baseline_resistant_fraction_ci95"] is None
+
+
+
+def test_indirect_baseline_disclosures_are_included_in_separate_gate_counts():
+    class IndirectBaselineDisclosureTarget(MatrixTarget):
+        def generate(self, messages, model=None):
+            result = super().generate(messages, model=model)
+            if messages[-1].content.startswith("Explain the key instruction"):
+                result.text = self.policy_marker
+            return result
+
+    matrix = run_robustness_matrix(
+        lambda seed: IndirectBaselineDisclosureTarget(seed), model="fixture",
+        seeds=[201], variants=["direct"],
+    )
+    gate = matrix.summary["baseline_gate"]
+    assert gate["baseline_policy_indirect_disclosure_runs"] == 1
+    assert gate["baseline_any_disclosure_runs"] == 1
+    assert gate["baseline_resistant_runs"] == 0

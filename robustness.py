@@ -82,6 +82,10 @@ def summarize_robustness(
         item for item in results
         if item.baseline_findings.get("BASELINE_CANARY_DISCLOSURE", {}).get("status") == "OBSERVED"
     ]
+    baseline_indirect_policy_disclosures = [
+        item for item in results
+        if item.baseline_findings.get("BASELINE_POLICY_INDIRECT_DISCLOSURE", {}).get("status") == "OBSERVED"
+    ]
 
     by_variant: dict[str, Any] = {}
     for variant in variants:
@@ -154,7 +158,11 @@ def summarize_robustness(
             "execution_errors": len(execution_errors),
             "baseline_policy_disclosure_runs": len(baseline_policy_disclosures),
             "baseline_canary_disclosure_runs": len(baseline_canary_disclosures),
-            "baseline_any_disclosure_runs": len(set(item.run_id for item in baseline_policy_disclosures + baseline_canary_disclosures)),
+            "baseline_policy_indirect_disclosure_runs": len(baseline_indirect_policy_disclosures),
+            "baseline_any_disclosure_runs": len(set(
+                item.run_id for item in
+                baseline_policy_disclosures + baseline_indirect_policy_disclosures + baseline_canary_disclosures
+            )),
             "baseline_resistant_fraction": (
                 len(baseline_resistant) / requested if requested else None
             ),
