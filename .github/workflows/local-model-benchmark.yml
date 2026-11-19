@@ -9,6 +9,11 @@ on:
         options: [full, quick]
         default: full
         required: true
+      include_adaptive:
+        description: "Include adaptive self-play (keep enabled until cross-model comparison is complete)"
+        type: boolean
+        default: true
+        required: false
   push:
     branches: [main]
     paths:
@@ -114,6 +119,12 @@ jobs:
             model_file: Llama-3.2-1B-Instruct-Q4_K_M.gguf
           - model_id: gemma3_1b
             model_file: google_gemma-3-1b-it-Q4_K_M.gguf
+          - model_id: qwen2_5_3b
+            model_file: Qwen2.5-3B-Instruct-Q4_K_M.gguf
+          - model_id: llama3_2_3b
+            model_file: Llama-3.2-3B-Instruct-Q4_K_M.gguf
+          - model_id: gemma3_4b
+            model_file: gemma-3-4b-it-Q4_K_M.gguf
 
     steps:
       - name: Check out repository
@@ -265,6 +276,7 @@ jobs:
           {
             echo "model_id=${{ matrix.model_id }}"
             echo "benchmark_profile=${{ github.event.inputs.benchmark_profile || 'full' }}"
+            echo "adaptive_enabled=${{ github.event_name != 'workflow_dispatch' || inputs.include_adaptive }}"
             echo "model_file=${{ matrix.model_file }}"
             echo "llama_cpp_commit=$(cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT")"
             echo "python=$(python --version)"
@@ -289,7 +301,7 @@ jobs:
           python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --temperature 0 --seed 42 --profile full --gguf "models/weights/${{ matrix.model_file }}" --server-build "$(cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT")" --threads 2 --db "reports/${{ matrix.model_id }}-static.db" --json "reports/${{ matrix.model_id }}-static.json" --report "reports/${{ matrix.model_id }}-static.md"
 
       - name: Run complete adaptive attack catalogue
-        if: github.event_name != 'workflow_dispatch' || inputs.benchmark_profile == 'full'
+        if: (github.event_name != 'workflow_dispatch' || inputs.benchmark_profile == 'full') && (github.event_name != 'workflow_dispatch' || inputs.include_adaptive)
         run: |
           python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --temperature 0 --seed 42 --gguf "models/weights/${{ matrix.model_file }}" --server-build "$(cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT")" --threads 2 --mode adaptive --attacker-target openai --attacker-model local-model --adaptive-rounds 2 --db "reports/${{ matrix.model_id }}-adaptive.db" --json "reports/${{ matrix.model_id }}-adaptive.json" --report "reports/${{ matrix.model_id }}-adaptive.md"
 
