@@ -8,9 +8,9 @@ Modelos GGUF pequeños para pruebas reproducibles de inferencia local. Los pesos
 | qwen2_5 | [Qwen2.5](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF) | 0,5B | Q4_K_M | 491 MB | Apache-2.0 |
 | llama3_2_1b | [Llama 3.2](https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF) | 1B | Q4_K_M | 808 MB | Llama 3.2 Community License |
 | gemma3_1b | [Gemma 3](https://huggingface.co/bartowski/google_gemma-3-1b-it-GGUF) | 1B | Q4_K_M | 806 MB | Gemma Terms |
-| granite3_3_2b | [Granite 3.3](https://huggingface.co/bartowski/ibm-granite_granite-3.3-2b-instruct-GGUF) | 2B | Q4_K_M | 1,55 GB | Apache-2.0 |
-| phi3_5_mini | [Phi-3.5 Mini](https://huggingface.co/bartowski/Phi-3.5-mini-instruct-GGUF) | 3,8B | Q4_K_M | 2,39 GB | MIT |
-| ministral_3b | [Ministral 3B](https://huggingface.co/tensorblock/Ministral-3b-instruct-GGUF) | 3B | Q4_K_M | 1,86 GB | Apache-2.0 |
+| qwen2_5_3b | [Qwen2.5 3B](https://huggingface.co/bartowski/Qwen2.5-3B-Instruct-GGUF) | 3B | Q4_K_M | 1,93 GB | Apache-2.0 |
+| llama3_2_3b | [Llama 3.2 3B](https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF) | 3B | Q4_K_M | 2,02 GB | Llama 3.2 Community License |
+| gemma3_4b | [Gemma 3 4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF) | 4B | Q4_K_M | 2,49 GB | Gemma Terms |
 
 Los GGUF son cuantizaciones comunitarias. Cada entrada identifica el repositorio cuantizado y el modelo original. Llama y Gemma tienen condiciones propias: consulta las tarjetas y licencias upstream antes de redistribuir o usar comercialmente. SmolLM2 está orientado principalmente al inglés; Qwen2.5 es multilingüe. No extrapoles una puntuación de un idioma a otro.
 
@@ -21,10 +21,13 @@ Desde la raíz del repositorio:
 ```bash
 python scripts/download_models.py --list
 python scripts/download_models.py --model llama3_2_1b
+python scripts/download_models.py --model smollm2
+python scripts/download_models.py --model qwen2_5
+python scripts/download_models.py --model llama3_2_1b
 python scripts/download_models.py --model gemma3_1b
-python scripts/download_models.py --model granite3_3_2b
-python scripts/download_models.py --model phi3_5_mini
-python scripts/download_models.py --model ministral_3b
+python scripts/download_models.py --model qwen2_5_3b
+python scripts/download_models.py --model llama3_2_3b
+python scripts/download_models.py --model gemma3_4b
 python scripts/download_models.py --model all
 ```
 
@@ -59,7 +62,7 @@ El mismo workflow permite seleccionar `benchmark_profile=quick` al lanzarlo manu
 
 ## Benchmark automatizado
 
-El workflow `.github/workflows/local-model-benchmark.yml` ejecuta el protocolo completo contra los siete GGUF. Para cada modelo inicia `llama-server` en CPU, ejecuta el catálogo estático íntegro, escenarios multi-turno deterministas, pruebas emparejadas inglés/español, controles benignos y la matriz de robustez estratificada por baseline. Publica SQLite, JSON, Markdown, logs, hoja de revisión y procedencia como artefactos.
+El workflow `.github/workflows/local-model-benchmark.yml` ejecuta el protocolo completo contra los siete GGUF de la tabla anterior: SmolLM2 360M; Qwen2.5 0,5B y 3B; Llama 3.2 1B y 3B; Gemma 3 1B y 4B. Para cada modelo inicia `llama-server` en CPU, ejecuta el catálogo estático íntegro, escenarios multi-turno deterministas, pruebas emparejadas inglés/español, controles benignos y la matriz de robustez estratificada por baseline. Publica SQLite, JSON, Markdown, logs, hoja de revisión y procedencia como artefactos.
 
 Puede iniciarse desde **Actions → Local model red-team benchmark → Run workflow**. El benchmark oficial utiliza `benchmark_profile=full` y registra `benchmark_mode=static`. Los cambios de catálogo/workflow no lanzan por sí solos el benchmark costoso; se despacha expresamente cuando está listo. Utiliza modelos públicos y no necesita secretos API.
 
@@ -68,4 +71,4 @@ El autoataque adaptativo queda fuera de la comparación oficial. El objetivo act
 
 ## Caché persistente de modelos
 
-El workflow de benchmark guarda cada GGUF por separado en la caché de GitHub Actions. La clave depende del sistema operativo del runner, el ID del modelo y el contenido del catálogo. La primera ejecución descarga los pesos; las siguientes restauran el archivo y sus metadatos y verifican su SHA-256 antes de iniciar la inferencia. Si cambia el catálogo, se genera una clave nueva deliberadamente. GitHub puede expulsar cachés antiguas por sus límites de almacenamiento o retención; en ese caso habrá que descargar de nuevo ese modelo. La caché contiene los modelos, no los informes ni credenciales.
+El workflow restaura cada uno de los siete GGUF desde su propia entrada de caché de GitHub Actions, valida los metadatos laterales y vuelve a calcular SHA-256 antes de la inferencia. La primera ejecución tras una ausencia de caché descarga el modelo; las siguientes lo reutilizan mientras GitHub conserve la entrada. La caché puede ser expulsada por las políticas de almacenamiento y retención, por lo que no equivale a tener los pesos instalados permanentemente en cada runner efímero. La preparación manual de caché se realiza mediante **Actions → Prepare local model cache** en `main`; descarga los tres modelos grandes añadidos —Qwen2.5 3B, Llama 3.2 3B y Gemma 3 4B—, resuelve sus revisiones y registra SHA-256. No ejecuta inferencias ni ataques.
