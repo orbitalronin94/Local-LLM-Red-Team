@@ -27,7 +27,7 @@ All target adapters accept the optional --max-output-tokens N setting. It maps t
 
 Quick workflow runs use 192 generated tokens per response. This cap is deliberately not applied to full runs. A cap can truncate a response; the adapters preserve the finish reason, and the scanner marks length-truncated evidence for review. A truncated answer must not be interpreted as a clean refusal or a completed probe. The paired-language and scenario reports preserve finish-reason provenance and mark truncated outputs for human review. The controlled persistence protocol aborts an incomplete oracle phase and labels the run `incomplete_truncated_response`; robustness summaries count it separately from transport errors and exclude it from the valid attack cohort.
 
-The configured cap is included in target provenance and in the static scan run metadata. For other command-line suites, the per-turn provenance records the configured cap. A null cap means the server default was used.
+The configured cap is included in target provenance and in the static scan run metadata. For other command-line suites, the per-turn provenance records the configured cap. A null cap means the server default was used. Static reports also calculate per-response generation tokens/s when the adapter supplies an output-token count and positive latency. They publish median, p95 and sample count; responses without reliable token counts are omitted. A single-response warmup is not treated as a representative sustained-throughput measurement.
 
 ## Interpreting comparisons
 
