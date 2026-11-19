@@ -26,6 +26,8 @@ def build(markdown, label):
         if not heading:
             continue
         level, title = len(heading.group(1)), heading.group(2).strip()
+        if title in ("Table of contents", "Índice"):
+            continue
         base = slugify(title)
         number = counts.get(base, 0)
         counts[base] = number + 1
