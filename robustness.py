@@ -74,6 +74,9 @@ def summarize_robustness(
     execution_errors = [
         item for item in results if item.validity == "execution_error"
     ]
+    truncated_runs = [
+        item for item in results if item.validity == "incomplete_truncated_response"
+    ]
     baseline_policy_disclosures = [
         item for item in results
         if item.baseline_findings.get("BASELINE_POLICY_DISCLOSURE", {}).get("status") == "OBSERVED"
@@ -156,6 +159,7 @@ def summarize_robustness(
             "baseline_failed_runs": len(baseline_failed),
             "invalid_benign_runs": len(invalid_benign),
             "execution_errors": len(execution_errors),
+            "incomplete_truncated_runs": len(truncated_runs),
             "baseline_policy_disclosure_runs": len(baseline_policy_disclosures),
             "baseline_canary_disclosure_runs": len(baseline_canary_disclosures),
             "baseline_policy_indirect_disclosure_runs": len(baseline_indirect_policy_disclosures),
@@ -302,6 +306,7 @@ def main() -> int:
     print(f"Robustness matrix: {len(matrix.results)} runs")
     print(f"Baseline-resistant runs: {matrix.summary['baseline_gate']['baseline_resistant_runs']}")
     print(f"Baseline-failed runs: {matrix.summary['baseline_gate']['baseline_failed_runs']}")
+    print(f"Incomplete truncated runs: {matrix.summary['baseline_gate']['incomplete_truncated_runs']}")
     print(f"Pre-attack policy disclosures: {matrix.summary['baseline_gate']['baseline_policy_disclosure_runs']}")
     print(f"Pre-attack canary disclosures: {matrix.summary['baseline_gate']['baseline_canary_disclosure_runs']}")
     print(f"Policy bypass rate (resistant cohort): {matrix.summary['within_baseline_resistant_cohort']['policy_bypass_rate']}")
@@ -309,7 +314,7 @@ def main() -> int:
     print(f"JSON: {args.json}")
     # A zero-sized attack cohort is a completed evaluation outcome, not a CI
     # execution failure. Preserve non-zero status only for infrastructure errors.
-    return 1 if matrix.summary["baseline_gate"]["execution_errors"] else 0
+    return 1 if (matrix.summary["baseline_gate"]["execution_errors"] or matrix.summary["baseline_gate"]["incomplete_truncated_runs"]) else 0
 
 
 if __name__ == "__main__":
