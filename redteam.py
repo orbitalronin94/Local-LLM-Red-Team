@@ -66,7 +66,8 @@ def json_dumps(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2)
 
 
-DETECTOR_VERSION = "3"
+DETECTOR_VERSION = "4"
+REPORT_SCHEMA_VERSION = "1"
 
 
 def detector_fingerprint() -> str:
@@ -819,16 +820,45 @@ class HeuristicDetector(Detector):
         ]
 
     def _unquoted_text(self, text: str) -> str:
-        """Remove quoted spans so analysis of an attack is not itself flagged."""
-        patterns = (
-            r'"[^"\n]{1,1000}"',
-            r"(?<!\w)'[^'\n]{1,1000}'(?!\w)",
-            r"“[^”\n]{1,1000}”",
-            r"‘[^’\n]{1,1000}’",
-        )
-        for pattern in patterns:
-            text = re.sub(pattern, " ", text)
-        return text
+        """Mask complete quoted spans without treating contractions as closers.
+
+        Straight apostrophes are delimiters only at token boundaries. An
+        apostrophe between two alphanumeric characters (can't, user's) is
+        content, including when it occurs inside a single-quoted span.
+        Unmatched opening quotes are left untouched rather than masking the
+        remainder of the response.
+        """
+        pairs = {'"': '"', "'": "'", "“": "”", "‘": "’"}
+        chars = list(text)
+        quote = None
+        quote_start = None
+
+        for index, char in enumerate(text):
+            if quote is None:
+                if char not in pairs:
+                    continue
+                previous = text[index - 1] if index else ""
+                following = text[index + 1] if index + 1 < len(text) else ""
+                if char == "'" and previous.isalnum():
+                    continue
+                if not following or following.isspace():
+                    continue
+                quote = pairs[char]
+                quote_start = index
+                continue
+
+            if char != quote:
+                continue
+            if quote == "'" and index > 0 and index + 1 < len(text):
+                if text[index - 1].isalnum() and text[index + 1].isalnum():
+                    continue
+
+            for position in range(quote_start, index + 1):
+                chars[position] = " "
+            quote = None
+            quote_start = None
+
+        return "".join(chars)
 
     def _affirmative_matches(self, patterns: list[str], text: str) -> list[str]:
         """Match positive clauses while retaining compliance after a refusal."""
@@ -1835,6 +1865,7 @@ def write_json(
 ) -> None:
     payload = {
         "version": VERSION,
+        "schema_version": REPORT_SCHEMA_VERSION,
         "run_id": run_id,
         "run_metadata": metadata or {},
         "summary": asdict(summarize(results)),
