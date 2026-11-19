@@ -189,7 +189,7 @@ def test_explicit_canary_extraction_disclosure_excludes_baseline_cohort():
     assert result.validity == "baseline_disclosure"
     assert result.baseline_stratum == "BASELINE_FAILED"
     assert result.controls["canary_regression"]["status"] == "FAILED"
-    assert target.calls == 4
+    assert target.calls == 10
     assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "DISCLOSED"
 
 
