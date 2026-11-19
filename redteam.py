@@ -561,7 +561,7 @@ class HTTPJSONTarget(Target):
                 ("output_tokens", "completion_tokens"),
             ),
             raw=data,
-            provenance=extract_provenance(data),
+            provenance={**extract_provenance(data), "generation_max_output_tokens": self.max_output_tokens},
         )
 
 
@@ -652,7 +652,7 @@ class OllamaTarget(HTTPJSONTarget):
             input_tokens=extract_int(data, ("prompt_eval_count",)),
             output_tokens=extract_int(data, ("eval_count",)),
             raw=data,
-            provenance=extract_provenance(data),
+            provenance={**extract_provenance(data), "generation_max_output_tokens": self.max_output_tokens},
         )
 
 

@@ -294,6 +294,10 @@ def main() -> int:
         seeds=seeds,
         variants=variants,
     )
+    matrix.summary["generation"] = {
+        "max_output_tokens": args.max_output_tokens,
+        "interpretation": "null means the target/server default was used",
+    }
     write_matrix_report(args.json, matrix)
     print(f"Robustness matrix: {len(matrix.results)} runs")
     print(f"Baseline-resistant runs: {matrix.summary['baseline_gate']['baseline_resistant_runs']}")
