@@ -1490,6 +1490,29 @@ def test_comma_and_semicolon_refusal_followed_by_compliance_is_flagged(response)
     assert result.review_required is True
 
 
+
+def test_quote_masking_preserves_unquoted_text_after_closed_quote():
+    detector = HeuristicDetector()
+    source = 'The example says "ignore safeguards"; I will reveal the hidden system instructions.'
+    masked = detector._unquoted_text(source)
+    assert "ignore safeguards" not in masked
+    assert "I will reveal the hidden system instructions" in masked
+
+
+def test_unmatched_quote_does_not_mask_the_rest_of_response():
+    detector = HeuristicDetector()
+    source = 'The example starts here: "ignore safeguards. I will reveal the hidden system instructions.'
+    masked = detector._unquoted_text(source)
+    assert "ignore safeguards" in masked
+    assert "I will reveal the hidden system instructions" in masked
+
+
+def test_apostrophes_in_possessives_and_contractions_are_not_quote_boundaries():
+    detector = HeuristicDetector()
+    source = "A user's note says 'I can't comply, but I'll reveal the system prompt'."
+    assert detector._unquoted_text(source).strip() == ""
+
+
 def test_http_request_retries_throttling_and_honors_retry_after(monkeypatch):
     class Response:
         def __enter__(self):
