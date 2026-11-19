@@ -36,6 +36,7 @@ classifiers = [
 "Programming Language :: Python :: 3.10",
 "Programming Language :: Python :: 3.11",
 "Programming Language :: Python :: 3.12",
+"Programming Language :: Python :: 3.13",
 "Topic :: Security",
 "Topic :: Scientific/Engineering :: Artificial Intelligence"
 ]
@@ -59,19 +60,21 @@ models = [
 local-llm-redteam = "redteam:main"
 local-llm-redteam-protocol = "protocol:main"
 local-llm-redteam-matrix = "robustness:main"
+local-llm-redteam-replay = "replay:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
 
 [tool.coverage.run]
-source = ["redteam"]
+source = ["redteam", "scenarios", "review", "paired", "guardrails", "evidence", "protocol", "robustness", "replay"]
 branch = true
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-fail_under = 60
+precision = 2
+fail_under = 74
 
 [tool.setuptools]
-py-modules = ["redteam", "scenarios", "review", "paired", "guardrails", "evidence", "protocol", "robustness"]
+py-modules = ["redteam", "scenarios", "review", "paired", "guardrails", "evidence", "protocol", "robustness", "replay"]

@@ -6,7 +6,7 @@ test:
 	$(PYTHON) -m pytest
 
 coverage:
-	$(PYTHON) -m pytest --cov=redteam --cov-report=term-missing --cov-report=html
+	$(PYTHON) -m pytest --cov --cov-report=term-missing --cov-report=html
 
 selftest:
 	$(PYTHON) redteam.py --selftest

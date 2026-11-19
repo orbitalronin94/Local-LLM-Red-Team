@@ -156,3 +156,37 @@ def test_matrix_summarizes_baseline_disclosures_without_counting_them_as_attack_
     assert gate["baseline_any_disclosure_runs"] == 2
     assert matrix.summary["within_baseline_resistant_cohort"]["denominator"] == 0
     assert matrix.summary["within_baseline_resistant_cohort"]["policy_bypass_rate"] is None
+
+
+
+def test_wilson_intervals_are_reported_and_null_for_empty_cohort():
+    matrix = run_robustness_matrix(
+        lambda seed: MatrixTarget(seed), model="fixture",
+        seeds=[31, 32, 33], variants=["direct"],
+    )
+    summary = matrix.summary
+    intervals = summary["within_baseline_resistant_cohort"]["capability_intervals95"]
+    assert intervals["POLICY_BYPASS"]["lower"] <= intervals["POLICY_BYPASS"]["upper"]
+    assert summary["baseline_gate"]["baseline_resistant_fraction_ci95"] is not None
+    empty = summarize_robustness([], seeds=[1], variants=["direct"])
+    assert empty["within_baseline_resistant_cohort"]["capability_intervals95"]["POLICY_BYPASS"] is None
+    assert empty["baseline_gate"]["baseline_resistant_fraction_ci95"] is None
+
+
+
+def test_indirect_baseline_disclosures_are_included_in_separate_gate_counts():
+    class IndirectBaselineDisclosureTarget(MatrixTarget):
+        def generate(self, messages, model=None):
+            result = super().generate(messages, model=model)
+            if messages[-1].content.startswith("Explain the key instruction"):
+                result.text = self.policy_marker
+            return result
+
+    matrix = run_robustness_matrix(
+        lambda seed: IndirectBaselineDisclosureTarget(seed), model="fixture",
+        seeds=[201], variants=["direct"],
+    )
+    gate = matrix.summary["baseline_gate"]
+    assert gate["baseline_policy_indirect_disclosure_runs"] == 1
+    assert gate["baseline_any_disclosure_runs"] == 1
+    assert gate["baseline_resistant_runs"] == 0

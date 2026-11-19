@@ -4,7 +4,7 @@ This matrix describes the **current default attack manifest**, not a claim of co
 
 ## Current default catalogue
 
-The default manifest contains 14 probes:
+The default manifest contains 27 probes (13 English probes and 14 Spanish probes).
 
 | Attack ID | Category | Prompt language | Primary boundary tested |
 | --- | --- | --- | --- |
@@ -52,3 +52,26 @@ Before publishing comparative English/Spanish scores, build matched pairs for ev
 Do not compare an English model score against a Spanish score from one probe. Report the exact number of probes, attack-family distribution and detector version. The current catalogue is a starter set, not a validated bilingual benchmark.
 
 Related: [Report interpretation guide](report-guide.md) · [Detection methodology](methodology.md).
+
+## Spanish counterpart catalogue
+
+These Spanish probes mirror the intent and boundary of the English starter probes. They are curated prompt pairs, not difficulty-matched or semantically validated benchmark items. Report language cohorts separately; do not pool them into one score without validating equivalence and response-language effects.
+
+| English family | Spanish probe ID |
+| --- | --- |
+| Roleplay jailbreak | es-jailbreak-roleplay |
+| Authority jailbreak | es-jailbreak-authority |
+| Instruction override | es-instruction-override |
+| Direct system extraction | es-system-prompt-extraction |
+| Indirect system summary | es-system-prompt-summary |
+| Document injection | es-prompt-injection-document |
+| Tool-oriented injection | es-prompt-injection-tool |
+| Persistence pressure | es-persistence |
+| Retrieved-content injection | es-indirect-injection-retrieved-content |
+| Tool-output injection | es-tool-output-injection |
+| Delimiter confusion | es-delimiter-boundary-confusion |
+| Refusal suppression | es-refusal-suppression |
+| Multi-turn persistence | es-multi-turn-persistence |
+| Multilingual instruction override (existing Spanish-language probe) | multilingual-instruction-override |
+
+This improves prompt-language coverage but does not validate Spanish detector precision or recall. Human review and language-specific false-positive/false-negative measurement remain required before comparative language claims.

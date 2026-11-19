@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Check out repository
@@ -40,15 +40,22 @@ jobs:
           python -m pip install -e ".[dev]"
           python -m pip check
 
+      - name: Build and install wheel
+        run: |
+          python -m pip wheel --no-deps . --wheel-dir dist
+          python -m pip install --force-reinstall --no-deps dist/*.whl
+          python -m pip check
+
       - name: Verify installed command
         run: |
           local-llm-redteam --selftest
           local-llm-redteam --list-attacks
           local-llm-redteam-protocol --help
           local-llm-redteam-matrix --help
+          local-llm-redteam-replay --help
 
       - name: Run test suite with coverage
-        run: python -m pytest --cov=redteam --cov-report=term-missing --cov-report=xml
+        run: python -m pytest --cov --cov-report=term-missing --cov-report=xml
 
       - name: Enforce coverage threshold
-        run: python -m coverage report --fail-under=60
+        run: python -m coverage report --fail-under=74
