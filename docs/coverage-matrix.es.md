@@ -72,5 +72,6 @@ Estas pruebas reflejan la intención y el límite de las pruebas iniciales en in
 | Confusión de delimitadores | es-delimiter-boundary-confusion |
 | Supresión del rechazo | es-refusal-suppression |
 | Persistencia multi-turno | es-multi-turn-persistence |
+| Anulación multilingüe de instrucciones (prueba previa en español) | multilingual-instruction-override |
 
 La ampliación mejora la cobertura de idioma de los prompts, pero no valida la precisión/recobrado del detector en español. La revisión humana y la medición de falsos positivos/negativos por idioma siguen siendo necesarias antes de publicar comparativas.

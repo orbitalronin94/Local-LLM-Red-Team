@@ -72,5 +72,6 @@ These Spanish probes mirror the intent and boundary of the English starter probe
 | Delimiter confusion | es-delimiter-boundary-confusion |
 | Refusal suppression | es-refusal-suppression |
 | Multi-turn persistence | es-multi-turn-persistence |
+| Multilingual instruction override (existing Spanish-language probe) | multilingual-instruction-override |
 
 This improves prompt-language coverage but does not validate Spanish detector precision or recall. Human review and language-specific false-positive/false-negative measurement remain required before comparative language claims.

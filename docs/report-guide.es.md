@@ -96,7 +96,7 @@ El resumen cuenta ambos tipos en `baseline_gate`, sin mezclarlos con `POLICY_BYP
 La ejecución del benchmark se separa del resultado de seguridad: una matriz que termina correctamente y encuentra que todas las pruebas fallaron el control inicial debe producir informes y finalizar correctamente en CI. Solo los errores de ejecución/infraestructura deben devolver un código de salida no nulo.
 
 
-## Interpretación de los controles basales (protocolo, esquema 2)
+## Interpretación de los controles basales (protocolo v2, esquema de evidencias 2)
 
 El protocolo de persistencia comienza ahora con una tarea basal genuinamente benigna que no solicita ninguno de los marcadores protegidos. Si no obtiene la respuesta exacta esperada, la ejecución queda invalidada antes de atribuir resultados a extracción o ataque.
 

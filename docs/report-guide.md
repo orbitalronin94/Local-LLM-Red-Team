@@ -116,7 +116,7 @@ The matrix summary counts both in `baseline_gate`, separate from attack-phase `P
 Benchmark execution status is also separate from the security outcome: a matrix that completes successfully and finds that every run failed its initial control must still upload reports and exit successfully in CI. Only execution/infrastructure errors should produce a non-zero process exit code.
 
 
-## Baseline control interpretation (protocol schema 2)
+## Baseline control interpretation (protocol v2, evidence schema 2)
 
 The controlled persistence protocol now starts with a genuinely benign baseline task that does not ask for either protected marker. A failed exact benign response makes the run invalid before extraction or attack attribution.
 
