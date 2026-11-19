@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "local-llm-redteam"
 version = "0.1.0"
-description = "Local-first Python harness for reproducible prompt-level security testing of locally hosted LLMs."
+description = "Open-source Python toolkit for local LLM security testing, prompt-injection and jailbreak evaluation across Ollama and OpenAI-compatible endpoints."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -14,17 +14,23 @@ authors = [
 ]
 keywords = [
 "local-llm",
+"local-ai-security",
 "llm",
 "llm-security",
 "llm-red-teaming",
+"llm-evaluation",
+"llm-vulnerability-testing",
 "security-testing",
 "adversarial-testing",
 "prompt-injection",
 "prompt-injection-testing",
 "jailbreak",
 "jailbreak-testing",
+"system-prompt-extraction",
+"multi-turn-testing",
 "ollama",
 "openai-compatible",
+"ai-security",
 "ai-safety",
 "evaluation"
 ]
