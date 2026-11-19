@@ -1763,6 +1763,6 @@ def test_summary_reports_generation_throughput_only_with_valid_token_samples():
         ),
     ]
     summary = summarize(results)
-    assert summary.generation_throughput_samples == 1
-    assert summary.generation_tokens_per_second_p50 == pytest.approx(20.0)
-    assert summary.generation_tokens_per_second_p95 == pytest.approx(20.0)
+    assert summary.effective_throughput_samples == 1
+    assert summary.effective_output_tokens_per_second_p50 == pytest.approx(20.0)
+    assert summary.effective_output_tokens_per_second_p95 == pytest.approx(20.0)
