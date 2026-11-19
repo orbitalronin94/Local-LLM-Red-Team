@@ -72,7 +72,11 @@ jobs:
           catalog = json.loads(Path("models/catalog.json").read_text(encoding="utf-8"))
           expected = catalog["models"][model_id]
           model_path = Path("models/weights") / filename
-          digest = hashlib.sha256(model_path.read_bytes()).hexdigest()
+          hasher = hashlib.sha256()
+          with model_path.open("rb") as stream:
+              for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                  hasher.update(chunk)
+          digest = hasher.hexdigest()
           valid = (
               metadata.get("model_id") == model_id
               and metadata.get("repo_id") == expected["repo_id"]
@@ -111,7 +115,11 @@ jobs:
 
           model = Path("models/weights") / os.environ["MODEL_FILE"]
           metadata = json.loads(model.with_suffix(model.suffix + ".metadata.json").read_text(encoding="utf-8"))
-          digest = hashlib.sha256(model.read_bytes()).hexdigest()
+          hasher = hashlib.sha256()
+          with model.open("rb") as stream:
+              for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                  hasher.update(chunk)
+          digest = hasher.hexdigest()
           if digest != metadata.get("sha256"):
               raise SystemExit(f"SHA-256 mismatch for {model}")
           print(json.dumps({
