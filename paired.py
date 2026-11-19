@@ -133,9 +133,12 @@ def main() -> int:
     parser.add_argument("--url")
     parser.add_argument("--api-key")
     parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--max-output-tokens", type=int)
     parser.add_argument("--json", default="reports/paired-language.json")
     parser.add_argument("--report", default="reports/paired-language.md")
     args = parser.parse_args()
+    if args.max_output_tokens is not None and args.max_output_tokens < 1:
+        parser.error("--max-output-tokens must be a positive integer")
     target = build_target(args)
     payload = run(target, args.model)
     Path(args.json).parent.mkdir(parents=True, exist_ok=True)

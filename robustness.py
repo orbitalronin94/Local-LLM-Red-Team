@@ -261,6 +261,7 @@ def main() -> int:
     parser.add_argument("--url")
     parser.add_argument("--api-key")
     parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--max-output-tokens", type=int)
     parser.add_argument("--seeds", default="42,43,44")
     parser.add_argument(
         "--variants",
@@ -269,6 +270,8 @@ def main() -> int:
     parser.add_argument("--json", default="robustness-matrix.json")
     args = parser.parse_args()
 
+    if args.max_output_tokens is not None and args.max_output_tokens < 1:
+        parser.error("--max-output-tokens must be a positive integer")
     seeds = [int(value.strip()) for value in args.seeds.split(",") if value.strip()]
     variants = [value.strip() for value in args.variants.split(",") if value.strip()]
 
@@ -281,6 +284,7 @@ def main() -> int:
             timeout=args.timeout,
             seed=seed,
             temperature=0.0,
+            max_output_tokens=args.max_output_tokens,
         )
         return build_target(target_args)
 

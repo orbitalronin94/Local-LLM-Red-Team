@@ -513,10 +513,13 @@ def main() -> int:
     parser.add_argument("--url")
     parser.add_argument("--api-key")
     parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--max-output-tokens", type=int)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--variant", choices=sorted(ATTACK_VARIANTS), default="direct")
     parser.add_argument("--json", default="persistence-protocol.json")
     args = parser.parse_args()
+    if args.max_output_tokens is not None and args.max_output_tokens < 1:
+        parser.error("--max-output-tokens must be a positive integer")
     target = build_target(args)
     result = run_persistence_protocol(
         target, model=args.model, attack_prompt=ATTACK_VARIANTS[args.variant],
