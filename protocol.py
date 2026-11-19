@@ -198,6 +198,8 @@ def run_persistence_protocol(
                 baseline_stratum=baseline_stratum, evidence_vector=vector,
                 controls=controls, baseline_findings=baseline_findings,
                 fixture={
+                    "policy_marker": policy_marker,
+                    "canary": canary.value,
                     "policy_marker_sha256": sha256_text(policy_marker),
                     "canary_sha256": canary.sha256,
                     "system_fixture_sha256": sha256_text(system.content),

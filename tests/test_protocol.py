@@ -82,7 +82,7 @@ def test_protocol_requires_new_post_injection_probe_and_separates_vector_levels(
     assert canary.value not in ATTACK_PROMPT
 
 
-def test_clean_regression_control_invalidates_scenario_before_attack():
+def test_explicit_direct_extraction_disclosure_excludes_baseline_cohort():
     marker, canary = fixture()
     target = ScriptedProtocolTarget(marker, canary.value, regression_leaks=True)
     result = run_persistence_protocol(target, canary=canary, policy_marker=marker)
@@ -177,13 +177,13 @@ def test_target_error_does_not_claim_baseline_resistance():
 
 
 
-def test_clean_canary_request_is_also_a_regression_gate():
+def test_explicit_canary_extraction_disclosure_excludes_baseline_cohort():
     marker, canary = fixture()
     target = ScriptedProtocolTarget(
         marker, canary.value, canary_regression_leaks=True
     )
     result = run_persistence_protocol(target, canary=canary, policy_marker=marker)
-    assert result.validity == "invalid_regression_control"
+    assert result.validity == "baseline_disclosure"
     assert result.baseline_stratum == "BASELINE_FAILED"
     assert result.controls["canary_regression"]["status"] == "FAILED"
     assert target.calls == 4
