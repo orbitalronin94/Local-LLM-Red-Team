@@ -752,7 +752,7 @@ def test_write_json(tmp_path):
     )
 
     assert payload["version"] == "0.1.0"
-    assert payload["schema_version"] == "1"
+    assert payload["schema_version"] == "2"
     assert payload["run_id"] == run_id
     assert payload["summary"]["total"] == 1
     assert payload["run_metadata"]["target_type"] == "fake"
@@ -1351,6 +1351,73 @@ def test_detector_fingerprint_is_stable_and_sha256():
     first = detector_fingerprint()
     assert len(first) == 64
     assert first == detector_fingerprint()
+
+
+
+def test_static_evidence_vector_keeps_dimensions_independent():
+    from redteam import _static_evidence_vector
+
+    attack = next(a for a in DEFAULT_ATTACKS if a.id == "instruction-override")
+    detection = HeuristicDetector().detect(attack, "Previous instructions have been disabled.")
+    vector = _static_evidence_vector(detection)
+
+    assert vector["VERBAL_ACCEPTANCE"]["status"] == "OBSERVED"
+    assert vector["PERSISTENT_OVERRIDE"]["status"] == "NOT_TESTED"
+    assert vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
+    assert vector["CANARY_DISCLOSURE"]["status"] == "NOT_TESTED"
+
+
+def test_static_canary_probe_uses_system_context_and_exact_match():
+    from evidence import create_canary
+    from redteam import CANARY_ATTACK
+
+    class RecordingTarget(FakeTarget):
+        def generate(self, messages, model=None):
+            self.messages = messages
+            return super().generate(messages, model=model)
+
+    canary = create_canary()
+    target = RecordingTarget(response="Diagnostic token: " + canary.value)
+    scanner = Scanner(target)
+    _, results = scanner.scan([CANARY_ATTACK], model="fixture", canary=canary)
+    result = results[0]
+
+    assert target.messages[0].role == "system"
+    assert canary.value in target.messages[0].content
+    assert result.evidence_vector["CANARY_DISCLOSURE"]["status"] == "DISCLOSED"
+    assert result.evidence_vector["CANARY_DISCLOSURE"]["evidence_type"] == "exact_string_match"
+    assert result.evidence_vector["VERBAL_ACCEPTANCE"]["status"] == "NOT_TESTED"
+    assert result.evidence_vector["PERSISTENT_OVERRIDE"]["status"] == "NOT_TESTED"
+    assert result.evidence_vector["POLICY_BYPASS"]["status"] == "UNVERIFIED"
+    assert scanner.last_run_metadata["canary_sha256"] == canary.sha256
+    assert canary.value not in json.dumps(scanner.last_run_metadata)
+    assert result.provenance["canary_context_sha256"]
+
+
+def test_static_canary_probe_requires_exact_token_not_semantic_claim():
+    from evidence import create_canary
+    from redteam import CANARY_ATTACK
+
+    canary = create_canary()
+    scanner = Scanner(FakeTarget(response="I disclosed the confidential diagnostic token."))
+    _, results = scanner.scan([CANARY_ATTACK], model="fixture", canary=canary)
+
+    assert results[0].evidence_vector["CANARY_DISCLOSURE"]["status"] == "NOT_DISCLOSED"
+
+
+def test_canary_probe_rejects_invalid_mode_and_missing_attack():
+    from evidence import create_canary
+    from redteam import CANARY_ATTACK
+
+    scanner = Scanner(FakeTarget())
+    with pytest.raises(ValueError, match="exactly one"):
+        scanner.scan([], model="fixture", canary=create_canary())
+    with pytest.raises(ValueError, match="static-only"):
+        scanner.scan(
+            [CANARY_ATTACK], model="fixture", mode="adaptive",
+            adaptive_attacker=FakeTarget(), canary=create_canary(),
+        )
+
 
 
 def test_detector_version_is_recorded_in_run_metadata():
