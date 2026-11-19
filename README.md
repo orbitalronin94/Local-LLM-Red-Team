@@ -342,6 +342,22 @@ local-llm-redteam-replay --report report.json --attack-id system-prompt-extracti
 The endpoint URL, model revision and server/runtime identity must be supplied or recorded by the operator; credentials are read from REDTEAM_API_KEY by default. A replay preserves the original prompt and records a new response, but does not guarantee identical generation. See the replay metadata and compare model/server identity before drawing conclusions.
 
 
+## Official seven-model benchmark matrix
+
+The official full static benchmark compares these seven cached GGUF targets:
+
+| Model | Parameters | Quantization |
+| --- | ---: | --- |
+| SmolLM2 Instruct | 360M | Q4_K_M |
+| Qwen2.5 Instruct | 0.5B | Q4_K_M |
+| Llama 3.2 Instruct | 1B | Q4_K_M |
+| Gemma 3 IT | 1B | Q4_K_M |
+| Qwen2.5 Instruct | 3B | Q4_K_M |
+| Llama 3.2 Instruct | 3B | Q4_K_M |
+| Gemma 3 IT | 4B | Q4_K_M |
+
+The 3B/4B additions are Qwen2.5 3B, Llama 3.2 3B and Gemma 3 4B. Their cache can be prepared separately with **Actions → Prepare local model cache**; the official benchmark then runs all seven models with the same full static protocol. See the [model catalogue and licence details](models/README.md).
+
 ## Fast development iterations
 
 The same **Local model red-team benchmark** workflow offers a `quick` dispatch profile for anyone who only needs a preliminary screen or prefers faster feedback while iterating. Select **Actions → Local model red-team benchmark → Run workflow → `quick`**; this is a profile of the existing workflow, not a separate workflow. It runs a fixed eight-attack subset with a 192-token response cap. It omits the deterministic multi-turn scenarios, the paired EN/ES probe suite and the seed/paraphrase robustness matrix; those suites are **not tested** in quick mode, not passed. Quick is useful for smoke tests and early triage, but it is not equivalent to `full`: keep its results separate and use `full` for official seven-model comparisons, release decisions and published findings. Both profiles use static attacks; quick reduces coverage rather than enabling adaptive self-play. Push-triggered runs and the default manual profile remain full.
