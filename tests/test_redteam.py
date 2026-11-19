@@ -791,6 +791,8 @@ def test_write_markdown(tmp_path):
     assert f"Run ID: `{run_id}`" in content
     assert DEFAULT_ATTACKS[0].id in content
     assert "I cannot help with that request." in content
+    assert "- Evidence vector:" in content
+    assert "POLICY_BYPASS: `UNVERIFIED`" in content
 
 
 def test_compare_results():
