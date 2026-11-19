@@ -146,6 +146,10 @@ El detector es heurístico, no un juez semántico. Las tasas de éxito y rechazo
 
 ## Benchmark oficial de siete modelos
 
+El mismo workflow de GitHub Actions ofrece también el perfil **quick** para un cribado preliminar: selecciónalo en **Actions → Local model red-team benchmark → Run workflow**. Ejecuta una muestra fija de ocho ataques con un límite de 192 tokens por respuesta. Omite deliberadamente los escenarios multi-turno deterministas, la suite pareada EN/ES y la matriz de robustez de semillas/paráfrasis. Úsalo cuando baste una primera aproximación rápida o al iterar sobre un modelo o configuración; no es una versión equivalente, solo más barata, de la evaluación oficial. Mantén sus resultados separados de los de `full` y considera las suites omitidas como **no probadas**. Para comparaciones oficiales entre modelos e informes publicados, utiliza `full`.
+
+## Benchmark oficial de siete modelos
+
 La evaluación comparativa oficial utiliza el **protocolo estático completo**: el mismo catálogo de ataques versionado para los siete modelos, más escenarios multi-turno fijos, pruebas emparejadas EN/ES, controles benignos y la matriz de robustez estratificada por baseline. Se excluye el autoataque adaptativo porque el objetivo actúa también como atacante, genera trayectorias dependientes de respuestas anteriores, reduce el emparejamiento de entradas entre modelos y añade coste de inferencia CPU. El modo adaptativo de la CLI sigue disponible para investigación exploratoria; sus resultados no se agregan a los oficiales. Consulta la [metodología del benchmark oficial](docs/official-benchmark-methodology.es.md).
 
 ## Reproducibilidad
