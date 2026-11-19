@@ -202,7 +202,7 @@ def test_review_export_includes_model_fingerprint_for_scenario_and_pair_rows(tmp
         "run_id": "multi",
         "model": "local-model",
         "model_metadata": identity,
-        "records": [{"attack_id": "paired-1", "status": "NOT_DETECTED"}],
+        "records": [{"attack_id": "paired-1", "status": "NOT_DETECTED", "truncated": True}],
         "results": [{
             "scenario_id": "scenario-1", "category": "jailbreak",
             "status": "NOT_DETECTED", "turns": [],
@@ -218,6 +218,7 @@ def test_review_export_includes_model_fingerprint_for_scenario_and_pair_rows(tmp
     assert all(row["upstream_model"] == "example/base" for row in rows)
     assert all(row["model_sha256"] == "f" * 64 for row in rows)
     assert all(row["inference_engine_commit"] == "d" * 40 for row in rows)
+    assert rows[0]["truncated"] == "true"
 
 
 
