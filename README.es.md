@@ -6,6 +6,38 @@
 
 **Idioma / Language:** [Español](README.es.md) · [English](README.md)
 
+## Índice
+
+<!-- TOC:START -->
+- [Seguridad de LLM locales: por qué existe](#seguridad-de-llm-locales-por-qué-existe)
+- [Capacidades](#capacidades)
+  - [Catálogo predeterminado](#catálogo-predeterminado)
+- [Inicio rápido](#inicio-rápido)
+- [Ejecutar pruebas](#ejecutar-pruebas)
+  - [Ollama](#ollama)
+  - [Servidor compatible con OpenAI](#servidor-compatible-con-openai)
+  - [Endpoint HTTP JSON](#endpoint-http-json)
+  - [Modo adaptativo multi-turno](#modo-adaptativo-multi-turno)
+- [Informes y resultados](#informes-y-resultados)
+- [Benchmark oficial de siete modelos](#benchmark-oficial-de-siete-modelos)
+- [Benchmark oficial de siete modelos](#benchmark-oficial-de-siete-modelos-1)
+- [Reproducibilidad](#reproducibilidad)
+- [Desarrollo y pruebas](#desarrollo-y-pruebas)
+- [Alcance y uso responsable](#alcance-y-uso-responsable)
+- [Preguntas frecuentes](#preguntas-frecuentes)
+- [Licencia](#licencia)
+- [Investigación y evolución](#investigación-y-evolución)
+  - [Escenarios deterministas de varios turnos](#escenarios-deterministas-de-varios-turnos)
+  - [Comparación emparejada EN/ES y revisión humana](#comparación-emparejada-enes-y-revisión-humana)
+- [Persistencia conductual y matriz de robustez](#persistencia-conductual-y-matriz-de-robustez)
+- [Preparación de la versión 1.0](#preparación-de-la-versión-10)
+  - [Repetir un ataque registrado](#repetir-un-ataque-registrado)
+- [Matriz oficial del benchmark: siete modelos](#matriz-oficial-del-benchmark-siete-modelos)
+- [Iteraciones rápidas de desarrollo](#iteraciones-rápidas-de-desarrollo)
+- [Vectores de evidencia, canario sintético y versiones de informes](#vectores-de-evidencia-canario-sintético-y-versiones-de-informes)
+<!-- TOC:END -->
+
+
 **Toolkit open source de Python para red teaming y evaluación de seguridad de LLM locales.** Ejecuta pruebas reproducibles de prompt injection, jailbreaks, exposición del system prompt, anulación de instrucciones y persistencia multi-turno contra Ollama, servidores locales compatibles con OpenAI y endpoints HTTP JSON genéricos. Examina evidencias en JSON, Markdown y SQLite. Pensado para desarrolladores que evalúan la seguridad y robustez de modelos de lenguaje autoalojados.
 
 **Estado:** Pre-1.0; los criterios de publicación se mantienen en [Preparación V1](docs/v1-readiness.es.md). La interfaz pública y el catálogo de ataques pueden evolucionar antes de 1.0. Al probar un endpoint local no hace falta una cuenta cloud, una suscripción API ni un framework de ejecución adicional.

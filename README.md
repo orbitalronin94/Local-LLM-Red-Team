@@ -6,6 +6,39 @@
 
 **Language / Idioma:** [English](README.md) · [Español](README.es.md)
 
+## Table of contents
+
+<!-- TOC:START -->
+- [Why this project exists](#why-this-project-exists)
+- [Capabilities](#capabilities)
+  - [Default attack catalogue](#default-attack-catalogue)
+- [Quick start](#quick-start)
+- [Run a scan](#run-a-scan)
+  - [Ollama](#ollama)
+  - [OpenAI-compatible local server](#openai-compatible-local-server)
+  - [Generic HTTP JSON endpoint](#generic-http-json-endpoint)
+  - [Adaptive multi-turn testing](#adaptive-multi-turn-testing)
+- [Results and reports](#results-and-reports)
+  - [Understanding detection results](#understanding-detection-results)
+- [Official seven-model benchmark](#official-seven-model-benchmark)
+- [Official seven-model benchmark](#official-seven-model-benchmark-1)
+- [Reproducibility](#reproducibility)
+- [Development and tests](#development-and-tests)
+- [Scope and responsible use](#scope-and-responsible-use)
+- [Frequently asked questions](#frequently-asked-questions)
+- [Resumen en español](#resumen-en-español)
+- [License](#license)
+  - [Deterministic multi-turn scenarios](#deterministic-multi-turn-scenarios)
+  - [Paired English/Spanish probes and human review](#paired-englishspanish-probes-and-human-review)
+- [Behavioral persistence and robustness matrix](#behavioral-persistence-and-robustness-matrix)
+- [Version 1.0 readiness](#version-10-readiness)
+  - [Replay one recorded attack](#replay-one-recorded-attack)
+- [Official seven-model benchmark matrix](#official-seven-model-benchmark-matrix)
+- [Fast development iterations](#fast-development-iterations)
+- [Evidence vectors, synthetic canary and report versions](#evidence-vectors-synthetic-canary-and-report-versions)
+<!-- TOC:END -->
+
+
 **An open-source Python toolkit for local LLM security testing and red teaming.** Run reproducible prompt-injection tests, jailbreak evaluations, system-prompt exposure probes, instruction-override checks and multi-turn persistence assessments against Ollama, OpenAI-compatible local servers and generic HTTP JSON endpoints. Review evidence in JSON, Markdown and SQLite. Designed for developers evaluating the security and robustness of self-hosted large language models.
 
 **Project status:** Pre-1.0 (package version 0.1.0). The project remains in active validation; the public interface, attack catalogue and report schemas may evolve before 1.0.

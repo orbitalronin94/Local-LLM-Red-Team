@@ -1,0 +1,41 @@
+name: Update README indexes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "README.md"
+      - "README.es.md"
+      - "scripts/update_readme_toc.py"
+      - ".github/workflows/update-readme-index.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: readme-index-main
+  cancel-in-progress: false
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Regenerate bilingual indexes
+        run: python3 scripts/update_readme_toc.py
+      - name: Commit changes when needed
+        run: |
+          if git diff --quiet -- README.md README.es.md; then
+            echo "README indexes are already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md README.es.md
+          git commit -m "docs: refresh generated README indexes"
+          git push origin HEAD:main
