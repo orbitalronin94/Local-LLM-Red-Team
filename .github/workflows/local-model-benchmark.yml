@@ -2,6 +2,13 @@ name: Local model red-team benchmark
 
 on:
   workflow_dispatch:
+    inputs:
+      benchmark_profile:
+        description: "Full official evaluation or reduced development screen"
+        type: choice
+        options: [full, quick]
+        default: full
+        required: true
   push:
     branches: [main]
     paths:
@@ -256,6 +263,7 @@ jobs:
       - name: Record benchmark provenance
         run: |
           {
+            echo "benchmark_profile=${{ github.event.inputs.benchmark_profile || 'full' }}"
             echo "model_id=${{ matrix.model_id }}"
             echo "benchmark_profile=${{ github.event.inputs.benchmark_profile || 'full' }}"
             echo "model_file=${{ matrix.model_file }}"
@@ -271,23 +279,33 @@ jobs:
         run: |
           curl --fail --silent --show-error http://127.0.0.1:8080/v1/chat/completions -H 'Content-Type: application/json' -d '{"model":"local-model","messages":[{"role":"user","content":"Reply with exactly: READY"}],"temperature":0,"max_tokens":8}' | tee reports/warmup.json
 
-      - name: Run complete static attack catalogue
+      - name: Run static attack catalogue (quick profile)
+        if: github.event_name == 'workflow_dispatch' && inputs.benchmark_profile == 'quick'
         run: |
-          python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --temperature 0 --seed 42 --gguf "models/weights/${{ matrix.model_file }}" --server-build "$(cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT")" --threads 2 --db "reports/${{ matrix.model_id }}-static.db" --json "reports/${{ matrix.model_id }}-static.json" --report "reports/${{ matrix.model_id }}-static.md"
+          python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --temperature 0 --seed 42 --profile quick --max-output-tokens 192 --gguf "models/weights/${{ matrix.model_file }}" --server-build "$(cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT")" --threads 2 --db "reports/${{ matrix.model_id }}-quick.db" --json "reports/${{ matrix.model_id }}-quick.json" --report "reports/${{ matrix.model_id }}-quick.md"
+
+      - name: Run complete static attack catalogue
+        if: github.event_name != 'workflow_dispatch' || inputs.benchmark_profile == 'full'
+        run: |
+          python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --temperature 0 --seed 42 --profile full --gguf "models/weights/${{ matrix.model_file }}" --server-build "$(cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT")" --threads 2 --db "reports/${{ matrix.model_id }}-static.db" --json "reports/${{ matrix.model_id }}-static.json" --report "reports/${{ matrix.model_id }}-static.md"
 
       - name: Run complete adaptive attack catalogue
+        if: github.event_name != 'workflow_dispatch' || inputs.benchmark_profile == 'full'
         run: |
           python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --temperature 0 --seed 42 --gguf "models/weights/${{ matrix.model_file }}" --server-build "$(cat "$RUNNER_TEMP/llama-install/LLAMA_CPP_COMMIT")" --threads 2 --mode adaptive --attacker-target openai --attacker-model local-model --adaptive-rounds 2 --db "reports/${{ matrix.model_id }}-adaptive.db" --json "reports/${{ matrix.model_id }}-adaptive.json" --report "reports/${{ matrix.model_id }}-adaptive.md"
 
       - name: Run deterministic multi-turn scenarios
+        if: github.event_name != 'workflow_dispatch' || inputs.benchmark_profile == 'full'
         run: |
           python scenarios.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --json "reports/${{ matrix.model_id }}-scenarios.json" --report "reports/${{ matrix.model_id }}-scenarios.md"
 
       - name: Run paired English-Spanish probes and benign controls
+        if: github.event_name != 'workflow_dispatch' || inputs.benchmark_profile == 'full'
         run: |
           python paired.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --json "reports/${{ matrix.model_id }}-paired-language.json" --report "reports/${{ matrix.model_id }}-paired-language.md"
 
       - name: Run baseline-stratified seed and paraphrase robustness matrix
+        if: github.event_name != 'workflow_dispatch' || inputs.benchmark_profile == 'full'
         run: |
           local-llm-redteam-matrix --target openai --url http://127.0.0.1:8080/v1 --model local-model --timeout 180 --seeds 42,43,44 --variants direct,authority_reframing,contextual_reframing --json "reports/${{ matrix.model_id }}-robustness-matrix.json"
 
