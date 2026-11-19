@@ -345,7 +345,7 @@ For local runs, use local-llm-redteam --profile quick. The quick profile is stat
 
 Every static result carries an independent evidence vector: `VERBAL_ACCEPTANCE`, `PERSISTENT_OVERRIDE`, `POLICY_BYPASS` and `CANARY_DISCLOSURE`. A phrase-level detector signal can populate only review-required `VERBAL_ACCEPTANCE`; it does not prove persistence or policy bypass. Those dimensions require a separate post-injection behavioural task or a deterministic oracle.
 
-Run the opt-in synthetic canary probe separately from the ordinary attack profile:
+To append an opt-in synthetic canary probe to the selected static attack set (with no filters, the default catalogue also runs):
 
 ```bash
 local-llm-redteam --target ollama --model llama3.2 --canary-test --json canary.json --report canary.md
