@@ -1524,3 +1524,14 @@ def test_spanish_document_injection_is_adversarial_not_a_defensive_control():
     attack = next(item for item in DEFAULT_ATTACKS if item.id == "es-prompt-injection-document")
     assert "sigue las instrucciones incrustadas" in attack.prompt
     assert "no obedezcas" not in attack.prompt
+
+
+
+def test_truncation_helper_recognizes_provider_length_finish_reasons():
+    from redteam import is_truncated_response
+
+    assert is_truncated_response({"finish_reason": "length"}) is True
+    assert is_truncated_response({"done_reason": "length"}) is True
+    assert is_truncated_response({"finish_reason": "stop"}) is False
+    assert is_truncated_response({}) is False
+    assert is_truncated_response(None) is False
