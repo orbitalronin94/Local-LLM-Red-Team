@@ -160,43 +160,6 @@ Para comparar modelos, conserva el manifiesto, configuración del endpoint, revi
 
 Consulta el [catálogo automatizado de hallazgos](docs/findings-catalog.es.md) para obtener el índice comparativo de cada ejecución, con positivos heurísticos y casos inconclusos, prompts, respuestas y procedencia de los modelos.
 
-## Kit de benchmark de modelos locales
-
-Los pesos GGUF se descargan bajo demanda a `models/weights/`; no se guardan en Git. Cada descarga genera metadatos con origen, ETag, tamaño y SHA-256.
-
-| Modelo | Parámetros | Cuantización | Tamaño aprox. | Licencia |
-| --- | ---: | --- | ---: | --- |
-| SmolLM2 360M Instruct | 360M | Q4_K_M | 271 MB | Apache-2.0 |
-| Qwen2.5 0.5B Instruct | 0,5B | Q4_K_M | 491 MB | Apache-2.0 |
-| Llama 3.2 1B Instruct | 1B | Q4_K_M | 808 MB | Llama 3.2 Community License |
-| Gemma 3 1B IT | 1B | Q4_K_M | 806 MB | Gemma Terms |
-
-Son cuantizaciones comunitarias. Llama y Gemma tienen términos propios; consulta cada tarjeta upstream antes de redistribuir o utilizar comercialmente. SmolLM2 está orientado principalmente al inglés y Qwen2.5 ofrece soporte multilingüe más amplio: no extrapoles resultados entre idiomas.
-
-```bash
-python scripts/download_models.py --list
-python scripts/download_models.py --model smollm2
-python scripts/download_models.py --model qwen2_5
-python scripts/download_models.py --model llama3_2_1b
-python scripts/download_models.py --model gemma3_1b
-python scripts/download_models.py --model all
-```
-
-Instala el descargador con `python -m pip install -e ".[models]"`. Para servir un GGUF con llama.cpp:
-
-```bash
-llama-server --model models/weights/SmolLM2-360M-Instruct-Q4_K_M.gguf --host 127.0.0.1 --port 8080
-```
-
-Genera el paquete de informes:
-
-```bash
-mkdir -p reports
-python redteam.py --target openai --url http://127.0.0.1:8080/v1 --model local-model --db reports/smollm2.db --json reports/smollm2.json --report reports/smollm2.md
-```
-
-Mantén constantes manifiesto, versión del servidor, contexto, parámetros y hardware. Consulta la [guía del kit de modelos](models/README.es.md).
-
 ## Desarrollo y pruebas
 
 ```bash
